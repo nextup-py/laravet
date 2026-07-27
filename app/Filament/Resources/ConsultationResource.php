@@ -52,7 +52,7 @@ class ConsultationResource extends Resource
                                     ->send();
                             }
                         })
-                        ->hidden(fn($record) => $record === null),
+                        ->hidden(fn($record) => $record === null || !auth()->user()?->hasAnyRole(['admin', 'veterinarian'])),
                 ])->columnSpanFull(),
                 Forms\Components\Textarea::make('diagnosis')
                     ->translateLabel()
@@ -117,6 +117,26 @@ class ConsultationResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
+    }
+
+    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
+    }
+
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
     }
 
     public static function getPages(): array

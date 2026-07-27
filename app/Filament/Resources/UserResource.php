@@ -48,6 +48,14 @@ class UserResource extends Resource
                             ->hiddenOn('edit')
                             ->translateLabel()
                             ->required(),
+                        Forms\Components\Select::make('role')
+                            ->label('Rol')
+                            ->options([
+                                'admin'        => 'Administrador',
+                                'veterinarian' => 'Veterinario',
+                                'assistant'    => 'Asistente',
+                            ])
+                            ->required(),
                     ]),
 
                 Section::make(__('Address information'))
@@ -131,6 +139,26 @@ class UserResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->hasRole('admin') ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->hasRole('admin') ?? false;
+    }
+
+    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return auth()->user()?->hasRole('admin') ?? false;
+    }
+
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return auth()->user()?->hasRole('admin') ?? false;
     }
 
     public static function getRelations(): array
