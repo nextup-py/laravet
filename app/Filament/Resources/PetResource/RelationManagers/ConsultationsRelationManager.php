@@ -21,6 +21,26 @@ class ConsultationsRelationManager extends RelationManager
     protected static ?string $modelLabel = 'consulta';
     protected static ?string $title = 'Consultas';
 
+    public function canViewAny(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
+    }
+
+    public function canCreate(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
+    }
+
+    public function canEditAny(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
+    }
+
+    public function canDeleteAny(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
+    }
+
     public function form(Form $form): Form
     {
         return $form
@@ -35,6 +55,7 @@ class ConsultationsRelationManager extends RelationManager
                         ->label('Asistir con IA')
                         ->icon('heroicon-o-sparkles')
                         ->color('info')
+                        ->hidden(fn() => !auth()->user()?->hasAnyRole(['admin', 'veterinarian']))
                         ->action(function (Get $get, Set $set, $livewire) {
                             try {
                                 $pet = $livewire->getOwnerRecord();

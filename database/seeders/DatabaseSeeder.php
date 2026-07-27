@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
         Artisan::call('paraguay-regions:seed');
 
         $this->call([
+            RolesAndPermissionsSeeder::class,
             UserSeeder::class,
             OwnerSeeder::class,
             PetSeeder::class,

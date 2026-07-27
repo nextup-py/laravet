@@ -18,6 +18,26 @@ class PetsRelationManager extends RelationManager
     protected static ?string $modelLabel = 'mascota';
     protected static ?string $title = 'Mascotas asociadas';
 
+    public function canViewAny(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
+    }
+
+    public function canCreate(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
+    }
+
+    public function canEditAny(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
+    }
+
+    public function canDeleteAny(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
+    }
+
     public function form(Form $form): Form
     {
         return $form

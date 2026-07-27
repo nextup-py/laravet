@@ -7,11 +7,14 @@ use App\Models\Department;
 use App\Models\Neighborhood;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\PermissionRegistrar;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
         $central = Department::whereRaw("LOWER(name) LIKE ?", ['%central%'])->first();
 
         $areGua     = City::whereRaw("LOWER(name) LIKE ?", ['%aregu%'])->where('department_id', $central?->id)->first();
@@ -55,8 +58,9 @@ class UserSeeder extends Seeder
             ],
         ];
 
-        foreach ($vets as $vet) {
-            User::create($vet);
+        foreach ($vets as $index => $vet) {
+            $user = User::updateOrCreate(['email' => $vet['email']], $vet);
+            $user->syncRoles($index === 0 ? ['admin'] : ['veterinarian']);
         }
     }
 }

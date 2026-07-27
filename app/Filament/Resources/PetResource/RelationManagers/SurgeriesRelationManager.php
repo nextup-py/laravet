@@ -16,6 +16,26 @@ class SurgeriesRelationManager extends RelationManager
     protected static ?string $modelLabel = 'cirugía';
     protected static ?string $title = 'Cirugías';
 
+    public function canViewAny(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
+    }
+
+    public function canCreate(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
+    }
+
+    public function canEditAny(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
+    }
+
+    public function canDeleteAny(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
+    }
+
     public function form(Form $form): Form
     {
         return $form

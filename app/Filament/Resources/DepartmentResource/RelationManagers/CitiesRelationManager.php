@@ -16,6 +16,26 @@ class CitiesRelationManager extends RelationManager
     protected static ?string $modelLabel = 'ciudad';
     protected static ?string $title = 'Ciudades';
 
+    public function canViewAny(): bool
+    {
+        return auth()->user()?->hasRole('admin') ?? false;
+    }
+
+    public function canCreate(): bool
+    {
+        return auth()->user()?->hasRole('admin') ?? false;
+    }
+
+    public function canEditAny(): bool
+    {
+        return auth()->user()?->hasRole('admin') ?? false;
+    }
+
+    public function canDeleteAny(): bool
+    {
+        return auth()->user()?->hasRole('admin') ?? false;
+    }
+
     public function form(Form $form): Form
     {
         return $form
