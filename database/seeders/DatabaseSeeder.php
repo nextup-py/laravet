@@ -8,16 +8,10 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call([
-            RegionsSeeder::class,
-            RolesAndPermissionsSeeder::class,
-            UserSeeder::class,
-            OwnerSeeder::class,
-            PetSeeder::class,
-            ConsultationSeeder::class,
-            VaccinationSeeder::class,
-            SurgerySeeder::class,
-            TestSeeder::class,
-        ]);
+        $this->call(ProductionSeeder::class);
+
+        if (app()->environment(['local', 'testing'])) {
+            $this->call(DemoSeeder::class);
+        }
     }
 }
