@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   deploy:
-    uses: nextup-py/deploy-actions/.github/workflows/laravel-deploy.yml@d12af88d114963c0929f859c066a035456494978
+    uses: nextup-py/deploy-actions/.github/workflows/laravel-deploy.yml@9fc64c40637a060f8c1ac7c792c44d0717244b03
     with:
       environment_name: laravet
       run_tests: true
