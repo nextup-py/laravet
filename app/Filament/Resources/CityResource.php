@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasAdminOnlyResourceAuthorization;
 use App\Filament\Resources\CityResource\Pages;
 use App\Filament\Resources\CityResource\RelationManagers;
 use App\Models\City;
@@ -10,16 +11,24 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Gestión de ciudades paraguayas (jerarquía Departamento → Ciudad → Barrio).
+ */
 class CityResource extends Resource
 {
+    use HasAdminOnlyResourceAuthorization;
+
     protected static ?string $model = City::class;
+
     protected static ?string $navigationGroup = 'Gestión del sistema';
+
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
+
     protected static ?int $navigationSort = 4;
+
     protected static ?string $modelLabel = 'ciudad';
+
     protected static ?string $pluralModelLabel = 'ciudades';
 
     public static function form(Form $form): Form
@@ -27,11 +36,11 @@ class CityResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->translateLabel()
+                    ->label('Nombre')
                     ->autofocus()
                     ->required(),
                 Forms\Components\TextInput::make('population')
-                    ->translateLabel()
+                    ->label('Población')
                     ->integer()
                     ->minValue(1)
                     ->required(),
@@ -40,7 +49,7 @@ class CityResource extends Resource
                     ->searchable()
                     ->preload()
                     ->live()
-                    ->translateLabel()
+                    ->label('Department id')
                     ->required(),
             ]);
     }
@@ -55,31 +64,29 @@ class CityResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('name')
-                    ->translateLabel()
+                    ->label('Nombre')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('population')
-                    ->translateLabel()
+                    ->label('Población')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('department.name')
-                    ->translateLabel()
+                    ->label('Departamento')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->translateLabel()
+                    ->label('Creado a las')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->translateLabel()
+                    ->label('Actualizado a las')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
@@ -89,26 +96,6 @@ class CityResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
-    }
-
-    public static function canViewAny(): bool
-    {
-        return auth()->user()?->hasRole('admin') ?? false;
-    }
-
-    public static function canCreate(): bool
-    {
-        return auth()->user()?->hasRole('admin') ?? false;
-    }
-
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
-    {
-        return auth()->user()?->hasRole('admin') ?? false;
-    }
-
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
-    {
-        return auth()->user()?->hasRole('admin') ?? false;
     }
 
     public static function getRelations(): array

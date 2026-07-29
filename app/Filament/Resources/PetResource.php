@@ -6,6 +6,7 @@ use App\Enums\PetGender;
 use App\Enums\PetReproductionStatus;
 use App\Enums\PetSize;
 use App\Enums\PetSpecies;
+use App\Filament\Concerns\HasClinicResourceAuthorization;
 use App\Filament\Resources\PetResource\Pages;
 use App\Filament\Resources\PetResource\RelationManagers;
 use App\Models\Pet;
@@ -15,10 +16,14 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Gestión de mascotas y su historial clínico asociado.
+ */
 class PetResource extends Resource
 {
+    use HasClinicResourceAuthorization;
+
     protected static ?string $model = Pet::class;
 
     protected static ?string $navigationGroup = 'Pacientes';
@@ -27,100 +32,114 @@ class PetResource extends Resource
 
     protected static ?string $modelLabel = 'mascota';
 
+    /**
+     * Schema del formulario, compartido con la PetsRelationManager de Owner
+     * (que lo usa tal cual, sin el campo owner_id porque ya está fijado por contexto).
+     */
+    public static function formSchema(): array
+    {
+        return [
+            Section::make('Datos identificatorios')
+                ->columns(3)
+                ->schema([
+                    Forms\Components\TextInput::make('id')
+                        ->label('ID')
+                        ->hiddenOn('create')
+                        ->readOnly(),
+                    Forms\Components\TextInput::make('name')
+                        ->label('Nombre')
+                        ->string()
+                        ->required(),
+                    Forms\Components\Select::make('species')
+                        ->label('Especie')
+                        ->searchable()
+                        ->preload()
+                        ->live()
+                        ->options(PetSpecies::class)
+                        ->required(),
+                    Forms\Components\TextInput::make('breed')
+                        ->label('Raza')
+                        ->string()
+                        ->required(),
+                    Forms\Components\DatePicker::make('birthdate')
+                        ->label('Fecha de nacimiento')
+                        ->required()
+                        ->native(false)
+                        ->displayFormat('d/m/Y')
+                        ->closeOnDateSelection()
+                        ->minDate(now()->subYears(25))
+                        ->maxDate(now()),
+                    Forms\Components\Radio::make('gender')
+                        ->label('Género')
+                        ->required()
+                        ->options(PetGender::class)
+                        ->inline()
+                        ->inlineLabel(false),
+                    Forms\Components\Select::make('reproduction')
+                        ->label('Reproducción')
+                        ->searchable()
+                        ->preload()
+                        ->live()
+                        ->options(PetReproductionStatus::class)
+                        ->required(),
+                    Forms\Components\Toggle::make('active')
+                        ->label('Activo')
+                        ->hiddenOn('create')
+                        ->onColor('success')
+                        ->offColor('danger')
+                        ->inline(false),
+                ]),
+
+            Section::make('Más información')
+                ->columns(3)
+                ->schema([
+                    Forms\Components\Select::make('size')
+                        ->label('Tamaño')
+                        ->searchable()
+                        ->preload()
+                        ->live()
+                        ->options(PetSize::class)
+                        ->required(),
+                    Forms\Components\TextInput::make('weight')
+                        ->label('Peso')
+                        ->suffix('kg')
+                        ->required()
+                        ->numeric()
+                        ->inputMode('decimal')
+                        ->minValue(0.1)
+                        ->maxValue(150),
+                    Forms\Components\TextInput::make('fur')
+                        ->label('Pelaje')
+                        ->string()
+                        ->required(),
+                    Forms\Components\FileUpload::make('image')
+                        ->label('Imagen')
+                        ->image()
+                        ->imageEditor()
+                        ->downloadable()
+                        ->columnSpanFull()
+                        ->uploadingMessage('Subiendo archivo adjunto...')
+                        ->required(),
+                ]),
+        ];
+    }
+
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Section::make(__('ID information'))
-                    ->columns(3)
-                    ->schema([
-                        Forms\Components\TextInput::make('id')
-                            ->label('ID')
-                            ->hiddenOn('create')
-                            ->readOnly(),
-                        Forms\Components\TextInput::make('name')
-                            ->translateLabel()
-                            ->string()
-                            ->required(),
-                        Forms\Components\Select::make('species')
-                            ->translateLabel()
-                            ->searchable()
-                            ->preload()
-                            ->live()
-                            ->options(PetSpecies::class)
-                            ->required(),
-                        Forms\Components\TextInput::make('breed')
-                            ->translateLabel()
-                            ->string()
-                            ->required(),
-                        Forms\Components\DatePicker::make('birthdate')
-                            ->translateLabel()
-                            ->required()
-                            ->native(false)
-                            ->displayFormat('d/m/Y')
-                            ->closeOnDateSelection()
-                            ->minDate(now()->subYears(25))
-                            ->maxDate(now()),
-                        Forms\Components\Radio::make('gender')
-                            ->translateLabel()
-                            ->required()
-                            ->options(PetGender::class)
-                            ->inline()
-                            ->inlineLabel(false),
-                        Forms\Components\Select::make('reproduction')
-                            ->translateLabel()
-                            ->searchable()
-                            ->preload()
-                            ->live()
-                            ->options(PetReproductionStatus::class)
-                            ->required(),
-                        Forms\Components\Toggle::make('active')
-                            ->translateLabel()
-                            ->hiddenOn('create')
-                            ->onColor('success')
-                            ->offColor('danger')
-                            ->inline(false),
-                        Forms\Components\Select::make('owner_id')
-                            ->translateLabel()
-                            ->relationship('owner', 'first_name')
-                            ->searchable(['first_name', 'ci'])
-                            ->preload()
-                            ->live()
-                            ->required(),
-                    ]),
+        $schema = self::formSchema();
 
-                Section::make(__('More information'))
-                    ->columns(3)
-                    ->schema([
-                        Forms\Components\Select::make('size')
-                            ->translateLabel()
-                            ->searchable()
-                            ->preload()
-                            ->live()
-                            ->options(PetSize::class)
-                            ->required(),
-                        Forms\Components\TextInput::make('weight')
-                            ->translateLabel()
-                            ->suffix('kg')
-                            ->required()
-                            ->numeric()
-                            ->inputMode('decimal')
-                            ->minValue(0.1)
-                            ->maxValue(150),
-                        Forms\Components\TextInput::make('fur')
-                            ->label(__('Pelage'))
-                            ->string()
-                            ->required(),
-                        Forms\Components\FileUpload::make('image')
-                            ->translateLabel()
-                            ->image()
-                            ->imageEditor()
-                            ->downloadable()
-                            ->columnSpanFull()
-                            ->uploadingMessage('Subiendo archivo adjunto...')
-                            ->required(),
-                    ]),
-            ]);
+        $schema[0] = $schema[0]->schema([
+            ...$schema[0]->getChildComponents(),
+            Forms\Components\Select::make('owner_id')
+                ->label('Owner id')
+                ->relationship('owner', 'first_name')
+                ->searchable(['first_name', 'ci'])
+                ->preload()
+                ->live()
+                ->required(),
+        ]);
+
+        return $form->schema($schema);
     }
 
     public static function table(Table $table): Table
@@ -128,7 +147,7 @@ class PetResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
-                    ->translateLabel()
+                    ->label('Imagen')
                     ->circular(),
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
@@ -136,66 +155,66 @@ class PetResource extends Resource
                     ->sortable()
                     ->numeric(),
                 Tables\Columns\TextColumn::make('name')
-                    ->translateLabel()
+                    ->label('Nombre')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('species')
-                    ->translateLabel()
+                    ->label('Especie')
                     ->badge()
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('breed')
-                    ->translateLabel()
+                    ->label('Raza')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('age')
                     ->label('Edad')
                     ->getStateUsing(fn (Pet $record) => $record->age),
                 Tables\Columns\IconColumn::make('active')
-                    ->translateLabel()
+                    ->label('Activo')
                     ->boolean()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('owner.first_name')
-                    ->translateLabel()
+                    ->label('Propietario')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('gender')
-                    ->translateLabel()
+                    ->label('Género')
                     ->badge()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('size')
-                    ->translateLabel()
+                    ->label('Tamaño')
                     ->badge()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('reproduction')
-                    ->translateLabel()
+                    ->label('Reproducción')
                     ->badge()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('user.name')
-                    ->translateLabel()
+                    ->label('Usuario')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->translateLabel()
+                    ->label('Creado a las')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->translateLabel()
+                    ->label('Actualizado a las')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('species')
-                    ->translateLabel()
+                    ->label('Especie')
                     ->options(PetSpecies::class)
                     ->multiple(),
                 Tables\Filters\SelectFilter::make('size')
-                    ->translateLabel()
+                    ->label('Tamaño')
                     ->options(PetSize::class),
                 Tables\Filters\SelectFilter::make('gender')
-                    ->translateLabel()
+                    ->label('Género')
                     ->options(PetGender::class),
                 Tables\Filters\TernaryFilter::make('active')
                     ->label('Estado'),
@@ -210,26 +229,6 @@ class PetResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])->selectCurrentPageOnly();
-    }
-
-    public static function canViewAny(): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
-    }
-
-    public static function canCreate(): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
-    }
-
-    public static function canEdit(Model $record): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
-    }
-
-    public static function canDelete(Model $record): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
     }
 
     public static function getRelations(): array

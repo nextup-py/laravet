@@ -2,69 +2,62 @@
 
 namespace App\Filament\Resources\UserResource\RelationManagers;
 
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Muestra, en modo solo lectura, las vacunaciones registradas por este usuario.
+ */
 class VaccinationsRelationManager extends RelationManager
 {
     protected static string $relationship = 'vaccinations';
 
+    protected static ?string $title = 'Vacunaciones registradas';
+
+    public function canViewAny(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
+    }
+
     public function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                /* Forms\Components\TextInput::make('vaccine')
-                    ->required()
-                    ->maxLength(255), */
-            ]);
+        return $form->schema([]);
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('vaccine')
             ->columns([
                 Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('vaccine')
+                    ->label('Vacuna')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('application_date')
-                    ->date()
+                    ->label('Fecha de aplicación')
+                    ->date('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('next_application')
-                    ->date()
+                    ->label('Próxima aplicación')
+                    ->date('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('batch')
+                    ->label('Lote')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('manufacturer')
+                    ->label('Fabricante')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('pet.name')
+                    ->label('Mascota')
                     ->searchable()
                     ->sortable(),
-            ])
-            ->filters([
-                //
-            ])
-            /* ->headerActions([
-                Tables\Actions\CreateAction::make(),
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]) */;
+            ]);
     }
 }

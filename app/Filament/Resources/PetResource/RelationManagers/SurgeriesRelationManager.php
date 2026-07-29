@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\PetResource\RelationManagers;
 
+use App\Filament\Concerns\ClinicRoles;
+use App\Filament\Concerns\HasClinicRelationManagerAuthorization;
 use App\Filament\Resources\SurgeryResource;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -13,30 +15,22 @@ use Illuminate\Support\Facades\Auth;
 
 class SurgeriesRelationManager extends RelationManager
 {
+    use HasClinicRelationManagerAuthorization;
+
     protected static string $relationship = 'surgeries';
 
     protected static ?string $modelLabel = 'cirugía';
 
     protected static ?string $title = 'Cirugías';
 
-    public function canViewAny(): bool
+    protected function createRoles(): array
     {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
+        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
     }
 
-    public function canCreate(): bool
+    protected function editRoles(): array
     {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
-    }
-
-    public function canEditAny(): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
-    }
-
-    public function canDeleteAny(): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
+        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
     }
 
     public function form(Form $form): Form
@@ -44,21 +38,21 @@ class SurgeriesRelationManager extends RelationManager
         return $form
             ->schema([
                 Forms\Components\DatePicker::make('date')
-                    ->translateLabel()
+                    ->label('Fecha')
                     ->required()
                     ->native(false)
                     ->displayFormat('d/m/Y')
                     ->closeOnDateSelection()
                     ->maxDate(now()),
                 Forms\Components\Select::make('type')
-                    ->translateLabel()
+                    ->label('Tipo')
                     ->searchable()
                     ->preload()
                     ->live()
                     ->options(SurgeryResource::typeOptions())
                     ->required(),
                 Forms\Components\Textarea::make('observation')
-                    ->translateLabel()
+                    ->label('Observación')
                     ->autosize()
                     ->columnSpanFull(),
             ]);
@@ -74,33 +68,33 @@ class SurgeriesRelationManager extends RelationManager
                     ->sortable()
                     ->numeric(),
                 Tables\Columns\TextColumn::make('date')
-                    ->translateLabel()
+                    ->label('Fecha')
                     ->date('d/m/Y')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('type')
-                    ->translateLabel()
+                    ->label('Tipo')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('user.name')
-                    ->translateLabel()
+                    ->label('Usuario')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->translateLabel()
+                    ->label('Creado a las')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->translateLabel()
+                    ->label('Actualizado a las')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\Filter::make('date')
-                    ->translateLabel()
+                    ->label('Fecha')
                     ->form([
                         Forms\Components\DatePicker::make('from')->label('Desde')->native(false),
                         Forms\Components\DatePicker::make('until')->label('Hasta')->native(false),

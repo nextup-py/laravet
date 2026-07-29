@@ -25,28 +25,28 @@ class ViewPet extends ViewRecord
     {
         return $infolist
             ->schema([
-                Section::make(__('ID information'))
+                Section::make('Datos identificatorios')
                     ->columns(3)
                     ->schema([
-                        TextEntry::make('name')->translateLabel(),
-                        TextEntry::make('species')->translateLabel()->badge(),
-                        TextEntry::make('breed')->translateLabel(),
+                        TextEntry::make('name')->label('Nombre'),
+                        TextEntry::make('species')->label('Especie')->badge(),
+                        TextEntry::make('breed')->label('Raza'),
                         TextEntry::make('age')->label('Edad'),
-                        TextEntry::make('gender')->translateLabel()->badge(),
-                        TextEntry::make('reproduction')->translateLabel()->badge(),
-                        TextEntry::make('active')->translateLabel()->badge()
+                        TextEntry::make('gender')->label('Género')->badge(),
+                        TextEntry::make('reproduction')->label('Reproducción')->badge(),
+                        TextEntry::make('active')->label('Activo')->badge()
                             ->formatStateUsing(fn (bool $state): string => $state ? 'Activo' : 'Inactivo')
                             ->color(fn (bool $state): string => $state ? 'success' : 'danger'),
-                        TextEntry::make('owner.first_name')->translateLabel()->label('Propietario'),
+                        TextEntry::make('owner.first_name')->label('Propietario'),
                     ]),
 
-                Section::make(__('More information'))
+                Section::make('Más información')
                     ->columns(3)
                     ->schema([
-                        TextEntry::make('size')->translateLabel()->badge(),
-                        TextEntry::make('weight')->translateLabel()->suffix(' kg'),
-                        TextEntry::make('fur')->label(__('Pelage')),
-                        ImageEntry::make('image')->translateLabel()->columnSpanFull(),
+                        TextEntry::make('size')->label('Tamaño')->badge(),
+                        TextEntry::make('weight')->label('Peso')->suffix(' kg'),
+                        TextEntry::make('fur')->label('Pelaje'),
+                        ImageEntry::make('image')->label('Imagen')->columnSpanFull(),
                     ]),
             ]);
     }

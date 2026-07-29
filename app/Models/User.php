@@ -2,20 +2,18 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser
 {
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -58,8 +56,6 @@ class User extends Authenticatable implements FilamentUser
     /**
      * Un usuario pertenece a un departamento.
      * Esta relación define que cada usuario está asociado con un departamento específico.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function department(): BelongsTo
     {
@@ -69,8 +65,6 @@ class User extends Authenticatable implements FilamentUser
     /**
      * Un usuario pertenece a una ciudad.
      * Esta relación define que cada usuario está asociado con una ciudad específica.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function city(): BelongsTo
     {
@@ -80,8 +74,6 @@ class User extends Authenticatable implements FilamentUser
     /**
      * Un usuario pertenece a un barrio.
      * Esta relación define que cada usuario está asociado con un barrio específico.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function neighborhood(): BelongsTo
     {
