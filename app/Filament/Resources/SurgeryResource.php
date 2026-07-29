@@ -134,6 +134,7 @@ class SurgeryResource extends Resource
             ])
             ->filters([])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -147,7 +148,10 @@ class SurgeryResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageSurgeries::route('/'),
+            'index' => Pages\ListSurgeries::route('/'),
+            'create' => Pages\CreateSurgery::route('/create'),
+            'view' => Pages\ViewSurgery::route('/{record}'),
+            'edit' => Pages\EditSurgery::route('/{record}/edit'),
         ];
     }
 }

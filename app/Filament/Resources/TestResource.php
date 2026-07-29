@@ -154,6 +154,7 @@ class TestResource extends Resource
             ])
             ->filters([])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -167,7 +168,10 @@ class TestResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageTests::route('/'),
+            'index' => Pages\ListTests::route('/'),
+            'create' => Pages\CreateTest::route('/create'),
+            'view' => Pages\ViewTest::route('/{record}'),
+            'edit' => Pages\EditTest::route('/{record}/edit'),
         ];
     }
 }

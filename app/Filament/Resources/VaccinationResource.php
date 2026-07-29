@@ -189,6 +189,7 @@ class VaccinationResource extends Resource
                     ->query(fn (Builder $query) => $query->whereBetween('next_application', [now(), now()->addDays(7)])),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -211,6 +212,7 @@ class VaccinationResource extends Resource
         return [
             'index' => Pages\ListVaccinations::route('/'),
             'create' => Pages\CreateVaccination::route('/create'),
+            'view' => Pages\ViewVaccination::route('/{record}'),
             'edit' => Pages\EditVaccination::route('/{record}/edit'),
         ];
     }

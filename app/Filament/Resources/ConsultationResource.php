@@ -47,6 +47,13 @@ class ConsultationResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Select::make('pet_id')
+                    ->label('Pet id')
+                    ->relationship('pet', 'name')
+                    ->searchable(['name', 'id'])
+                    ->preload()
+                    ->live()
+                    ->required(),
                 Forms\Components\Textarea::make('anamnesis')
                     ->label('Anamnesis')
                     ->columnSpanFull()
@@ -136,6 +143,7 @@ class ConsultationResource extends Resource
                     }),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -149,7 +157,10 @@ class ConsultationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageConsultations::route('/'),
+            'index' => Pages\ListConsultations::route('/'),
+            'create' => Pages\CreateConsultation::route('/create'),
+            'view' => Pages\ViewConsultation::route('/{record}'),
+            'edit' => Pages\EditConsultation::route('/{record}/edit'),
         ];
     }
 }

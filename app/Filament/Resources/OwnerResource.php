@@ -187,6 +187,7 @@ class OwnerResource extends Resource
                     ->preload(),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -209,6 +210,7 @@ class OwnerResource extends Resource
         return [
             'index' => Pages\ListOwners::route('/'),
             'create' => Pages\CreateOwner::route('/create'),
+            'view' => Pages\ViewOwner::route('/{record}'),
             'edit' => Pages\EditOwner::route('/{record}/edit'),
         ];
     }
