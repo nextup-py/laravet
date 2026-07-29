@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\PetResource\RelationManagers;
 
+use App\Filament\Resources\SurgeryResource;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class SurgeriesRelationManager extends RelationManager
 {
@@ -53,32 +55,7 @@ class SurgeriesRelationManager extends RelationManager
                     ->searchable()
                     ->preload()
                     ->live()
-                    ->options([
-                        'Esterilización' => __('Sterilization'),
-                        'Ovariohisterectomía' => __('Ovariohysterectomy'),
-                        'Castración' => __('Neutering'),
-                        'Cirugía Dental' => __('Dental Surgery'),
-                        'Extracción de Tumores' => __('Tumor Removal'),
-                        'Cirugía de Cuerpo Extraño' => __('Foreign Body Surgery'),
-                        'Reparación de Fracturas' => __('Fracture Repair'),
-                        'Cesárea' => __('Cesarean Section'),
-                        'Amputación' => __('Amputation'),
-                        'Enucleación Ocular' => __('Eye Enucleation'),
-                        'Cirugía de Ligamento Cruzado' => __('Cruciate Ligament Surgery'),
-                        'Gastropexia Preventiva' => __('Prophylactic Gastropexy'),
-                        'Desungulación' => __('Declawing'),
-                        'Herniorrafia' => __('Hernia Repair'),
-                        'Laparotomía Exploratoria' => __('Exploratory Laparotomy'),
-                        'Onychectomía' => __('Onychectomy'),
-                        'Cistotomía' => __('Cystotomy'),
-                        'Uretrostomía Perineal' => __('Perineal Urethrostomy'),
-                        'Esplenectomía' => __('Splenectomy'),
-                        'Tiroidectomía' => __('Thyroidectomy'),
-                        'Cirugía de Luxación de Rótula' => __('Patellar Luxation Surgery'),
-                        'Toracotomía' => __('Thoracotomy'),
-                        'Resección Intestinal' => __('Intestinal Resection'),
-                        'Cirugía de Glándulas Perianales' => __('Perianal Gland Surgery'),
-                    ])
+                    ->options(SurgeryResource::typeOptions())
                     ->required(),
                 Forms\Components\Textarea::make('observation')
                     ->translateLabel()
@@ -135,7 +112,12 @@ class SurgeriesRelationManager extends RelationManager
                     }),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->mutateFormDataUsing(function (array $data): array {
+                        $data['user_id'] = Auth::id();
+
+                        return $data;
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

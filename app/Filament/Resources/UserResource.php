@@ -4,27 +4,30 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
-use App\Models\User;
-use App\Models\Department;
 use App\Models\City;
 use App\Models\Neighborhood;
+use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
+
+    protected static ?string $navigationGroup = 'Administración';
+
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
+
     protected static ?int $navigationSort = 2;
+
     protected static ?string $modelLabel = 'usuario';
 
     public static function form(Form $form): Form
@@ -51,9 +54,9 @@ class UserResource extends Resource
                         Forms\Components\Select::make('role')
                             ->label('Rol')
                             ->options([
-                                'admin'        => 'Administrador',
+                                'admin' => 'Administrador',
                                 'veterinarian' => 'Veterinario',
-                                'assistant'    => 'Asistente',
+                                'assistant' => 'Asistente',
                             ])
                             ->required(),
                     ]),
@@ -74,17 +77,17 @@ class UserResource extends Resource
                             ->required(),
 
                         Forms\Components\Select::make('city_id')
-                            ->options(fn(Get $get): Collection => City::query()->where('department_id', $get('department_id'))->pluck('name', 'id'))
+                            ->options(fn (Get $get): Collection => City::query()->where('department_id', $get('department_id'))->pluck('name', 'id'))
                             ->searchable()
                             ->preload()
                             ->live()
-                            ->afterStateUpdated(fn(Set $set) => $set('neighborhood_id', null))
+                            ->afterStateUpdated(fn (Set $set) => $set('neighborhood_id', null))
                             ->label(__('City'))
                             ->translateLabel()
                             ->required(),
 
                         Forms\Components\Select::make('neighborhood_id')
-                            ->options(fn(Get $get): Collection => Neighborhood::query()->where('city_id', $get('city_id'))->pluck('name', 'id'))
+                            ->options(fn (Get $get): Collection => Neighborhood::query()->where('city_id', $get('city_id'))->pluck('name', 'id'))
                             ->searchable()
                             ->preload()
                             ->label(__('Neighborhood'))
@@ -95,7 +98,7 @@ class UserResource extends Resource
                             ->translateLabel()
                             ->columnSpanFull()
                             ->required(),
-                    ])
+                    ]),
             ]);
     }
 
@@ -116,6 +119,15 @@ class UserResource extends Resource
                     ->translateLabel()
                     ->sortable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('roles.name')
+                    ->label('Rol')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'admin' => 'Administrador',
+                        'veterinarian' => 'Veterinario',
+                        'assistant' => 'Asistente',
+                        default => $state ?? '—',
+                    }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->translateLabel()
                     ->dateTime('d/m/Y H:i')
@@ -128,7 +140,14 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('roles')
+                    ->relationship('roles', 'name')
+                    ->label('Rol')
+                    ->options([
+                        'admin' => 'Administrador',
+                        'veterinarian' => 'Veterinario',
+                        'assistant' => 'Asistente',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -151,12 +170,12 @@ class UserResource extends Resource
         return auth()->user()?->hasRole('admin') ?? false;
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return auth()->user()?->hasRole('admin') ?? false;
     }
 
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canDelete(Model $record): bool
     {
         return auth()->user()?->hasRole('admin') ?? false;
     }

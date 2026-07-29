@@ -9,15 +9,16 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class VaccinationResource extends Resource
 {
     protected static ?string $model = Vaccination::class;
 
-    protected static ?string $navigationGroup = 'Procedures';
+    protected static ?string $navigationGroup = 'Historial clínico';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-shield-check';
 
     protected static ?string $modelLabel = 'vacunación';
 
@@ -164,7 +165,12 @@ class VaccinationResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\Filter::make('overdue')
+                    ->label('Vencidas')
+                    ->query(fn (Builder $query) => $query->where('next_application', '<', now())),
+                Tables\Filters\Filter::make('upcoming')
+                    ->label('Próximas (7 días)')
+                    ->query(fn (Builder $query) => $query->whereBetween('next_application', [now(), now()->addDays(7)])),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

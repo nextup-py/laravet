@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PetResource\RelationManagers;
 
+use App\Filament\Resources\TestResource;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -54,20 +55,7 @@ class TestsRelationManager extends RelationManager
                     ->searchable()
                     ->preload()
                     ->live()
-                    ->options([
-                        'Hematología' => __('Hematology'),
-                        'Bioquímica' => __('Biochemistry'),
-                        'Inmunología' => __('Immunology'),
-                        'Microbiología' => __('Microbiology'),
-                        'Parasitología' => __('Parasitology'),
-                        'Uroanálisis' => __('Urinalysis'),
-                        'Coprología' => __('Fecal Analysis'),
-                        'Cultivo' => __('Culture'),
-                        'Prueba Rápida' => __('Rapid Test'),
-                        'PCR' => __('PCR'),
-                        'Serología' => __('Serology'),
-                        'Otros' => __('Others'),
-                    ])
+                    ->options(TestResource::typeOptions())
                     ->required(),
                 Forms\Components\FileUpload::make('result')
                     ->label('Resultados')

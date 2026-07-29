@@ -15,14 +15,17 @@ use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 class OwnerResource extends Resource
 {
     protected static ?string $model = Owner::class;
+
+    protected static ?string $navigationGroup = 'Pacientes';
+
     protected static ?string $navigationIcon = 'heroicon-o-user';
+
     protected static ?string $modelLabel = 'propietario';
 
     public static function form(Form $form): Form
@@ -81,16 +84,16 @@ class OwnerResource extends Resource
                             ->translateLabel()
                             ->required(),
                         Forms\Components\Select::make('city_id')
-                            ->options(fn(Get $get): Collection => City::query()->where('department_id', $get('department_id'))->pluck('name', 'id'))
+                            ->options(fn (Get $get): Collection => City::query()->where('department_id', $get('department_id'))->pluck('name', 'id'))
                             ->searchable()
                             ->preload()
                             ->live()
-                            ->afterStateUpdated(fn(Set $set) => $set('neighborhood_id', null))
+                            ->afterStateUpdated(fn (Set $set) => $set('neighborhood_id', null))
                             ->label(__('City'))
                             ->translateLabel()
                             ->required(),
                         Forms\Components\Select::make('neighborhood_id')
-                            ->options(fn(Get $get): Collection => Neighborhood::query()->where('city_id', $get('city_id'))->pluck('name', 'id'))
+                            ->options(fn (Get $get): Collection => Neighborhood::query()->where('city_id', $get('city_id'))->pluck('name', 'id'))
                             ->searchable()
                             ->preload()
                             ->label(__('Neighborhood'))
@@ -175,7 +178,11 @@ class OwnerResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('department_id')
+                    ->relationship('department', 'name')
+                    ->label('Departamento')
+                    ->searchable()
+                    ->preload(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -197,12 +204,12 @@ class OwnerResource extends Resource
         return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
     }
 
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canDelete(Model $record): bool
     {
         return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
     }

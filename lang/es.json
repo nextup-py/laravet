@@ -102,6 +102,7 @@
     "Fur": "Pelaje",
     "Gateway Timeout": "Tiempo de espera de puerta de enlace",
     "Gender": "Género",
+    "General information": "Información general",
     "Giant": "Gigante",
     "Go Home": "Ir a inicio",
     "Go to page :page": "Ir a la página :page",
@@ -345,6 +346,9 @@
     "Thoracotomy": "Toracotomía",
     "Intestinal Resection": "Resección Intestinal",
     "Perianal Gland Surgery": "Cirugía de Glándulas Perianales",
+    "Wound Suture": "Sutura de herida",
+    "Dental Extraction": "Extracción dental",
+    "Urethral Unblocking": "Desobstrucción uretral",
 
     "Hematology": "Hematología",
     "Biochemistry": "Bioquímica",

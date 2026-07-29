@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ConsultationResource\Pages;
-use App\Filament\Resources\ConsultationResource\RelationManagers;
 use App\Models\Consultation;
 use App\Services\AIDiagnosticService;
 use Filament\Forms;
@@ -15,13 +14,16 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Database\Eloquent\Model;
 
 class ConsultationResource extends Resource
 {
     protected static ?string $model = Consultation::class;
-    protected static ?string $navigationGroup = 'Procedures';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    protected static ?string $navigationGroup = 'Historial clínico';
+
+    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
+
     protected static ?string $modelLabel = 'consulta';
 
     public static function form(Form $form): Form
@@ -52,7 +54,7 @@ class ConsultationResource extends Resource
                                     ->send();
                             }
                         })
-                        ->hidden(fn($record) => $record === null || !auth()->user()?->hasAnyRole(['admin', 'veterinarian'])),
+                        ->hidden(fn ($record) => $record === null || ! auth()->user()?->hasAnyRole(['admin', 'veterinarian'])),
                 ])->columnSpanFull(),
                 Forms\Components\Textarea::make('diagnosis')
                     ->translateLabel()
@@ -67,7 +69,7 @@ class ConsultationResource extends Resource
                 Forms\Components\Textarea::make('observation')
                     ->translateLabel()
                     ->columnSpanFull()
-                    ->autosize()
+                    ->autosize(),
             ]);
     }
 
@@ -106,7 +108,17 @@ class ConsultationResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\Filter::make('created_at')
+                    ->translateLabel()
+                    ->form([
+                        Forms\Components\DatePicker::make('from')->label('Desde')->native(false),
+                        Forms\Components\DatePicker::make('until')->label('Hasta')->native(false),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['from'], fn (Builder $query, $date) => $query->whereDate('created_at', '>=', $date))
+                            ->when($data['until'], fn (Builder $query, $date) => $query->whereDate('created_at', '<=', $date));
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -129,12 +141,12 @@ class ConsultationResource extends Resource
         return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
     }
 
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canDelete(Model $record): bool
     {
         return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
     }

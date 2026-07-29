@@ -25,11 +25,16 @@ class Test extends Model
         'user_id', // ID del veterinario que realizó el examen
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'result' => 'array',
+        ];
+    }
+
     /**
      * Un examen pertenece a una mascota.
      * Esta relación define que cada examen está asociado con una mascota específica.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function pet(): BelongsTo
     {
@@ -39,8 +44,6 @@ class Test extends Model
     /**
      * Un examen pertenece a un usuario (veterinario).
      * Esta relación define que cada examen está asociado con un veterinario específico.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function user(): BelongsTo
     {
