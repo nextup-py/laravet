@@ -12,6 +12,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // La columna es NOT NULL hoy, así que primero se relaja esa restricción
+        // (todavía como string) antes de poder vaciarla fila por fila.
+        Schema::table('tests', function (Blueprint $table) {
+            $table->string('result')->nullable()->change();
+        });
+
         // Los valores existentes en `result` son texto plano (no JSON válido),
         // ya que hasta ahora el campo guardaba una descripción del resultado en
         // vez de rutas de archivos. Se preservan al inicio de `observation` antes
