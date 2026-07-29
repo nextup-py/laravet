@@ -25,9 +25,15 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        // La tabla de settings puede no existir aún (instalación nueva antes de migrar),
-        // así que el panel cae a los valores por defecto en ese caso.
-        $settings = Schema::hasTable('settings') ? app(ClinicSettings::class) : null;
+        // La base de datos puede no estar disponible aún en este punto del arranque
+        // (instalación nueva antes de migrar, composer install ejecutando
+        // package:discover, CI sin base creada), así que el panel cae a los
+        // valores por defecto ante cualquier fallo, no solo tabla faltante.
+        try {
+            $settings = Schema::hasTable('settings') ? app(ClinicSettings::class) : null;
+        } catch (\Throwable) {
+            $settings = null;
+        }
 
         return $panel
             ->default()
