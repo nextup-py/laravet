@@ -43,18 +43,18 @@ class TestResource extends Resource
     public static function typeOptions(): array
     {
         return [
-            'Hematología' => 'Hematology',
-            'Bioquímica' => 'Biochemistry',
-            'Inmunología' => 'Immunology',
-            'Microbiología' => 'Microbiology',
-            'Parasitología' => 'Parasitology',
-            'Uroanálisis' => 'Urinalysis',
-            'Coprología' => 'Fecal Analysis',
-            'Cultivo' => 'Culture',
-            'Prueba Rápida' => 'Rapid Test',
+            'Hematología' => 'Hematología',
+            'Bioquímica' => 'Bioquímica',
+            'Inmunología' => 'Inmunología',
+            'Microbiología' => 'Microbiología',
+            'Parasitología' => 'Parasitología',
+            'Uroanálisis' => 'Uroanálisis',
+            'Coprología' => 'Coprología',
+            'Cultivo' => 'Cultivo',
+            'Prueba Rápida' => 'Prueba Rápida',
             'PCR' => 'PCR',
-            'Serología' => 'Serology',
-            'Otros' => 'Others',
+            'Serología' => 'Serología',
+            'Otros' => 'Otros',
         ];
     }
 
