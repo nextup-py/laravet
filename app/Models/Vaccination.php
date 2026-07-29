@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,8 +30,6 @@ class Vaccination extends Model
 
     /**
      * Una vacunación pertenece a una mascota.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function pet(): BelongsTo
     {
@@ -39,11 +38,17 @@ class Vaccination extends Model
 
     /**
      * Una vacunación pertenece a un usuario (veterinario).
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Vacunas vencidas o que vencen dentro de los próximos $days días.
+     */
+    public function scopeUpcomingOrOverdue(Builder $query, int $days = 7): Builder
+    {
+        return $query->where('next_application', '<', now()->addDays($days));
     }
 }

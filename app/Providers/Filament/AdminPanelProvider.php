@@ -27,12 +27,25 @@ class AdminPanelProvider extends PanelProvider
     {
         // La base de datos puede no estar disponible aún en este punto del arranque
         // (instalación nueva antes de migrar, composer install ejecutando
-        // package:discover, CI sin base creada), así que el panel cae a los
-        // valores por defecto ante cualquier fallo, no solo tabla faltante.
+        // package:discover, CI sin base creada, o una migración de settings
+        // pendiente tras agregar una propiedad nueva a ClinicSettings), así que
+        // el panel cae a los valores por defecto ante cualquier fallo al leer
+        // los settings, no solo tabla faltante.
+        $brandName = config('app.name');
+        $brandLogo = null;
+        $favicon = null;
+        $primaryColor = null;
+
         try {
-            $settings = Schema::hasTable('settings') ? app(ClinicSettings::class) : null;
+            if (Schema::hasTable('settings')) {
+                $settings = app(ClinicSettings::class);
+                $brandName = $settings->name ?? $brandName;
+                $brandLogo = $settings->logo ? Storage::url($settings->logo) : null;
+                $favicon = $settings->favicon ? Storage::url($settings->favicon) : null;
+                $primaryColor = $settings->primary_color;
+            }
         } catch (\Throwable) {
-            $settings = null;
+            // Se mantienen los valores por defecto seteados arriba.
         }
 
         return $panel
@@ -44,11 +57,11 @@ class AdminPanelProvider extends PanelProvider
             ->spa()
             ->profile(isSimple: false)
             ->sidebarCollapsibleOnDesktop()
-            ->brandName($settings?->name ?? config('app.name'))
-            ->brandLogo($settings?->logo ? Storage::url($settings->logo) : null)
-            ->favicon($settings?->favicon ? Storage::url($settings->favicon) : null)
+            ->brandName($brandName)
+            ->brandLogo($brandLogo)
+            ->favicon($favicon)
             ->colors([
-                'primary' => $settings?->primary_color ? Color::hex($settings->primary_color) : Color::Amber,
+                'primary' => $primaryColor ? Color::hex($primaryColor) : Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

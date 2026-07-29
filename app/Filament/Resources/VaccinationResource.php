@@ -40,6 +40,16 @@ class VaccinationResource extends Resource
         return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) static::getModel()::upcomingOrOverdue()->count();
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return static::getModel()::where('next_application', '<', now())->exists() ? 'danger' : 'warning';
+    }
+
     public static function form(Form $form): Form
     {
         return $form

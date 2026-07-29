@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Resources\ConsultationResource;
 use App\Models\Consultation;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -41,6 +42,7 @@ class RecentConsultationsWidget extends BaseWidget
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
             ])
+            ->recordUrl(fn (Consultation $record) => ConsultationResource::getUrl('view', ['record' => $record]))
             ->paginated(false);
     }
 }

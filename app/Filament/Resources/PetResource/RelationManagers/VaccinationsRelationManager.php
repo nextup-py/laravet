@@ -4,8 +4,7 @@ namespace App\Filament\Resources\PetResource\RelationManagers;
 
 use App\Filament\Concerns\ClinicRoles;
 use App\Filament\Concerns\HasClinicRelationManagerAuthorization;
-use App\Settings\ClinicSettings;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\PdfGeneratorService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -185,22 +184,17 @@ class VaccinationsRelationManager extends RelationManager
                 Tables\Actions\Action::make('downloadVaccineCard')
                     ->label('Descargar PDF')
                     ->color('success')
-                    ->action(function () {
+                    ->action(function (PdfGeneratorService $pdfGenerator) {
                         $pet = $this->getOwnerRecord(); // Obtenemos el Pet desde el contexto padre
 
                         if (! $pet) {
                             throw new \Exception('Mascota no encontrada');
                         }
 
-                        return response()->streamDownload(
-                            function () use ($pet) {
-                                echo Pdf::loadView('pdf.vaccine-card', [
-                                    'pet' => $pet,
-                                    'vaccinations' => $pet->vaccinations, // Accedemos a la relación
-                                    'clinic' => app(ClinicSettings::class),
-                                ])->stream();
-                            },
-                            "Carnet-Vacunacion-{$pet->name}.pdf"
+                        return $pdfGenerator->download(
+                            'pdf.vaccine-card',
+                            ['pet' => $pet, 'vaccinations' => $pet->vaccinations],
+                            "Carnet-Vacunacion-{$pet->name}.pdf",
                         );
                     })
                     ->requiresConfirmation()

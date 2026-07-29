@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Resources\VaccinationResource;
 use App\Models\Vaccination;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -26,9 +27,10 @@ class UpcomingVaccinationsWidget extends BaseWidget
             ->query(
                 Vaccination::query()
                     ->with(['pet', 'pet.owner'])
-                    ->where('next_application', '<', now()->addDays(7))
+                    ->upcomingOrOverdue()
                     ->orderBy('next_application')
             )
+            ->recordUrl(fn (Vaccination $record) => VaccinationResource::getUrl('view', ['record' => $record]))
             ->columns([
                 Tables\Columns\TextColumn::make('pet.name')
                     ->label('Mascota')
