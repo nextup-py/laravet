@@ -8,15 +8,15 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 
 class TestsRelationManager extends RelationManager
 {
     protected static string $relationship = 'tests';
-    protected static ?string $modelLabel = 'prueba laboratorial';
-    protected static ?string $title = 'Pruebas Laboratoriales';
 
+    protected static ?string $modelLabel = 'prueba laboratorial';
+
+    protected static ?string $title = 'Pruebas Laboratoriales';
 
     public function canViewAny(): bool
     {
@@ -83,7 +83,7 @@ class TestsRelationManager extends RelationManager
                 Forms\Components\Textarea::make('observation')
                     ->translateLabel()
                     ->autosize()
-                    ->columnSpanFull()
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -122,12 +122,23 @@ class TestsRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\Filter::make('date')
+                    ->translateLabel()
+                    ->form([
+                        Forms\Components\DatePicker::make('from')->label('Desde')->native(false),
+                        Forms\Components\DatePicker::make('until')->label('Hasta')->native(false),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['from'], fn (Builder $query, $date) => $query->whereDate('date', '>=', $date))
+                            ->when($data['until'], fn (Builder $query, $date) => $query->whereDate('date', '<=', $date));
+                    }),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = Auth::id();
+
                         return $data;
                     }),
             ])

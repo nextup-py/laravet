@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Pet;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -11,10 +10,12 @@ class AIDiagnosticService
 {
     public function suggest(Pet $pet, string $anamnesis): array
     {
-        $age = $this->formatAge($pet->birthdate);
-        $userPrompt = "Paciente: {$pet->species} | Raza: {$pet->breed} | Edad: {$age} | Peso: {$pet->weight}kg\n"
-            . "Género: {$pet->gender} | Reproducción: {$pet->reproduction}\n\n"
-            . "Anamnesis:\n{$anamnesis}";
+        $species = $pet->species->getLabel();
+        $gender = $pet->gender->getLabel();
+        $reproduction = $pet->reproduction->getLabel();
+        $userPrompt = "Paciente: {$species} | Raza: {$pet->breed} | Edad: {$pet->age} | Peso: {$pet->weight}kg\n"
+            ."Género: {$gender} | Reproducción: {$reproduction}\n\n"
+            ."Anamnesis:\n{$anamnesis}";
 
         $response = Http::withHeaders([
             'x-api-key' => config('services.anthropic.key'),
@@ -29,7 +30,7 @@ class AIDiagnosticService
         ]);
 
         if ($response->failed()) {
-            throw new RuntimeException('Error al conectar con la API de IA: ' . $response->status());
+            throw new RuntimeException('Error al conectar con la API de IA: '.$response->status());
         }
 
         $content = $response->json('content.0.text') ?? '';
@@ -38,23 +39,10 @@ class AIDiagnosticService
 
         $result = json_decode($content, true);
 
-        if (!isset($result['diagnosis'], $result['treatment'])) {
+        if (! isset($result['diagnosis'], $result['treatment'])) {
             throw new RuntimeException('La respuesta de la IA no tiene el formato esperado.');
         }
 
         return $result;
-    }
-
-    private function formatAge(mixed $birthdate): string
-    {
-        $birth = Carbon::parse($birthdate);
-        $years = $birth->diffInYears(now());
-
-        if ($years > 0) {
-            return "{$years} " . ($years === 1 ? 'año' : 'años');
-        }
-
-        $months = $birth->diffInMonths(now());
-        return "{$months} " . ($months === 1 ? 'mes' : 'meses');
     }
 }

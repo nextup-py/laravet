@@ -2,20 +2,24 @@
 
 namespace App\Filament\Resources\OwnerResource\RelationManagers;
 
+use App\Enums\PetGender;
+use App\Enums\PetReproductionStatus;
+use App\Enums\PetSize;
+use App\Enums\PetSpecies;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 
 class PetsRelationManager extends RelationManager
 {
     protected static string $relationship = 'pets';
+
     protected static ?string $modelLabel = 'mascota';
+
     protected static ?string $title = 'Mascotas asociadas';
 
     public function canViewAny(): bool
@@ -58,16 +62,7 @@ class PetsRelationManager extends RelationManager
                             ->searchable()
                             ->preload()
                             ->live()
-                            ->options([
-                                'Canino' => __('Canine'),
-                                'Felino' => __('Feline'),
-                                'Roedor' => __('Rodent'),
-                                'Ave' => __('Bird'),
-                                'Equino' => __('Equine'),
-                                'Bovino' => __('Bovine'),
-                                'Pez' => __('Fish'),
-                                'Reptil' => __('Reptile'),
-                            ])
+                            ->options(PetSpecies::class)
                             ->required(),
                         Forms\Components\TextInput::make('breed')
                             ->translateLabel()
@@ -84,10 +79,7 @@ class PetsRelationManager extends RelationManager
                         Forms\Components\Radio::make('gender')
                             ->translateLabel()
                             ->required()
-                            ->options([
-                                'Male' => 'Macho',
-                                'Female' => 'Hembra',
-                            ])
+                            ->options(PetGender::class)
                             ->inline()
                             ->inlineLabel(false),
                         Forms\Components\Select::make('reproduction')
@@ -95,11 +87,7 @@ class PetsRelationManager extends RelationManager
                             ->searchable()
                             ->preload()
                             ->live()
-                            ->options([
-                                'Normal' => __('Normal'),
-                                'Castrated' => __('Castrated'),
-                                'Sterilized' => __('Sterilized'),
-                            ])
+                            ->options(PetReproductionStatus::class)
                             ->required(),
                         Forms\Components\Toggle::make('active')
                             ->translateLabel()
@@ -117,13 +105,7 @@ class PetsRelationManager extends RelationManager
                             ->searchable()
                             ->preload()
                             ->live()
-                            ->options([
-                                'Giant' => __('Giant'),
-                                'Big' => __('Big'),
-                                'Medium' => __('Medium'),
-                                'Small' => __('Small'),
-                                'Tiny' => __('Tiny'),
-                            ])
+                            ->options(PetSize::class)
                             ->required(),
                         Forms\Components\TextInput::make('weight')
                             ->translateLabel()
@@ -145,7 +127,7 @@ class PetsRelationManager extends RelationManager
                             ->columnSpanFull()
                             ->uploadingMessage('Subiendo archivo adjunto...')
                             ->required(),
-                    ])
+                    ]),
             ]);
     }
 
@@ -167,6 +149,7 @@ class PetsRelationManager extends RelationManager
                     ->sortable(),
                 Tables\Columns\TextColumn::make('species')
                     ->translateLabel()
+                    ->badge()
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('breed')
@@ -195,6 +178,7 @@ class PetsRelationManager extends RelationManager
                 Tables\Actions\CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = Auth::id();
+
                         return $data;
                     }),
             ])

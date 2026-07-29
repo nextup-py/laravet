@@ -3,25 +3,24 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\VaccinationResource\Pages;
-use App\Filament\Resources\VaccinationResource\RelationManagers;
 use App\Models\Vaccination;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Exports\VaccinationExporter;
-use Filament\Tables\Actions\ExportAction;
-
+use Illuminate\Database\Eloquent\Model;
 
 class VaccinationResource extends Resource
 {
     protected static ?string $model = Vaccination::class;
+
     protected static ?string $navigationGroup = 'Procedures';
+
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
     protected static ?string $modelLabel = 'vacunación';
+
     protected static ?string $pluralModelLabel = 'vacunaciones';
 
     public static function form(Form $form): Form
@@ -109,7 +108,7 @@ class VaccinationResource extends Resource
                     ->required(),
                 Forms\Components\Textarea::make('observation')
                     ->translateLabel()
-                    ->columnSpanFull()
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -188,12 +187,12 @@ class VaccinationResource extends Resource
         return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
     }
 
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canDelete(Model $record): bool
     {
         return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
     }

@@ -8,12 +8,13 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class SurgeriesRelationManager extends RelationManager
 {
     protected static string $relationship = 'surgeries';
+
     protected static ?string $modelLabel = 'cirugía';
+
     protected static ?string $title = 'Cirugías';
 
     public function canViewAny(): bool
@@ -82,7 +83,7 @@ class SurgeriesRelationManager extends RelationManager
                 Forms\Components\Textarea::make('observation')
                     ->translateLabel()
                     ->autosize()
-                    ->columnSpanFull()
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -121,7 +122,17 @@ class SurgeriesRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\Filter::make('date')
+                    ->translateLabel()
+                    ->form([
+                        Forms\Components\DatePicker::make('from')->label('Desde')->native(false),
+                        Forms\Components\DatePicker::make('until')->label('Hasta')->native(false),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['from'], fn (Builder $query, $date) => $query->whereDate('date', '>=', $date))
+                            ->when($data['until'], fn (Builder $query, $date) => $query->whereDate('date', '<=', $date));
+                    }),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),

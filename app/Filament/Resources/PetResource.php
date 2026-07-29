@@ -2,6 +2,10 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\PetGender;
+use App\Enums\PetReproductionStatus;
+use App\Enums\PetSize;
+use App\Enums\PetSpecies;
 use App\Filament\Resources\PetResource\Pages;
 use App\Filament\Resources\PetResource\RelationManagers;
 use App\Models\Pet;
@@ -11,14 +15,14 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Tables\Columns\Layout\Split;
+use Illuminate\Database\Eloquent\Model;
 
 class PetResource extends Resource
 {
     protected static ?string $model = Pet::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    protected static ?string $navigationIcon = 'heroicon-o-identification';
+
     protected static ?string $modelLabel = 'mascota';
 
     public static function form(Form $form): Form
@@ -41,16 +45,7 @@ class PetResource extends Resource
                             ->searchable()
                             ->preload()
                             ->live()
-                            ->options([
-                                'Canino' => __('Canine'),
-                                'Felino' => __('Feline'),
-                                'Roedor' => __('Rodent'),
-                                'Ave' => __('Bird'),
-                                'Equino' => __('Equine'),
-                                'Bovino' => __('Bovine'),
-                                'Pez' => __('Fish'),
-                                'Reptil' => __('Reptile'),
-                            ])
+                            ->options(PetSpecies::class)
                             ->required(),
                         Forms\Components\TextInput::make('breed')
                             ->translateLabel()
@@ -67,10 +62,7 @@ class PetResource extends Resource
                         Forms\Components\Radio::make('gender')
                             ->translateLabel()
                             ->required()
-                            ->options([
-                                'Male' => 'Macho',
-                                'Female' => 'Hembra',
-                            ])
+                            ->options(PetGender::class)
                             ->inline()
                             ->inlineLabel(false),
                         Forms\Components\Select::make('reproduction')
@@ -78,11 +70,7 @@ class PetResource extends Resource
                             ->searchable()
                             ->preload()
                             ->live()
-                            ->options([
-                                'Normal' => __('Normal'),
-                                'Castrated' => __('Castrated'),
-                                'Sterilized' => __('Sterilized'),
-                            ])
+                            ->options(PetReproductionStatus::class)
                             ->required(),
                         Forms\Components\Toggle::make('active')
                             ->translateLabel()
@@ -107,13 +95,7 @@ class PetResource extends Resource
                             ->searchable()
                             ->preload()
                             ->live()
-                            ->options([
-                                'Giant' => __('Giant'),
-                                'Big' => __('Big'),
-                                'Medium' => __('Medium'),
-                                'Small' => __('Small'),
-                                'Tiny' => __('Tiny'),
-                            ])
+                            ->options(PetSize::class)
                             ->required(),
                         Forms\Components\TextInput::make('weight')
                             ->translateLabel()
@@ -135,7 +117,7 @@ class PetResource extends Resource
                             ->columnSpanFull()
                             ->uploadingMessage('Subiendo archivo adjunto...')
                             ->required(),
-                    ])
+                    ]),
             ]);
     }
 
@@ -157,12 +139,16 @@ class PetResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('species')
                     ->translateLabel()
+                    ->badge()
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('breed')
                     ->translateLabel()
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('age')
+                    ->label('Edad')
+                    ->getStateUsing(fn (Pet $record) => $record->age),
                 Tables\Columns\IconColumn::make('active')
                     ->translateLabel()
                     ->boolean()
@@ -171,6 +157,18 @@ class PetResource extends Resource
                     ->translateLabel()
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('gender')
+                    ->translateLabel()
+                    ->badge()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('size')
+                    ->translateLabel()
+                    ->badge()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('reproduction')
+                    ->translateLabel()
+                    ->badge()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('user.name')
                     ->translateLabel()
                     ->sortable()
@@ -187,9 +185,21 @@ class PetResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('species')
+                    ->translateLabel()
+                    ->options(PetSpecies::class)
+                    ->multiple(),
+                Tables\Filters\SelectFilter::make('size')
+                    ->translateLabel()
+                    ->options(PetSize::class),
+                Tables\Filters\SelectFilter::make('gender')
+                    ->translateLabel()
+                    ->options(PetGender::class),
+                Tables\Filters\TernaryFilter::make('active')
+                    ->label('Estado'),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -210,12 +220,12 @@ class PetResource extends Resource
         return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
     }
 
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canDelete(Model $record): bool
     {
         return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
     }
@@ -235,6 +245,7 @@ class PetResource extends Resource
         return [
             'index' => Pages\ListPets::route('/'),
             'create' => Pages\CreatePet::route('/create'),
+            'view' => Pages\ViewPet::route('/{record}'),
             'edit' => Pages\EditPet::route('/{record}/edit'),
         ];
     }

@@ -2,8 +2,9 @@
 
 namespace App\Notifications;
 
+use App\Filament\Resources\PetResource;
+use App\Settings\ClinicSettings;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -36,12 +37,14 @@ class VaccinationNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $clinic = app(ClinicSettings::class);
+
         return (new MailMessage)
-            ->greeting('¡Hola, ' . $this->vaccination->pet->owner->first_name . '!')
+            ->greeting('¡Hola, '.$this->vaccination->pet->owner->first_name.'!')
             ->subject(__('Recordatorio de vacunación para tu mascota.'))
-            ->line('La vacuna de tu mascota ' . $this->vaccination->pet->name . ' está por vencer el '. $this->vaccination->next_application)
-            ->action('Ver detalles', url('http://127.0.0.1:8000/admin/pets/2/edit'))
-            ->line('¡Gracias por usar nuestra aplicación!');
+            ->line('La vacuna de tu mascota '.$this->vaccination->pet->name.' está por vencer el '.$this->vaccination->next_application)
+            ->action('Ver detalles', PetResource::getUrl('edit', ['record' => $this->vaccination->pet_id]))
+            ->salutation('Saludos, '.$clinic->name);
     }
 
     /**
