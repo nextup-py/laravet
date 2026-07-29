@@ -60,6 +60,7 @@ class VaccinationResource extends Resource
                     ->preload()
                     ->live()
                     ->options([
+                        'Séptuple' => 'Séptuple',
                         'Rabia' => 'Rabia',
                         'Moquillo' => 'Moquillo',
                         'Parvovirus' => 'Parvovirus',
@@ -78,7 +79,7 @@ class VaccinationResource extends Resource
                         'Coronavirus Canino' => 'Coronavirus Canino',
                         'Giardia' => 'Giardia',
                         'Rabia Recombinante' => 'Rabia Recombinante',
-                        'Vacuna Antirrábica' => 'Vacuna Antirrábica',
+                        'Antirrábica' => 'Antirrábica',
                         'Herpesvirus Equino' => 'Herpesvirus Equino',
                         'Mixomatosis' => 'Mixomatosis',
                         'Enfermedad Hemorrágica Vírica' => 'Enfermedad Hemorrágica Vírica',

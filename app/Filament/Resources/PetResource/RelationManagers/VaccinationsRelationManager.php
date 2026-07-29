@@ -43,6 +43,7 @@ class VaccinationsRelationManager extends RelationManager
                     ->preload()
                     ->live()
                     ->options([
+                        'Séptuple' => 'Séptuple',
                         'Rabia' => 'Rabia',
                         'Moquillo' => 'Moquillo',
                         'Parvovirus' => 'Parvovirus',
@@ -61,7 +62,7 @@ class VaccinationsRelationManager extends RelationManager
                         'Coronavirus Canino' => 'Coronavirus Canino',
                         'Giardia' => 'Giardia',
                         'Rabia Recombinante' => 'Rabia Recombinante',
-                        'Vacuna Antirrábica' => 'Vacuna Antirrábica',
+                        'Antirrábica' => 'Antirrábica',
                         'Herpesvirus Equino' => 'Herpesvirus Equino',
                         'Mixomatosis' => 'Mixomatosis',
                         'Enfermedad Hemorrágica Vírica' => 'Enfermedad Hemorrágica Vírica',
