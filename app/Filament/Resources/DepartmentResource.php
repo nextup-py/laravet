@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasAdminOnlyResourceAuthorization;
 use App\Filament\Resources\DepartmentResource\Pages;
 use App\Filament\Resources\DepartmentResource\RelationManagers;
 use App\Models\Department;
@@ -10,29 +11,35 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Gestión de departamentos paraguayos (jerarquía Departamento → Ciudad → Barrio).
+ */
 class DepartmentResource extends Resource
 {
-    protected static ?string $model = Department::class;
-    protected static ?string $navigationGroup = 'Gestión del sistema';
-    protected static ?string $navigationIcon = 'heroicon-o-building-library';
-    protected static ?int $navigationSort = 3;
-    protected static ?string $modelLabel = 'departamento';
+    use HasAdminOnlyResourceAuthorization;
 
+    protected static ?string $model = Department::class;
+
+    protected static ?string $navigationGroup = 'Gestión del sistema';
+
+    protected static ?string $navigationIcon = 'heroicon-o-building-library';
+
+    protected static ?int $navigationSort = 3;
+
+    protected static ?string $modelLabel = 'departamento';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->translateLabel()
+                    ->label('Nombre')
                     ->autofocus()
                     ->string()
                     ->required(),
                 Forms\Components\TextInput::make('capital')
-                    ->translateLabel()
+                    ->label('Capital')
                     ->string()
                     ->required(),
             ]);
@@ -48,17 +55,15 @@ class DepartmentResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('name')
-                    ->translateLabel()
+                    ->label('Nombre')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('capital')
-                    ->translateLabel()
+                    ->label('Capital')
                     ->searchable()
                     ->sortable(),
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
@@ -68,26 +73,6 @@ class DepartmentResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
-    }
-
-    public static function canViewAny(): bool
-    {
-        return auth()->user()?->hasRole('admin') ?? false;
-    }
-
-    public static function canCreate(): bool
-    {
-        return auth()->user()?->hasRole('admin') ?? false;
-    }
-
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
-    {
-        return auth()->user()?->hasRole('admin') ?? false;
-    }
-
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
-    {
-        return auth()->user()?->hasRole('admin') ?? false;
     }
 
     public static function getRelations(): array

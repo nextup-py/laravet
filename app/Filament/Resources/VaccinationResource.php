@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\ClinicRoles;
+use App\Filament\Concerns\HasClinicResourceAuthorization;
 use App\Filament\Resources\VaccinationResource\Pages;
 use App\Models\Vaccination;
 use Filament\Forms;
@@ -10,10 +12,14 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Gestión de vacunaciones aplicadas a las mascotas.
+ */
 class VaccinationResource extends Resource
 {
+    use HasClinicResourceAuthorization;
+
     protected static ?string $model = Vaccination::class;
 
     protected static ?string $navigationGroup = 'Historial clínico';
@@ -24,91 +30,112 @@ class VaccinationResource extends Resource
 
     protected static ?string $pluralModelLabel = 'vacunaciones';
 
+    protected static function createRoles(): array
+    {
+        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
+    }
+
+    protected static function editRoles(): array
+    {
+        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) static::getModel()::upcomingOrOverdue()->count();
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return static::getModel()::where('next_application', '<', now())->exists() ? 'danger' : 'warning';
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\Select::make('vaccine')
-                    ->translateLabel()
+                    ->label('Vacuna')
                     ->searchable()
                     ->preload()
                     ->live()
                     ->options([
-                        'Rabia' => __('Rabies'),
-                        'Moquillo' => __('Distemper'),
-                        'Parvovirus' => __('Parvovirus'),
-                        'Adenovirus' => __('Adenovirus'),
-                        'Leptospirosis' => __('Leptospirosis'),
-                        'Parainfluenza' => __('Parainfluenza'),
-                        'Bordetella' => __('Bordetella'),
-                        'Leucemia Felina' => __('Feline Leukemia'),
-                        'Panleucopenia' => __('Panleukopenia'),
-                        'Calicivirus' => __('Calicivirus'),
-                        'Rinotraqueítis Felina' => __('Feline Herpesvirus'),
-                        'Triple Felina' => __('FVRCP Vaccine'),
-                        'Lyme' => __('Lyme Disease'),
-                        'Gripe Canina' => __('Canine Influenza'),
-                        'Tos de las Perreras' => __('Kennel Cough'),
-                        'Coronavirus Canino' => __('Canine Coronavirus'),
-                        'Giardia' => __('Giardia'),
-                        'Rabia Recombinante' => __('Recombinant Rabies'),
-                        'Vacuna Antirrábica' => __('Anti-Rabies Vaccine'),
-                        'Herpesvirus Equino' => __('Equine Herpesvirus'),
-                        'Mixomatosis' => __('Myxomatosis'),
-                        'Enfermedad Hemorrágica Vírica' => __('Viral Haemorrhagic Disease'),
-                        'Vacuna Polivalente' => __('Polyvalent Vaccine'),
+                        'Séptuple' => 'Séptuple',
+                        'Rabia' => 'Rabia',
+                        'Moquillo' => 'Moquillo',
+                        'Parvovirus' => 'Parvovirus',
+                        'Adenovirus' => 'Adenovirus',
+                        'Leptospirosis' => 'Leptospirosis',
+                        'Parainfluenza' => 'Parainfluenza',
+                        'Bordetella' => 'Bordetella',
+                        'Leucemia Felina' => 'Leucemia Felina',
+                        'Panleucopenia' => 'Panleucopenia',
+                        'Calicivirus' => 'Calicivirus',
+                        'Rinotraqueítis Felina' => 'Rinotraqueítis Felina',
+                        'Triple Felina' => 'Triple Felina',
+                        'Lyme' => 'Lyme',
+                        'Gripe Canina' => 'Gripe Canina',
+                        'Tos de las Perreras' => 'Tos de las Perreras',
+                        'Coronavirus Canino' => 'Coronavirus Canino',
+                        'Giardia' => 'Giardia',
+                        'Rabia Recombinante' => 'Rabia Recombinante',
+                        'Antirrábica' => 'Antirrábica',
+                        'Herpesvirus Equino' => 'Herpesvirus Equino',
+                        'Mixomatosis' => 'Mixomatosis',
+                        'Enfermedad Hemorrágica Vírica' => 'Enfermedad Hemorrágica Vírica',
+                        'Vacuna Polivalente' => 'Vacuna Polivalente',
                     ])
                     ->required(),
                 Forms\Components\DatePicker::make('application_date')
-                    ->translateLabel()
+                    ->label('Fecha de aplicación')
                     ->required()
                     ->native(false)
                     ->maxDate(now()),
                 Forms\Components\DatePicker::make('next_application')
-                    ->translateLabel()
+                    ->label('Próxima aplicación')
                     ->required()
                     ->native(false)
                     ->minDate(now()),
                 Forms\Components\TextInput::make('batch')
-                    ->translateLabel()
+                    ->label('Lote')
                     ->string()
                     ->required(),
                 Forms\Components\Select::make('manufacturer')
-                    ->translateLabel()
+                    ->label('Fabricante')
                     ->searchable()
                     ->preload()
                     ->live()
                     ->options([
-                        'Zoetis' => __('Zoetis'),
-                        'MSD' => __('MSD'),
-                        'Elanco' => __('Elanco'),
-                        'Boehringer Ingelheim' => __('Boehringer Ingelheim'),
-                        'Merial' => __('Merial'),
-                        'Virbac' => __('Virbac'),
-                        'Ceva' => __('Ceva'),
-                        'Heska' => __('Heska'),
-                        'Bayer' => __('Bayer'),
-                        'Vetoquinol' => __('Vetoquinol'),
-                        'Phibro' => __('Phibro'),
-                        'Hipra' => __('Hipra'),
-                        'Biogénesis Bagó' => __('Biogénesis Bagó'),
-                        'Bioiberica' => __('Bioiberica'),
-                        'Syva' => __('Syva'),
-                        'IDT Biologika' => __('IDT Biologika'),
-                        'VECOL' => __('VECOL'),
-                        'Karnov' => __('Karnov'),
-                        'Labiana' => __('Labiana'),
+                        'Zoetis' => 'Zoetis',
+                        'MSD' => 'MSD',
+                        'Elanco' => 'Elanco',
+                        'Boehringer Ingelheim' => 'Boehringer Ingelheim',
+                        'Merial' => 'Merial',
+                        'Virbac' => 'Virbac',
+                        'Ceva' => 'Ceva',
+                        'Heska' => 'Heska',
+                        'Bayer' => 'Bayer',
+                        'Vetoquinol' => 'Vetoquinol',
+                        'Phibro' => 'Phibro',
+                        'Hipra' => 'Hipra',
+                        'Biogénesis Bagó' => 'Biogénesis Bagó',
+                        'Bioiberica' => 'Bioiberica',
+                        'Syva' => 'Syva',
+                        'IDT Biologika' => 'IDT Biologika',
+                        'VECOL' => 'VECOL',
+                        'Karnov' => 'Karnov',
+                        'Labiana' => 'Labiana',
                     ])
                     ->required(),
                 Forms\Components\Select::make('pet_id')
-                    ->translateLabel()
+                    ->label('Pet id')
                     ->relationship('pet', 'name')
                     ->searchable(['name', 'id'])
                     ->preload()
                     ->live()
                     ->required(),
                 Forms\Components\Textarea::make('observation')
-                    ->translateLabel()
+                    ->label('Observación')
                     ->columnSpanFull(),
             ]);
     }
@@ -123,43 +150,43 @@ class VaccinationResource extends Resource
                     ->sortable()
                     ->numeric(),
                 Tables\Columns\TextColumn::make('pet.name')
-                    ->translateLabel()
+                    ->label('Mascota')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('vaccine')
-                    ->translateLabel()
+                    ->label('Vacuna')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('application_date')
-                    ->translateLabel()
+                    ->label('Fecha de aplicación')
                     ->date()
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('next_application')
-                    ->translateLabel()
+                    ->label('Próxima aplicación')
                     ->date()
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('batch')
-                    ->translateLabel()
+                    ->label('Lote')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('manufacturer')
-                    ->translateLabel()
+                    ->label('Fabricante')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('user.name')
-                    ->translateLabel()
+                    ->label('Usuario')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->translateLabel()
+                    ->label('Creado a las')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->translateLabel()
+                    ->label('Actualizado a las')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -173,6 +200,7 @@ class VaccinationResource extends Resource
                     ->query(fn (Builder $query) => $query->whereBetween('next_application', [now(), now()->addDays(7)])),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -181,26 +209,6 @@ class VaccinationResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])->selectCurrentPageOnly();
-    }
-
-    public static function canViewAny(): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
-    }
-
-    public static function canCreate(): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
-    }
-
-    public static function canEdit(Model $record): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
-    }
-
-    public static function canDelete(Model $record): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
     }
 
     public static function getRelations(): array
@@ -215,6 +223,7 @@ class VaccinationResource extends Resource
         return [
             'index' => Pages\ListVaccinations::route('/'),
             'create' => Pages\CreateVaccination::route('/create'),
+            'view' => Pages\ViewVaccination::route('/{record}'),
             'edit' => Pages\EditVaccination::route('/{record}/edit'),
         ];
     }

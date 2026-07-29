@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PetResource\Pages;
 
 use App\Filament\Resources\PetResource;
+use App\Services\PdfGeneratorService;
 use Filament\Actions;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section;
@@ -17,6 +18,30 @@ class ViewPet extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('downloadClinicalHistory')
+                ->label('Descargar historia clínica')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('success')
+                ->action(fn (PdfGeneratorService $pdfGenerator) => $pdfGenerator->download(
+                    'pdf.clinical-history',
+                    ['pet' => $this->record],
+                    "Historia-Clinica-{$this->record->name}.pdf",
+                ))
+                ->requiresConfirmation()
+                ->modalHeading('Generar historia clínica')
+                ->modalDescription('¿Desea descargar el PDF con el historial completo de consultas?'),
+            Actions\Action::make('downloadPetIdCard')
+                ->label('Descargar ficha de mascota')
+                ->icon('heroicon-o-identification')
+                ->color('success')
+                ->action(fn (PdfGeneratorService $pdfGenerator) => $pdfGenerator->download(
+                    'pdf.pet-id-card',
+                    ['pet' => $this->record],
+                    "Ficha-Mascota-{$this->record->name}.pdf",
+                ))
+                ->requiresConfirmation()
+                ->modalHeading('Generar ficha de identificación')
+                ->modalDescription('¿Desea descargar el PDF con la ficha de identificación de la mascota?'),
             Actions\EditAction::make(),
         ];
     }
@@ -25,28 +50,28 @@ class ViewPet extends ViewRecord
     {
         return $infolist
             ->schema([
-                Section::make(__('ID information'))
+                Section::make('Datos identificatorios')
                     ->columns(3)
                     ->schema([
-                        TextEntry::make('name')->translateLabel(),
-                        TextEntry::make('species')->translateLabel()->badge(),
-                        TextEntry::make('breed')->translateLabel(),
+                        TextEntry::make('name')->label('Nombre'),
+                        TextEntry::make('species')->label('Especie')->badge(),
+                        TextEntry::make('breed')->label('Raza'),
                         TextEntry::make('age')->label('Edad'),
-                        TextEntry::make('gender')->translateLabel()->badge(),
-                        TextEntry::make('reproduction')->translateLabel()->badge(),
-                        TextEntry::make('active')->translateLabel()->badge()
+                        TextEntry::make('gender')->label('Género')->badge(),
+                        TextEntry::make('reproduction')->label('Reproducción')->badge(),
+                        TextEntry::make('active')->label('Activo')->badge()
                             ->formatStateUsing(fn (bool $state): string => $state ? 'Activo' : 'Inactivo')
                             ->color(fn (bool $state): string => $state ? 'success' : 'danger'),
-                        TextEntry::make('owner.first_name')->translateLabel()->label('Propietario'),
+                        TextEntry::make('owner.first_name')->label('Propietario'),
                     ]),
 
-                Section::make(__('More information'))
+                Section::make('Más información')
                     ->columns(3)
                     ->schema([
-                        TextEntry::make('size')->translateLabel()->badge(),
-                        TextEntry::make('weight')->translateLabel()->suffix(' kg'),
-                        TextEntry::make('fur')->label(__('Pelage')),
-                        ImageEntry::make('image')->translateLabel()->columnSpanFull(),
+                        TextEntry::make('size')->label('Tamaño')->badge(),
+                        TextEntry::make('weight')->label('Peso')->suffix(' kg'),
+                        TextEntry::make('fur')->label('Pelaje'),
+                        ImageEntry::make('image')->label('Imagen')->columnSpanFull(),
                     ]),
             ]);
     }

@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\VaccinationResource\Pages;
 
 use App\Filament\Resources\VaccinationResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 

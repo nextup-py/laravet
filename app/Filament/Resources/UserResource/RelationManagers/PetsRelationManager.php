@@ -2,62 +2,53 @@
 
 namespace App\Filament\Resources\UserResource\RelationManagers;
 
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Muestra, en modo solo lectura, las mascotas registradas por este usuario.
+ */
 class PetsRelationManager extends RelationManager
 {
     protected static string $relationship = 'pets';
 
+    protected static ?string $title = 'Mascotas registradas';
+
+    public function canViewAny(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
+    }
+
     public function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                /* Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255), */
-            ]);
+        return $form->schema([]);
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('name')
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
+                    ->label('Imagen')
                     ->circular(),
                 Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Nombre')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('species')
+                    ->label('Especie')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('breed')
+                    ->label('Raza')
                     ->searchable()
                     ->sortable(),
-            ])
-            ->filters([
-                //
-            ])
-/*             ->headerActions([
-                Tables\Actions\CreateAction::make(),
-            ]) */
-            /* ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]) */;
+            ]);
     }
 }

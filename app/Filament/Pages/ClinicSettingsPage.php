@@ -47,11 +47,14 @@ class ClinicSettingsPage extends Page implements HasForms
                     ->schema([
                         Forms\Components\TextInput::make('name')
                             ->label('Nombre de la clínica')
+                            ->helperText('Aparece en el encabezado de los PDFs generados y en el panel.')
                             ->required(),
                         Forms\Components\ColorPicker::make('primary_color')
-                            ->label('Color primario del panel'),
+                            ->label('Color primario del panel')
+                            ->helperText('Color de acento usado en el panel y en el encabezado de los PDFs.'),
                         Forms\Components\FileUpload::make('logo')
                             ->label('Logo')
+                            ->helperText('Aparece en el encabezado de todos los PDFs generados.')
                             ->image()
                             ->directory('clinic'),
                         Forms\Components\FileUpload::make('favicon')
@@ -68,12 +71,18 @@ class ClinicSettingsPage extends Page implements HasForms
                             ->columnSpanFull(),
                         Forms\Components\TextInput::make('phone')
                             ->label('Teléfono')
+                            ->helperText('Aparece en el encabezado de los PDFs generados.')
+                            ->tel(),
+                        Forms\Components\TextInput::make('whatsapp')
+                            ->label('WhatsApp')
+                            ->helperText('Aparece en el encabezado de los PDFs generados, junto al teléfono.')
                             ->tel(),
                         Forms\Components\TextInput::make('email')
                             ->label('Email')
                             ->email(),
                         Forms\Components\TextInput::make('business_hours')
-                            ->label('Horario de atención'),
+                            ->label('Horario de atención')
+                            ->helperText('Aparece en el encabezado de los PDFs generados.'),
                     ]),
 
                 Forms\Components\Section::make('Datos legales y fiscales')

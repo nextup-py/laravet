@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasClinicResourceAuthorization;
 use App\Filament\Resources\OwnerResource\Pages;
 use App\Filament\Resources\OwnerResource\RelationManagers;
 use App\Models\City;
@@ -15,11 +16,15 @@ use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
+/**
+ * Gestión de propietarios de mascotas.
+ */
 class OwnerResource extends Resource
 {
+    use HasClinicResourceAuthorization;
+
     protected static ?string $model = Owner::class;
 
     protected static ?string $navigationGroup = 'Pacientes';
@@ -33,7 +38,7 @@ class OwnerResource extends Resource
         return $form
             ->schema([
 
-                Section::make(__('Personal information'))
+                Section::make('Datos personales')
                     ->columns(2)
                     ->schema([
                         Forms\Components\TextInput::make('ci')
@@ -41,35 +46,36 @@ class OwnerResource extends Resource
                             ->required()
                             ->integer()
                             ->minValue(1)
-                            ->unique(),
+                            ->unique(ignoreRecord: true),
                         Forms\Components\TextInput::make('first_name')
-                            ->translateLabel()
+                            ->label('Nombre(s)')
                             ->required()
                             ->string(),
                         Forms\Components\TextInput::make('last_name')
-                            ->translateLabel()
+                            ->label('Apellido(s)')
                             ->required()
                             ->string(),
                         Forms\Components\Radio::make('gender')
-                            ->translateLabel()
+                            ->label('Género')
                             ->required()
                             ->options([
-                                'Male' => __('Male'),
-                                'Female' => __('Female'),
+                                'Male' => 'Masculino',
+                                'Female' => 'Femenino',
                             ])
                             ->inline()
                             ->inlineLabel(false),
                         Forms\Components\TextInput::make('email')
-                            ->translateLabel()
+                            ->label('Correo electrónico')
                             ->email()
+                            ->unique(ignoreRecord: true)
                             ->required(),
                         Forms\Components\TextInput::make('phone')
-                            ->translateLabel()
+                            ->label('Teléfono')
                             ->tel()
                             ->required(),
                     ]),
 
-                Section::make(__('Address information'))
+                Section::make('Datos del domicilio')
                     ->columns(2)
                     ->schema([
                         Forms\Components\Select::make('department_id')
@@ -81,7 +87,7 @@ class OwnerResource extends Resource
                                 $set('city_id', null);
                                 $set('neighborhood_id', null);
                             })
-                            ->translateLabel()
+                            ->label('Department id')
                             ->required(),
                         Forms\Components\Select::make('city_id')
                             ->options(fn (Get $get): Collection => City::query()->where('department_id', $get('department_id'))->pluck('name', 'id'))
@@ -89,18 +95,16 @@ class OwnerResource extends Resource
                             ->preload()
                             ->live()
                             ->afterStateUpdated(fn (Set $set) => $set('neighborhood_id', null))
-                            ->label(__('City'))
-                            ->translateLabel()
+                            ->label('Ciudad')
                             ->required(),
                         Forms\Components\Select::make('neighborhood_id')
                             ->options(fn (Get $get): Collection => Neighborhood::query()->where('city_id', $get('city_id'))->pluck('name', 'id'))
                             ->searchable()
                             ->preload()
-                            ->label(__('Neighborhood'))
-                            ->translateLabel()
+                            ->label('Barrio')
                             ->required(),
                         Forms\Components\TextInput::make('address')
-                            ->translateLabel()
+                            ->label('Dirección')
                             ->required(),
                     ]),
 
@@ -121,58 +125,56 @@ class OwnerResource extends Resource
                     ->searchable()
                     ->numeric(),
                 Tables\Columns\TextColumn::make('first_name')
-                    ->translateLabel()
+                    ->label('Nombre(s)')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('last_name')
-                    ->translateLabel()
+                    ->label('Apellido(s)')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('gender')
-                    ->translateLabel()
+                    ->label('Género')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
-                    ->translateLabel()
+                    ->label('Correo electrónico')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('phone')
-                    ->translateLabel()
+                    ->label('Teléfono')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('department.name')
-                    ->translateLabel()
+                    ->label('Departamento')
                     ->sortable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('city.name')
-                    ->translateLabel()
+                    ->label('Ciudad')
                     ->sortable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('neighborhood.name')
-                    ->translateLabel()
+                    ->label('Barrio')
                     ->sortable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('address')
-                    ->translateLabel()
+                    ->label('Dirección')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('user.name')
-                    ->translateLabel()
+                    ->label('Usuario')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->translateLabel()
-                    ->label(__('Created'))
+                    ->label('Creado')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->translateLabel()
-                    ->label(__('Updated'))
+                    ->label('Actualizado')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -185,33 +187,15 @@ class OwnerResource extends Resource
                     ->preload(),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
-    }
-
-    public static function canViewAny(): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
-    }
-
-    public static function canCreate(): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
-    }
-
-    public static function canEdit(Model $record): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
-    }
-
-    public static function canDelete(Model $record): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
     }
 
     public static function getRelations(): array
@@ -226,6 +210,7 @@ class OwnerResource extends Resource
         return [
             'index' => Pages\ListOwners::route('/'),
             'create' => Pages\CreateOwner::route('/create'),
+            'view' => Pages\ViewOwner::route('/{record}'),
             'edit' => Pages\EditOwner::route('/{record}/edit'),
         ];
     }

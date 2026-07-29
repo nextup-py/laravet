@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasAdminOnlyResourceAuthorization;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\City;
@@ -15,11 +16,15 @@ use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
+/**
+ * Gestión de usuarios del panel (veterinarios, asistentes y administradores).
+ */
 class UserResource extends Resource
 {
+    use HasAdminOnlyResourceAuthorization;
+
     protected static ?string $model = User::class;
 
     protected static ?string $navigationGroup = 'Administración';
@@ -30,38 +35,48 @@ class UserResource extends Resource
 
     protected static ?string $modelLabel = 'usuario';
 
+    /**
+     * Opciones de rol reutilizadas por el formulario, la columna y el filtro de rol.
+     */
+    public static function roleOptions(): array
+    {
+        return [
+            'admin' => 'Administrador',
+            'veterinarian' => 'Veterinario',
+            'assistant' => 'Asistente',
+        ];
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
 
-                Section::make(__('Personal information'))
+                Section::make('Datos personales')
                     ->columns(3)
                     ->schema([
                         Forms\Components\TextInput::make('name')
-                            ->translateLabel()
+                            ->label('Nombre')
                             ->string()
                             ->required(),
                         Forms\Components\TextInput::make('email')
+                            ->label('Correo electrónico')
                             ->email()
-                            ->translateLabel()
+                            ->unique(ignoreRecord: true)
                             ->required(),
                         Forms\Components\TextInput::make('password')
                             ->password()
-                            ->hiddenOn('edit')
-                            ->translateLabel()
-                            ->required(),
+                            ->label('Contraseña')
+                            ->required(fn (string $operation): bool => $operation === 'create')
+                            ->dehydrated(fn ($state): bool => filled($state))
+                            ->minLength(8),
                         Forms\Components\Select::make('role')
                             ->label('Rol')
-                            ->options([
-                                'admin' => 'Administrador',
-                                'veterinarian' => 'Veterinario',
-                                'assistant' => 'Asistente',
-                            ])
+                            ->options(self::roleOptions())
                             ->required(),
                     ]),
 
-                Section::make(__('Address information'))
+                Section::make('Datos del domicilio')
                     ->columns(3)
                     ->schema([
                         Forms\Components\Select::make('department_id')
@@ -73,7 +88,7 @@ class UserResource extends Resource
                                 $set('city_id', null);
                                 $set('neighborhood_id', null);
                             })
-                            ->translateLabel()
+                            ->label('Department id')
                             ->required(),
 
                         Forms\Components\Select::make('city_id')
@@ -82,20 +97,18 @@ class UserResource extends Resource
                             ->preload()
                             ->live()
                             ->afterStateUpdated(fn (Set $set) => $set('neighborhood_id', null))
-                            ->label(__('City'))
-                            ->translateLabel()
+                            ->label('Ciudad')
                             ->required(),
 
                         Forms\Components\Select::make('neighborhood_id')
                             ->options(fn (Get $get): Collection => Neighborhood::query()->where('city_id', $get('city_id'))->pluck('name', 'id'))
                             ->searchable()
                             ->preload()
-                            ->label(__('Neighborhood'))
-                            ->translateLabel()
+                            ->label('Barrio')
                             ->required(),
 
                         Forms\Components\TextInput::make('address')
-                            ->translateLabel()
+                            ->label('Dirección')
                             ->columnSpanFull()
                             ->required(),
                     ]),
@@ -112,29 +125,24 @@ class UserResource extends Resource
                     ->sortable()
                     ->numeric(),
                 Tables\Columns\TextColumn::make('name')
-                    ->translateLabel()
+                    ->label('Nombre')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
-                    ->translateLabel()
+                    ->label('Correo electrónico')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('roles.name')
                     ->label('Rol')
                     ->badge()
-                    ->formatStateUsing(fn (?string $state): string => match ($state) {
-                        'admin' => 'Administrador',
-                        'veterinarian' => 'Veterinario',
-                        'assistant' => 'Asistente',
-                        default => $state ?? '—',
-                    }),
+                    ->formatStateUsing(fn (?string $state): string => self::roleOptions()[$state] ?? $state ?? '—'),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->translateLabel()
+                    ->label('Creado a las')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->translateLabel()
+                    ->label('Actualizado a las')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -143,13 +151,10 @@ class UserResource extends Resource
                 Tables\Filters\SelectFilter::make('roles')
                     ->relationship('roles', 'name')
                     ->label('Rol')
-                    ->options([
-                        'admin' => 'Administrador',
-                        'veterinarian' => 'Veterinario',
-                        'assistant' => 'Asistente',
-                    ]),
+                    ->options(self::roleOptions()),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -158,26 +163,6 @@ class UserResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
-    }
-
-    public static function canViewAny(): bool
-    {
-        return auth()->user()?->hasRole('admin') ?? false;
-    }
-
-    public static function canCreate(): bool
-    {
-        return auth()->user()?->hasRole('admin') ?? false;
-    }
-
-    public static function canEdit(Model $record): bool
-    {
-        return auth()->user()?->hasRole('admin') ?? false;
-    }
-
-    public static function canDelete(Model $record): bool
-    {
-        return auth()->user()?->hasRole('admin') ?? false;
     }
 
     public static function getRelations(): array
@@ -193,6 +178,7 @@ class UserResource extends Resource
         return [
             'index' => Pages\ListUsers::route('/'),
             'create' => Pages\CreateUser::route('/create'),
+            'view' => Pages\ViewUser::route('/{record}'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }

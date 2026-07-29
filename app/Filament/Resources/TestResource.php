@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\ClinicRoles;
+use App\Filament\Concerns\HasClinicResourceAuthorization;
 use App\Filament\Resources\TestResource\Pages;
 use App\Models\Test;
 use Filament\Forms;
@@ -10,10 +12,14 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Gestión de pruebas laboratoriales realizadas a las mascotas.
+ */
 class TestResource extends Resource
 {
+    use HasClinicResourceAuthorization;
+
     protected static ?string $model = Test::class;
 
     protected static ?string $navigationGroup = 'Historial clínico';
@@ -24,21 +30,31 @@ class TestResource extends Resource
 
     protected static ?string $pluralModelLabel = 'pruebas laboratoriales';
 
+    protected static function createRoles(): array
+    {
+        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
+    }
+
+    protected static function editRoles(): array
+    {
+        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
+    }
+
     public static function typeOptions(): array
     {
         return [
-            'Hematología' => __('Hematology'),
-            'Bioquímica' => __('Biochemistry'),
-            'Inmunología' => __('Immunology'),
-            'Microbiología' => __('Microbiology'),
-            'Parasitología' => __('Parasitology'),
-            'Uroanálisis' => __('Urinalysis'),
-            'Coprología' => __('Fecal Analysis'),
-            'Cultivo' => __('Culture'),
-            'Prueba Rápida' => __('Rapid Test'),
-            'PCR' => __('PCR'),
-            'Serología' => __('Serology'),
-            'Otros' => __('Others'),
+            'Hematología' => 'Hematología',
+            'Bioquímica' => 'Bioquímica',
+            'Inmunología' => 'Inmunología',
+            'Microbiología' => 'Microbiología',
+            'Parasitología' => 'Parasitología',
+            'Uroanálisis' => 'Uroanálisis',
+            'Coprología' => 'Coprología',
+            'Cultivo' => 'Cultivo',
+            'Prueba Rápida' => 'Prueba Rápida',
+            'PCR' => 'PCR',
+            'Serología' => 'Serología',
+            'Otros' => 'Otros',
         ];
     }
 
@@ -46,25 +62,25 @@ class TestResource extends Resource
     {
         return $form
             ->schema([
-                Section::make(__('General information'))
+                Section::make('Información general')
                     ->columns(2)
                     ->schema([
                         Forms\Components\Select::make('pet_id')
-                            ->translateLabel()
+                            ->label('Pet id')
                             ->relationship('pet', 'name')
                             ->searchable(['name', 'id'])
                             ->preload()
                             ->live()
                             ->required(),
                         Forms\Components\DatePicker::make('date')
-                            ->translateLabel()
+                            ->label('Fecha')
                             ->required()
                             ->native(false)
                             ->displayFormat('d/m/Y')
                             ->closeOnDateSelection()
                             ->maxDate(now()),
                         Forms\Components\Select::make('type')
-                            ->translateLabel()
+                            ->label('Tipo')
                             ->searchable()
                             ->preload()
                             ->live()
@@ -82,7 +98,7 @@ class TestResource extends Resource
                             ->columnSpanFull()
                             ->required(),
                         Forms\Components\Textarea::make('observation')
-                            ->translateLabel()
+                            ->label('Observación')
                             ->autosize()
                             ->columnSpanFull(),
                     ]),
@@ -98,15 +114,15 @@ class TestResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('pet.name')
-                    ->translateLabel()
+                    ->label('Mascota')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('date')
-                    ->translateLabel()
+                    ->label('Fecha')
                     ->date('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('type')
-                    ->translateLabel()
+                    ->label('Tipo')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('result')
@@ -117,29 +133,28 @@ class TestResource extends Resource
                         return is_array($files) && count($files) > 0 ? count($files).' archivo(s)' : '—';
                     }),
                 Tables\Columns\TextColumn::make('observation')
-                    ->translateLabel()
+                    ->label('Observación')
                     ->limit(50)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('user.name')
-                    ->translateLabel()
+                    ->label('Usuario')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->translateLabel()
+                    ->label('Creado a las')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->translateLabel()
+                    ->label('Actualizado a las')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -150,30 +165,13 @@ class TestResource extends Resource
             ]);
     }
 
-    public static function canViewAny(): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
-    }
-
-    public static function canCreate(): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
-    }
-
-    public static function canEdit(Model $record): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
-    }
-
-    public static function canDelete(Model $record): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
-    }
-
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageTests::route('/'),
+            'index' => Pages\ListTests::route('/'),
+            'create' => Pages\CreateTest::route('/create'),
+            'view' => Pages\ViewTest::route('/{record}'),
+            'edit' => Pages\EditTest::route('/{record}/edit'),
         ];
     }
 }

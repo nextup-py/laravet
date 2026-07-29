@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\ClinicRoles;
+use App\Filament\Concerns\HasClinicResourceAuthorization;
 use App\Filament\Resources\ConsultationResource\Pages;
 use App\Models\Consultation;
 use App\Services\AIDiagnosticService;
@@ -14,10 +16,15 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
+/**
+ * Gestión de consultas veterinarias, con diagnóstico asistido por IA.
+ */
 class ConsultationResource extends Resource
 {
+    use HasClinicResourceAuthorization;
+
     protected static ?string $model = Consultation::class;
 
     protected static ?string $navigationGroup = 'Historial clínico';
@@ -26,12 +33,29 @@ class ConsultationResource extends Resource
 
     protected static ?string $modelLabel = 'consulta';
 
+    protected static function createRoles(): array
+    {
+        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
+    }
+
+    protected static function editRoles(): array
+    {
+        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+                Forms\Components\Select::make('pet_id')
+                    ->label('Pet id')
+                    ->relationship('pet', 'name')
+                    ->searchable(['name', 'id'])
+                    ->preload()
+                    ->live()
+                    ->required(),
                 Forms\Components\Textarea::make('anamnesis')
-                    ->translateLabel()
+                    ->label('Anamnesis')
                     ->columnSpanFull()
                     ->autosize()
                     ->required(),
@@ -47,9 +71,11 @@ class ConsultationResource extends Resource
                                 $set('diagnosis', $result['diagnosis']);
                                 $set('treatment', $result['treatment']);
                             } catch (\Throwable $e) {
+                                Log::error('Error en sugerencia de IA: '.$e->getMessage());
+
                                 Notification::make()
                                     ->title('Error al generar sugerencia')
-                                    ->body($e->getMessage())
+                                    ->body('No se pudo generar la sugerencia. Intentá nuevamente en unos minutos.')
                                     ->danger()
                                     ->send();
                             }
@@ -57,17 +83,17 @@ class ConsultationResource extends Resource
                         ->hidden(fn ($record) => $record === null || ! auth()->user()?->hasAnyRole(['admin', 'veterinarian'])),
                 ])->columnSpanFull(),
                 Forms\Components\Textarea::make('diagnosis')
-                    ->translateLabel()
+                    ->label('Diagnóstico')
                     ->columnSpanFull()
                     ->autosize()
                     ->required(),
                 Forms\Components\Textarea::make('treatment')
-                    ->translateLabel()
+                    ->label('Tratamiento')
                     ->columnSpanFull()
                     ->autosize()
                     ->required(),
                 Forms\Components\Textarea::make('observation')
-                    ->translateLabel()
+                    ->label('Observación')
                     ->columnSpanFull()
                     ->autosize(),
             ]);
@@ -83,15 +109,11 @@ class ConsultationResource extends Resource
                     ->sortable()
                     ->numeric(),
                 Tables\Columns\TextColumn::make('pet.name')
-                    ->translateLabel()
+                    ->label('Mascota')
                     ->searchable()
                     ->sortable(),
-                /* Tables\Columns\TextColumn::make('anamnesis')
-                    ->translateLabel()
-                    ->searchable()
-                    ->sortable(), */
                 Tables\Columns\TextColumn::make('diagnosis')
-                    ->translateLabel()
+                    ->label('Diagnóstico')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('user.name')
@@ -109,7 +131,7 @@ class ConsultationResource extends Resource
             ])
             ->filters([
                 Tables\Filters\Filter::make('created_at')
-                    ->translateLabel()
+                    ->label('Creado a las')
                     ->form([
                         Forms\Components\DatePicker::make('from')->label('Desde')->native(false),
                         Forms\Components\DatePicker::make('until')->label('Hasta')->native(false),
@@ -121,6 +143,7 @@ class ConsultationResource extends Resource
                     }),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -131,30 +154,13 @@ class ConsultationResource extends Resource
             ]);
     }
 
-    public static function canViewAny(): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
-    }
-
-    public static function canCreate(): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
-    }
-
-    public static function canEdit(Model $record): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
-    }
-
-    public static function canDelete(Model $record): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
-    }
-
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageConsultations::route('/'),
+            'index' => Pages\ListConsultations::route('/'),
+            'create' => Pages\CreateConsultation::route('/create'),
+            'view' => Pages\ViewConsultation::route('/{record}'),
+            'edit' => Pages\EditConsultation::route('/{record}/edit'),
         ];
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\ClinicRoles;
+use App\Filament\Concerns\HasClinicResourceAuthorization;
 use App\Filament\Resources\SurgeryResource\Pages;
 use App\Models\Surgery;
 use Filament\Forms;
@@ -10,10 +12,14 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Gestión de cirugías realizadas a las mascotas.
+ */
 class SurgeryResource extends Resource
 {
+    use HasClinicResourceAuthorization;
+
     protected static ?string $model = Surgery::class;
 
     protected static ?string $navigationGroup = 'Historial clínico';
@@ -22,36 +28,46 @@ class SurgeryResource extends Resource
 
     protected static ?string $modelLabel = 'cirugía';
 
+    protected static function createRoles(): array
+    {
+        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
+    }
+
+    protected static function editRoles(): array
+    {
+        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
+    }
+
     public static function typeOptions(): array
     {
         return [
-            'Esterilización' => __('Sterilization'),
-            'Ovariohisterectomía' => __('Ovariohysterectomy'),
-            'Castración' => __('Neutering'),
-            'Cirugía Dental' => __('Dental Surgery'),
-            'Extracción de Tumores' => __('Tumor Removal'),
-            'Cirugía de Cuerpo Extraño' => __('Foreign Body Surgery'),
-            'Reparación de Fracturas' => __('Fracture Repair'),
-            'Cesárea' => __('Cesarean Section'),
-            'Amputación' => __('Amputation'),
-            'Enucleación Ocular' => __('Eye Enucleation'),
-            'Cirugía de Ligamento Cruzado' => __('Cruciate Ligament Surgery'),
-            'Gastropexia Preventiva' => __('Prophylactic Gastropexy'),
-            'Desungulación' => __('Declawing'),
-            'Herniorrafia' => __('Hernia Repair'),
-            'Laparotomía Exploratoria' => __('Exploratory Laparotomy'),
-            'Onychectomía' => __('Onychectomy'),
-            'Cistotomía' => __('Cystotomy'),
-            'Uretrostomía Perineal' => __('Perineal Urethrostomy'),
-            'Esplenectomía' => __('Splenectomy'),
-            'Tiroidectomía' => __('Thyroidectomy'),
-            'Cirugía de Luxación de Rótula' => __('Patellar Luxation Surgery'),
-            'Toracotomía' => __('Thoracotomy'),
-            'Resección Intestinal' => __('Intestinal Resection'),
-            'Cirugía de Glándulas Perianales' => __('Perianal Gland Surgery'),
-            'Sutura de herida' => __('Wound Suture'),
-            'Extracción dental' => __('Dental Extraction'),
-            'Desobstrucción uretral' => __('Urethral Unblocking'),
+            'Esterilización' => 'Esterilización',
+            'Ovariohisterectomía' => 'Ovariohisterectomía',
+            'Castración' => 'Castración',
+            'Cirugía Dental' => 'Cirugía Dental',
+            'Extracción de Tumores' => 'Extracción de Tumores',
+            'Cirugía de Cuerpo Extraño' => 'Cirugía de Cuerpo Extraño',
+            'Reparación de Fracturas' => 'Reparación de Fracturas',
+            'Cesárea' => 'Cesárea',
+            'Amputación' => 'Amputación',
+            'Enucleación Ocular' => 'Enucleación Ocular',
+            'Cirugía de Ligamento Cruzado' => 'Cirugía de Ligamento Cruzado',
+            'Gastropexia Preventiva' => 'Gastropexia Preventiva',
+            'Desungulación' => 'Desungulación',
+            'Herniorrafia' => 'Herniorrafia',
+            'Laparotomía Exploratoria' => 'Laparotomía Exploratoria',
+            'Onicectomía' => 'Onicectomía',
+            'Cistotomía' => 'Cistotomía',
+            'Uretrostomía Perineal' => 'Uretrostomía Perineal',
+            'Esplenectomía' => 'Esplenectomía',
+            'Tiroidectomía' => 'Tiroidectomía',
+            'Cirugía de Luxación de Rótula' => 'Cirugía de Luxación de Rótula',
+            'Toracotomía' => 'Toracotomía',
+            'Resección Intestinal' => 'Resección Intestinal',
+            'Cirugía de Glándulas Perianales' => 'Cirugía de Glándulas Perianales',
+            'Sutura de herida' => 'Sutura de herida',
+            'Extracción dental' => 'Extracción dental',
+            'Desobstrucción uretral' => 'Desobstrucción uretral',
         ];
     }
 
@@ -59,32 +75,32 @@ class SurgeryResource extends Resource
     {
         return $form
             ->schema([
-                Section::make(__('General information'))
+                Section::make('Información general')
                     ->columns(2)
                     ->schema([
                         Forms\Components\Select::make('pet_id')
-                            ->translateLabel()
+                            ->label('Pet id')
                             ->relationship('pet', 'name')
                             ->searchable(['name', 'id'])
                             ->preload()
                             ->live()
                             ->required(),
                         Forms\Components\DatePicker::make('date')
-                            ->translateLabel()
+                            ->label('Fecha')
                             ->required()
                             ->native(false)
                             ->displayFormat('d/m/Y')
                             ->closeOnDateSelection()
                             ->maxDate(now()),
                         Forms\Components\Select::make('type')
-                            ->translateLabel()
+                            ->label('Tipo')
                             ->searchable()
                             ->preload()
                             ->live()
                             ->options(self::typeOptions())
                             ->required(),
                         Forms\Components\Textarea::make('observation')
-                            ->translateLabel()
+                            ->label('Observación')
                             ->autosize()
                             ->columnSpanFull(),
                     ]),
@@ -100,26 +116,25 @@ class SurgeryResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('pet.name')
-                    ->translateLabel()
+                    ->label('Mascota')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('date')
-                    ->translateLabel()
+                    ->label('Fecha')
                     ->date('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('type')
-                    ->translateLabel()
+                    ->label('Tipo')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('observation')
-                    ->translateLabel()
+                    ->label('Observación')
                     ->limit(50)
                     ->searchable(),
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -130,30 +145,13 @@ class SurgeryResource extends Resource
             ]);
     }
 
-    public static function canViewAny(): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
-    }
-
-    public static function canCreate(): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
-    }
-
-    public static function canEdit(Model $record): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
-    }
-
-    public static function canDelete(Model $record): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
-    }
-
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageSurgeries::route('/'),
+            'index' => Pages\ListSurgeries::route('/'),
+            'create' => Pages\CreateSurgery::route('/create'),
+            'view' => Pages\ViewSurgery::route('/{record}'),
+            'edit' => Pages\EditSurgery::route('/{record}/edit'),
         ];
     }
 }

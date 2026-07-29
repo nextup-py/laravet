@@ -18,6 +18,8 @@ class ClinicSettings extends Settings
 
     public ?string $phone;
 
+    public ?string $whatsapp;
+
     public ?string $email;
 
     public ?string $business_hours;

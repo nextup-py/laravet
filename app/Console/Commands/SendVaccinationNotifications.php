@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 class SendVaccinationNotifications extends Command
 {
     /**
-     * El nombre y la firma del comando de consola..
+     * El nombre y la firma del comando de consola.
      *
      * @var string
      */
@@ -20,22 +20,32 @@ class SendVaccinationNotifications extends Command
      *
      * @var string
      */
-    protected $description = 'Sends vaccination reminders to pet owners';
+    protected $description = 'Envía recordatorios de vacunación a los dueños de las mascotas.';
 
     /**
      * Ejecutar el comando de consola.
      */
-    public function handle()
+    public function handle(): void
     {
-        // Obtener las vacunaciones cuya próxima aplicación sea en los próximos 3 días
-        $vaccinations = Vaccination::where('next_application', '<=', now()->addDays(3))->get();
+        // Vacunaciones cuya próxima aplicación es en los próximos 3 días y que aún
+        // no recibieron un recordatorio (evita reenviar en cada corrida del schedule).
+        $vaccinations = Vaccination::query()
+            ->whereNull('reminder_sent_at')
+            ->where('next_application', '<=', now()->addDays(3))
+            ->with(['pet.owner'])
+            ->get();
 
         foreach ($vaccinations as $vaccination) {
-            // Obtener el dueño de la mascota que recibió la vacunación
-            $owner = $vaccination->pet->owner;
+            $owner = $vaccination->pet?->owner;
 
-            // Enviar una notificación al dueño sobre la vacunación realizada
+            if (! $owner) {
+                continue;
+            }
+
             $owner->notify(new VaccinationNotification($vaccination));
+
+            $vaccination->reminder_sent_at = now();
+            $vaccination->save();
         }
     }
 }

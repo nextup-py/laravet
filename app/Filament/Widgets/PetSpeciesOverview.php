@@ -16,7 +16,7 @@ class PetSpeciesOverview extends BaseWidget
                 ->icon('heroicon-o-identification')
                 ->color('info'),
             Stat::make('Felinos', Pet::query()->where('species', PetSpecies::Felino)->count())
-                ->icon('heroicon-o-identification')
+                ->icon('heroicon-o-face-smile')
                 ->color('warning'),
             Stat::make('Total', Pet::query()->count())
                 ->icon('heroicon-o-rectangle-stack')

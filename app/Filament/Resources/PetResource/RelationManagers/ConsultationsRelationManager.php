@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\PetResource\RelationManagers;
 
+use App\Filament\Concerns\ClinicRoles;
+use App\Filament\Concerns\HasClinicRelationManagerAuthorization;
 use App\Services\AIDiagnosticService;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -13,33 +15,26 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ConsultationsRelationManager extends RelationManager
 {
+    use HasClinicRelationManagerAuthorization;
+
     protected static string $relationship = 'consultations';
 
     protected static ?string $modelLabel = 'consulta';
 
     protected static ?string $title = 'Consultas';
 
-    public function canViewAny(): bool
+    protected function createRoles(): array
     {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
+        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
     }
 
-    public function canCreate(): bool
+    protected function editRoles(): array
     {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
-    }
-
-    public function canEditAny(): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
-    }
-
-    public function canDeleteAny(): bool
-    {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
+        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
     }
 
     public function form(Form $form): Form
@@ -47,7 +42,7 @@ class ConsultationsRelationManager extends RelationManager
         return $form
             ->schema([
                 Forms\Components\Textarea::make('anamnesis')
-                    ->translateLabel()
+                    ->label('Anamnesis')
                     ->columnSpanFull()
                     ->autosize()
                     ->required(),
@@ -64,26 +59,28 @@ class ConsultationsRelationManager extends RelationManager
                                 $set('diagnosis', $result['diagnosis']);
                                 $set('treatment', $result['treatment']);
                             } catch (\Throwable $e) {
+                                Log::error('Error en sugerencia de IA: '.$e->getMessage());
+
                                 Notification::make()
                                     ->title('Error al generar sugerencia')
-                                    ->body($e->getMessage())
+                                    ->body('No se pudo generar la sugerencia. Intentá nuevamente en unos minutos.')
                                     ->danger()
                                     ->send();
                             }
                         }),
                 ])->columnSpanFull(),
                 Forms\Components\Textarea::make('diagnosis')
-                    ->translateLabel()
+                    ->label('Diagnóstico')
                     ->columnSpanFull()
                     ->autosize()
                     ->required(),
                 Forms\Components\Textarea::make('treatment')
-                    ->translateLabel()
+                    ->label('Tratamiento')
                     ->columnSpanFull()
                     ->autosize()
                     ->required(),
                 Forms\Components\Textarea::make('observation')
-                    ->translateLabel()
+                    ->label('Observación')
                     ->columnSpanFull()
                     ->autosize(),
             ]);
@@ -99,28 +96,28 @@ class ConsultationsRelationManager extends RelationManager
                     ->sortable()
                     ->numeric(),
                 Tables\Columns\TextColumn::make('diagnosis')
-                    ->translateLabel()
+                    ->label('Diagnóstico')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('user.name')
-                    ->translateLabel()
+                    ->label('Usuario')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->translateLabel()
+                    ->label('Creado a las')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->translateLabel()
+                    ->label('Actualizado a las')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\Filter::make('created_at')
-                    ->translateLabel()
+                    ->label('Creado a las')
                     ->form([
                         Forms\Components\DatePicker::make('from')->label('Desde')->native(false),
                         Forms\Components\DatePicker::make('until')->label('Hasta')->native(false),

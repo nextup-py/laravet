@@ -2,23 +2,30 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasAdminOnlyResourceAuthorization;
 use App\Filament\Resources\NeighborhoodResource\Pages;
-use App\Filament\Resources\NeighborhoodResource\RelationManagers;
 use App\Models\Neighborhood;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Gestión de barrios paraguayos (jerarquía Departamento → Ciudad → Barrio).
+ */
 class NeighborhoodResource extends Resource
 {
+    use HasAdminOnlyResourceAuthorization;
+
     protected static ?string $model = Neighborhood::class;
+
     protected static ?string $navigationGroup = 'Gestión del sistema';
+
     protected static ?string $navigationIcon = 'heroicon-o-home-modern';
+
     protected static ?int $navigationSort = 5;
+
     protected static ?string $modelLabel = 'barrio';
 
     public static function form(Form $form): Form
@@ -26,15 +33,14 @@ class NeighborhoodResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->translateLabel()
+                    ->label('Nombre')
                     ->required(),
                 Forms\Components\Select::make('city_id')
                     ->relationship('city', 'name')
                     ->searchable()
                     ->preload()
                     ->live()
-                    ->label(__('City'))
-                    ->translateLabel()
+                    ->label('Ciudad')
                     ->required(),
             ]);
     }
@@ -49,17 +55,15 @@ class NeighborhoodResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('name')
-                    ->translateLabel()
+                    ->label('Nombre')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('city.name')
-                    ->translateLabel()
+                    ->label('Ciudad')
                     ->searchable()
                     ->sortable(),
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
@@ -69,26 +73,6 @@ class NeighborhoodResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
-    }
-
-    public static function canViewAny(): bool
-    {
-        return auth()->user()?->hasRole('admin') ?? false;
-    }
-
-    public static function canCreate(): bool
-    {
-        return auth()->user()?->hasRole('admin') ?? false;
-    }
-
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
-    {
-        return auth()->user()?->hasRole('admin') ?? false;
-    }
-
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
-    {
-        return auth()->user()?->hasRole('admin') ?? false;
     }
 
     public static function getRelations(): array
