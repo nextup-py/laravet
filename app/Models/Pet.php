@@ -2,6 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\PetGender;
+use App\Enums\PetReproductionStatus;
+use App\Enums\PetSize;
+use App\Enums\PetSpecies;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -33,11 +38,38 @@ class Pet extends Model
         'user_id', // ID del veterinario que registró la mascota
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'species' => PetSpecies::class,
+            'gender' => PetGender::class,
+            'size' => PetSize::class,
+            'reproduction' => PetReproductionStatus::class,
+            'birthdate' => 'date',
+        ];
+    }
+
+    /**
+     * Edad de la mascota en años (o meses si es menor a un año).
+     */
+    protected function age(): Attribute
+    {
+        return Attribute::make(get: function () {
+            $years = (int) $this->birthdate->diffInYears(now());
+
+            if ($years > 0) {
+                return "{$years} ".($years === 1 ? 'año' : 'años');
+            }
+
+            $months = (int) $this->birthdate->diffInMonths(now());
+
+            return "{$months} ".($months === 1 ? 'mes' : 'meses');
+        });
+    }
+
     /**
      * Una mascota pertenece a un dueño.
      * Esta relación define que cada mascota está asociada con un dueño específico.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function owner(): BelongsTo
     {
@@ -47,8 +79,6 @@ class Pet extends Model
     /**
      * Una mascota pertenece a un usuario (veterinario).
      * Esta relación define que cada mascota está asociada con un veterinario específico.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function user(): BelongsTo
     {
@@ -58,8 +88,6 @@ class Pet extends Model
     /**
      * Una mascota tiene muchas vacunaciones.
      * Esta relación define que una mascota puede tener múltiples registros de vacunación asociados.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function vaccinations(): HasMany
     {
@@ -69,8 +97,6 @@ class Pet extends Model
     /**
      * Una mascota tiene muchas consultas.
      * Esta relación define que una mascota puede tener múltiples consultas médicas asociadas.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function consultations(): HasMany
     {
@@ -80,20 +106,16 @@ class Pet extends Model
     /**
      * Una mascota tiene muchas cirugías.
      * Esta relación define que una mascota puede tener múltiples cirugías asociadas.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function surgeries(): HasMany
     {
         return $this->hasMany(Surgery::class);
+    }
 
-/**
+    /**
      * Una mascota tiene muchos exámenes.
      * Esta relación define que una mascota puede tener múltiples exámenes de laboratorio asociados.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */    }
-
+     */
     public function tests(): HasMany
     {
         return $this->hasMany(Test::class);

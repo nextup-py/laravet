@@ -12,13 +12,14 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 
 class ConsultationsRelationManager extends RelationManager
 {
     protected static string $relationship = 'consultations';
+
     protected static ?string $modelLabel = 'consulta';
+
     protected static ?string $title = 'Consultas';
 
     public function canViewAny(): bool
@@ -55,7 +56,7 @@ class ConsultationsRelationManager extends RelationManager
                         ->label('Asistir con IA')
                         ->icon('heroicon-o-sparkles')
                         ->color('info')
-                        ->hidden(fn() => !auth()->user()?->hasAnyRole(['admin', 'veterinarian']))
+                        ->hidden(fn () => ! auth()->user()?->hasAnyRole(['admin', 'veterinarian']))
                         ->action(function (Get $get, Set $set, $livewire) {
                             try {
                                 $pet = $livewire->getOwnerRecord();
@@ -84,7 +85,7 @@ class ConsultationsRelationManager extends RelationManager
                 Forms\Components\Textarea::make('observation')
                     ->translateLabel()
                     ->columnSpanFull()
-                    ->autosize()
+                    ->autosize(),
             ]);
     }
 
@@ -118,12 +119,23 @@ class ConsultationsRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\Filter::make('created_at')
+                    ->translateLabel()
+                    ->form([
+                        Forms\Components\DatePicker::make('from')->label('Desde')->native(false),
+                        Forms\Components\DatePicker::make('until')->label('Hasta')->native(false),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['from'], fn (Builder $query, $date) => $query->whereDate('created_at', '>=', $date))
+                            ->when($data['until'], fn (Builder $query, $date) => $query->whereDate('created_at', '<=', $date));
+                    }),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = Auth::id();
+
                         return $data;
                     }),
             ])

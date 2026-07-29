@@ -15,7 +15,8 @@
         "laravel/tinker": "^2.9",
         "league/flysystem-aws-s3-v3": "3.0",
         "resend/resend-laravel": "^1.4",
-        "spatie/laravel-permission": "^6.25"
+        "spatie/laravel-permission": "^6.25",
+        "spatie/laravel-settings": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

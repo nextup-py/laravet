@@ -30,9 +30,18 @@
 
 <body>
     <div class="header">
-        <h2>{{ config('app.name') }}</h2>
+        @if($clinic->logo)
+            <img src="{{ Illuminate\Support\Facades\Storage::path($clinic->logo) }}" alt="{{ $clinic->name }}" style="max-height: 80px;">
+        @endif
+        <h2>{{ $clinic->name }}</h2>
+        @if($clinic->address || $clinic->phone)
+            <p>{{ $clinic->address }}{{ $clinic->address && $clinic->phone ? ' | ' : '' }}{{ $clinic->phone }}</p>
+        @endif
+        @if($clinic->ruc)
+            <p>RUC: {{ $clinic->ruc }}</p>
+        @endif
         <h3>Carnet de Vacunación</h3>
-        <p>Mascota: {{ $pet->name }} | Especie: {{ $pet->species }} | Raza: {{ $pet->breed }} | Fecha de nacimiento: {{ \Carbon\Carbon::parse($pet->birthdate)->format('d/m/Y') }}</p>
+        <p>Mascota: {{ $pet->name }} | Especie: {{ $pet->species->getLabel() }} | Raza: {{ $pet->breed }} | Fecha de nacimiento: {{ $pet->birthdate->format('d/m/Y') }}</p>
         <p>Responsable: {{ $pet->owner->full_name }} | Telefono: {{ $pet->owner->phone }}</p>
     </div>
 

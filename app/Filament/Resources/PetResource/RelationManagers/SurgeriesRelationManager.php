@@ -2,18 +2,21 @@
 
 namespace App\Filament\Resources\PetResource\RelationManagers;
 
+use App\Filament\Resources\SurgeryResource;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class SurgeriesRelationManager extends RelationManager
 {
     protected static string $relationship = 'surgeries';
+
     protected static ?string $modelLabel = 'cirugía';
+
     protected static ?string $title = 'Cirugías';
 
     public function canViewAny(): bool
@@ -52,37 +55,12 @@ class SurgeriesRelationManager extends RelationManager
                     ->searchable()
                     ->preload()
                     ->live()
-                    ->options([
-                        'Esterilización' => __('Sterilization'),
-                        'Ovariohisterectomía' => __('Ovariohysterectomy'),
-                        'Castración' => __('Neutering'),
-                        'Cirugía Dental' => __('Dental Surgery'),
-                        'Extracción de Tumores' => __('Tumor Removal'),
-                        'Cirugía de Cuerpo Extraño' => __('Foreign Body Surgery'),
-                        'Reparación de Fracturas' => __('Fracture Repair'),
-                        'Cesárea' => __('Cesarean Section'),
-                        'Amputación' => __('Amputation'),
-                        'Enucleación Ocular' => __('Eye Enucleation'),
-                        'Cirugía de Ligamento Cruzado' => __('Cruciate Ligament Surgery'),
-                        'Gastropexia Preventiva' => __('Prophylactic Gastropexy'),
-                        'Desungulación' => __('Declawing'),
-                        'Herniorrafia' => __('Hernia Repair'),
-                        'Laparotomía Exploratoria' => __('Exploratory Laparotomy'),
-                        'Onychectomía' => __('Onychectomy'),
-                        'Cistotomía' => __('Cystotomy'),
-                        'Uretrostomía Perineal' => __('Perineal Urethrostomy'),
-                        'Esplenectomía' => __('Splenectomy'),
-                        'Tiroidectomía' => __('Thyroidectomy'),
-                        'Cirugía de Luxación de Rótula' => __('Patellar Luxation Surgery'),
-                        'Toracotomía' => __('Thoracotomy'),
-                        'Resección Intestinal' => __('Intestinal Resection'),
-                        'Cirugía de Glándulas Perianales' => __('Perianal Gland Surgery'),
-                    ])
+                    ->options(SurgeryResource::typeOptions())
                     ->required(),
                 Forms\Components\Textarea::make('observation')
                     ->translateLabel()
                     ->autosize()
-                    ->columnSpanFull()
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -121,10 +99,25 @@ class SurgeriesRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\Filter::make('date')
+                    ->translateLabel()
+                    ->form([
+                        Forms\Components\DatePicker::make('from')->label('Desde')->native(false),
+                        Forms\Components\DatePicker::make('until')->label('Hasta')->native(false),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['from'], fn (Builder $query, $date) => $query->whereDate('date', '>=', $date))
+                            ->when($data['until'], fn (Builder $query, $date) => $query->whereDate('date', '<=', $date));
+                    }),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->mutateFormDataUsing(function (array $data): array {
+                        $data['user_id'] = Auth::id();
+
+                        return $data;
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Settings\ClinicSettings;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -16,12 +17,18 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        // La tabla de settings puede no existir aún (instalación nueva antes de migrar),
+        // así que el panel cae a los valores por defecto en ese caso.
+        $settings = Schema::hasTable('settings') ? app(ClinicSettings::class) : null;
+
         return $panel
             ->default()
             ->id('admin')
@@ -31,8 +38,11 @@ class AdminPanelProvider extends PanelProvider
             ->spa()
             ->profile(isSimple: false)
             ->sidebarCollapsibleOnDesktop()
+            ->brandName($settings?->name ?? config('app.name'))
+            ->brandLogo($settings?->logo ? Storage::url($settings->logo) : null)
+            ->favicon($settings?->favicon ? Storage::url($settings->favicon) : null)
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => $settings?->primary_color ? Color::hex($settings->primary_color) : Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

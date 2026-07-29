@@ -3,45 +3,89 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TestResource\Pages;
-use App\Filament\Resources\TestResource\RelationManagers;
 use App\Models\Test;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Database\Eloquent\Model;
 
 class TestResource extends Resource
 {
     protected static ?string $model = Test::class;
-    protected static ?string $navigationGroup = 'Procedures';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    protected static ?string $navigationGroup = 'Historial clínico';
+
+    protected static ?string $navigationIcon = 'heroicon-o-beaker';
+
     protected static ?string $modelLabel = 'prueba laboratorial';
+
     protected static ?string $pluralModelLabel = 'pruebas laboratoriales';
+
+    public static function typeOptions(): array
+    {
+        return [
+            'Hematología' => __('Hematology'),
+            'Bioquímica' => __('Biochemistry'),
+            'Inmunología' => __('Immunology'),
+            'Microbiología' => __('Microbiology'),
+            'Parasitología' => __('Parasitology'),
+            'Uroanálisis' => __('Urinalysis'),
+            'Coprología' => __('Fecal Analysis'),
+            'Cultivo' => __('Culture'),
+            'Prueba Rápida' => __('Rapid Test'),
+            'PCR' => __('PCR'),
+            'Serología' => __('Serology'),
+            'Otros' => __('Others'),
+        ];
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('pet_id')
-                    ->relationship('pet', 'name')
-                    ->searchable(['name', 'id'])
-                    ->preload()
-                    ->live()
-                    ->required(),
-                Forms\Components\DatePicker::make('date')
-                    ->required()
-                    ->native(false)
-                    ->maxDate(now()),
-                Forms\Components\TextInput::make('type')
-                    ->required()
-                    ->maxLength(60),
-                Forms\Components\TextInput::make('result')
-                    ->required(),
-                Forms\Components\Textarea::make('observation')
-                    ->columnSpanFull()
+                Section::make(__('General information'))
+                    ->columns(2)
+                    ->schema([
+                        Forms\Components\Select::make('pet_id')
+                            ->translateLabel()
+                            ->relationship('pet', 'name')
+                            ->searchable(['name', 'id'])
+                            ->preload()
+                            ->live()
+                            ->required(),
+                        Forms\Components\DatePicker::make('date')
+                            ->translateLabel()
+                            ->required()
+                            ->native(false)
+                            ->displayFormat('d/m/Y')
+                            ->closeOnDateSelection()
+                            ->maxDate(now()),
+                        Forms\Components\Select::make('type')
+                            ->translateLabel()
+                            ->searchable()
+                            ->preload()
+                            ->live()
+                            ->options(self::typeOptions())
+                            ->required(),
+                        Forms\Components\FileUpload::make('result')
+                            ->label('Resultados')
+                            ->multiple()
+                            ->maxParallelUploads(1)
+                            ->panelLayout('grid')
+                            ->openable()
+                            ->downloadable()
+                            ->uploadingMessage('Subiendo archivo adjunto...')
+                            ->maxFiles(5)
+                            ->columnSpanFull()
+                            ->required(),
+                        Forms\Components\Textarea::make('observation')
+                            ->translateLabel()
+                            ->autosize()
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 
@@ -50,29 +94,45 @@ class TestResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('pet.name')
+                    ->translateLabel()
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('date')
-                    ->date()
+                    ->translateLabel()
+                    ->date('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('type')
+                    ->translateLabel()
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('result')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('observation')->limit(50)
+                    ->label('Resultados')
+                    ->getStateUsing(function (Test $record) {
+                        $files = $record->result;
+
+                        return is_array($files) && count($files) > 0 ? count($files).' archivo(s)' : '—';
+                    }),
+                Tables\Columns\TextColumn::make('observation')
+                    ->translateLabel()
+                    ->limit(50)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('user.name')
+                    ->translateLabel()
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->translateLabel()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->translateLabel()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -100,12 +160,12 @@ class TestResource extends Resource
         return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
     }
 
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canDelete(Model $record): bool
     {
         return auth()->user()?->hasAnyRole(['admin', 'veterinarian']) ?? false;
     }

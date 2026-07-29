@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PetResource\RelationManagers;
 
 use App\Models\Pet;
+use App\Settings\ClinicSettings;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -10,13 +11,14 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 
 class VaccinationsRelationManager extends RelationManager
 {
     protected static string $relationship = 'vaccinations';
+
     protected static ?string $modelLabel = 'vacunación';
+
     protected static ?string $title = 'Vacunaciones';
 
     public function canViewAny(): bool
@@ -173,12 +175,18 @@ class VaccinationsRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\Filter::make('overdue')
+                    ->label('Vencidas')
+                    ->query(fn (Builder $query) => $query->where('next_application', '<', now())),
+                Tables\Filters\Filter::make('upcoming')
+                    ->label('Próximas (7 días)')
+                    ->query(fn (Builder $query) => $query->whereBetween('next_application', [now(), now()->addDays(7)])),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = Auth::id();
+
                         return $data;
                     }),
                 Tables\Actions\Action::make('downloadVaccineCard')
@@ -187,7 +195,7 @@ class VaccinationsRelationManager extends RelationManager
                     ->action(function () {
                         $pet = $this->getOwnerRecord(); // Obtenemos el Pet desde el contexto padre
 
-                        if (!$pet) {
+                        if (! $pet) {
                             throw new \Exception('Mascota no encontrada');
                         }
 
@@ -195,7 +203,8 @@ class VaccinationsRelationManager extends RelationManager
                             function () use ($pet) {
                                 echo Pdf::loadView('pdf.vaccine-card', [
                                     'pet' => $pet,
-                                    'vaccinations' => $pet->vaccinations // Accedemos a la relación
+                                    'vaccinations' => $pet->vaccinations, // Accedemos a la relación
+                                    'clinic' => app(ClinicSettings::class),
                                 ])->stream();
                             },
                             "Carnet-Vacunacion-{$pet->name}.pdf"
