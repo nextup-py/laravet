@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PetResource\RelationManagers;
 
 use App\Filament\Concerns\ClinicRoles;
 use App\Filament\Concerns\HasClinicRelationManagerAuthorization;
+use App\Filament\Resources\VaccinationResource;
 use App\Services\PdfGeneratorService;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -42,32 +43,7 @@ class VaccinationsRelationManager extends RelationManager
                     ->searchable()
                     ->preload()
                     ->live()
-                    ->options([
-                        'Séptuple' => 'Séptuple',
-                        'Rabia' => 'Rabia',
-                        'Moquillo' => 'Moquillo',
-                        'Parvovirus' => 'Parvovirus',
-                        'Adenovirus' => 'Adenovirus',
-                        'Leptospirosis' => 'Leptospirosis',
-                        'Parainfluenza' => 'Parainfluenza',
-                        'Bordetella' => 'Bordetella',
-                        'Leucemia Felina' => 'Leucemia Felina',
-                        'Panleucopenia' => 'Panleucopenia',
-                        'Calicivirus' => 'Calicivirus',
-                        'Rinotraqueítis Felina' => 'Rinotraqueítis Felina',
-                        'Triple Felina' => 'Triple Felina',
-                        'Lyme' => 'Lyme',
-                        'Gripe Canina' => 'Gripe Canina',
-                        'Tos de las Perreras' => 'Tos de las Perreras',
-                        'Coronavirus Canino' => 'Coronavirus Canino',
-                        'Giardia' => 'Giardia',
-                        'Rabia Recombinante' => 'Rabia Recombinante',
-                        'Antirrábica' => 'Antirrábica',
-                        'Herpesvirus Equino' => 'Herpesvirus Equino',
-                        'Mixomatosis' => 'Mixomatosis',
-                        'Enfermedad Hemorrágica Vírica' => 'Enfermedad Hemorrágica Vírica',
-                        'Vacuna Polivalente' => 'Vacuna Polivalente',
-                    ])
+                    ->options(VaccinationResource::vaccineOptions())
                     ->required(),
                 Forms\Components\DatePicker::make('application_date')
                     ->label('Fecha de aplicación')

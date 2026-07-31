@@ -50,6 +50,36 @@ class VaccinationResource extends Resource
         return static::getModel()::where('next_application', '<', now())->exists() ? 'danger' : 'warning';
     }
 
+    public static function vaccineOptions(): array
+    {
+        return [
+            'Séptuple' => 'Séptuple',
+            'Rabia' => 'Rabia',
+            'Moquillo' => 'Moquillo',
+            'Parvovirus' => 'Parvovirus',
+            'Adenovirus' => 'Adenovirus',
+            'Leptospirosis' => 'Leptospirosis',
+            'Parainfluenza' => 'Parainfluenza',
+            'Bordetella' => 'Bordetella',
+            'Leucemia Felina' => 'Leucemia Felina',
+            'Panleucopenia' => 'Panleucopenia',
+            'Calicivirus' => 'Calicivirus',
+            'Rinotraqueítis Felina' => 'Rinotraqueítis Felina',
+            'Triple Felina' => 'Triple Felina',
+            'Lyme' => 'Lyme',
+            'Gripe Canina' => 'Gripe Canina',
+            'Tos de las Perreras' => 'Tos de las Perreras',
+            'Coronavirus Canino' => 'Coronavirus Canino',
+            'Giardia' => 'Giardia',
+            'Rabia Recombinante' => 'Rabia Recombinante',
+            'Antirrábica' => 'Antirrábica',
+            'Herpesvirus Equino' => 'Herpesvirus Equino',
+            'Mixomatosis' => 'Mixomatosis',
+            'Enfermedad Hemorrágica Vírica' => 'Enfermedad Hemorrágica Vírica',
+            'Vacuna Polivalente' => 'Vacuna Polivalente',
+        ];
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -59,32 +89,7 @@ class VaccinationResource extends Resource
                     ->searchable()
                     ->preload()
                     ->live()
-                    ->options([
-                        'Séptuple' => 'Séptuple',
-                        'Rabia' => 'Rabia',
-                        'Moquillo' => 'Moquillo',
-                        'Parvovirus' => 'Parvovirus',
-                        'Adenovirus' => 'Adenovirus',
-                        'Leptospirosis' => 'Leptospirosis',
-                        'Parainfluenza' => 'Parainfluenza',
-                        'Bordetella' => 'Bordetella',
-                        'Leucemia Felina' => 'Leucemia Felina',
-                        'Panleucopenia' => 'Panleucopenia',
-                        'Calicivirus' => 'Calicivirus',
-                        'Rinotraqueítis Felina' => 'Rinotraqueítis Felina',
-                        'Triple Felina' => 'Triple Felina',
-                        'Lyme' => 'Lyme',
-                        'Gripe Canina' => 'Gripe Canina',
-                        'Tos de las Perreras' => 'Tos de las Perreras',
-                        'Coronavirus Canino' => 'Coronavirus Canino',
-                        'Giardia' => 'Giardia',
-                        'Rabia Recombinante' => 'Rabia Recombinante',
-                        'Antirrábica' => 'Antirrábica',
-                        'Herpesvirus Equino' => 'Herpesvirus Equino',
-                        'Mixomatosis' => 'Mixomatosis',
-                        'Enfermedad Hemorrágica Vírica' => 'Enfermedad Hemorrágica Vírica',
-                        'Vacuna Polivalente' => 'Vacuna Polivalente',
-                    ])
+                    ->options(self::vaccineOptions())
                     ->required(),
                 Forms\Components\DatePicker::make('application_date')
                     ->label('Fecha de aplicación')
