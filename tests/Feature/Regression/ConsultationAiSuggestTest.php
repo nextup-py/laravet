@@ -11,13 +11,14 @@ beforeEach(function () {
     config(['services.anthropic.key' => 'test-key']);
 });
 
-function fakeAiResponse(string $diagnosis = 'Diagnóstico IA', string $treatment = 'Tratamiento IA'): void
+function fakeAiResponse(string $diagnosis = 'Diagnóstico IA', string $treatment = 'Tratamiento IA', string $urgency = 'baja'): void
 {
     Http::fake([
         'api.anthropic.com/*' => Http::response([
             'content' => [
-                ['text' => json_encode(['diagnosis' => $diagnosis, 'treatment' => $treatment])],
+                ['text' => json_encode(['diagnosis' => $diagnosis, 'treatment' => $treatment, 'urgency' => $urgency])],
             ],
+            'usage' => ['input_tokens' => 100, 'output_tokens' => 50],
         ]),
     ]);
 }
@@ -36,7 +37,26 @@ it('el botón IA completa diagnóstico y tratamiento en el form top-level', func
         ->assertFormSet([
             'diagnosis' => 'Diagnóstico IA',
             'treatment' => 'Tratamiento IA',
+            'ai_diagnosis_suggestion' => 'Diagnóstico IA',
+            'ai_treatment_suggestion' => 'Tratamiento IA',
+            'ai_urgency' => 'baja',
+            'ai_input_tokens' => 100,
+            'ai_output_tokens' => 50,
         ]);
+});
+
+it('el botón IA muestra una alerta de urgencia si la IA detecta una urgencia alta', function () {
+    actingAsRole('veterinarian');
+    $pet = Pet::factory()->create();
+    fakeAiResponse(urgency: 'alta');
+
+    Livewire::test(CreateConsultation::class)
+        ->fillForm([
+            'pet_id' => $pet->id,
+            'anamnesis' => 'Convulsiones y dificultad respiratoria',
+        ])
+        ->callFormComponentAction('aiSuggestAction', 'aiSuggest')
+        ->assertNotified('Posible urgencia detectada');
 });
 
 it('el botón IA pide confirmación en el form top-level si ya hay diagnóstico o tratamiento cargado', function () {

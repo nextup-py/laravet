@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ConsultationResource\Pages;
 
 use App\Filament\Resources\ConsultationResource;
+use App\Models\Consultation;
 use Filament\Actions;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -38,6 +39,29 @@ class ViewConsultation extends ViewRecord
                         TextEntry::make('diagnosis')->label('Diagnóstico')->columnSpanFull(),
                         TextEntry::make('treatment')->label('Tratamiento')->columnSpanFull(),
                         TextEntry::make('observation')->label('Observación')->columnSpanFull()
+                            ->placeholder('—'),
+                    ]),
+
+                Section::make('Diagnóstico asistido por IA')
+                    ->columns(2)
+                    ->visible(fn (Consultation $record) => filled($record->ai_suggested_at))
+                    ->schema([
+                        TextEntry::make('ai_usage_status')
+                            ->label('Estado')
+                            ->state(fn (Consultation $record) => $record->aiUsageStatus())
+                            ->badge(),
+                        TextEntry::make('ai_urgency')
+                            ->label('Urgencia detectada')
+                            ->badge()
+                            ->placeholder('—'),
+                        TextEntry::make('ai_suggested_at')
+                            ->label('Sugerido el')
+                            ->dateTime(),
+                        TextEntry::make('ai_input_tokens')
+                            ->label('Tokens (entrada)')
+                            ->placeholder('—'),
+                        TextEntry::make('ai_output_tokens')
+                            ->label('Tokens (salida)')
                             ->placeholder('—'),
                     ]),
             ]);

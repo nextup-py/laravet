@@ -100,6 +100,20 @@ class ConsultationResource extends Resource
                                 $result = app(AIDiagnosticService::class)->suggest($pet, $get('anamnesis'));
                                 $set('diagnosis', $result['diagnosis']);
                                 $set('treatment', $result['treatment']);
+                                $set('ai_diagnosis_suggestion', $result['diagnosis']);
+                                $set('ai_treatment_suggestion', $result['treatment']);
+                                $set('ai_urgency', $result['urgency']);
+                                $set('ai_suggested_at', now());
+                                $set('ai_input_tokens', $result['input_tokens']);
+                                $set('ai_output_tokens', $result['output_tokens']);
+
+                                if (in_array($result['urgency'], ['alta', 'emergencia'], true)) {
+                                    Notification::make()
+                                        ->title('Posible urgencia detectada')
+                                        ->body('La IA marcó esta consulta con urgencia "'.$result['urgency'].'". Priorizá la revisión del paciente.')
+                                        ->danger()
+                                        ->send();
+                                }
                             } catch (\Throwable $e) {
                                 Log::error('Error en sugerencia de IA: '.$e->getMessage());
 
@@ -112,6 +126,12 @@ class ConsultationResource extends Resource
                         })
                         ->hidden(fn () => ! auth()->user()?->hasAnyRole(['admin', 'veterinarian'])),
                 ])->columnSpanFull(),
+                Forms\Components\Hidden::make('ai_diagnosis_suggestion'),
+                Forms\Components\Hidden::make('ai_treatment_suggestion'),
+                Forms\Components\Hidden::make('ai_urgency'),
+                Forms\Components\Hidden::make('ai_suggested_at'),
+                Forms\Components\Hidden::make('ai_input_tokens'),
+                Forms\Components\Hidden::make('ai_output_tokens'),
                 Forms\Components\Textarea::make('diagnosis')
                     ->label('Diagnóstico')
                     ->columnSpanFull()
@@ -154,6 +174,10 @@ class ConsultationResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->limit(60),
+                Tables\Columns\IconColumn::make('ai_suggested_at')
+                    ->label('IA')
+                    ->boolean()
+                    ->getStateUsing(fn (Consultation $record) => filled($record->ai_suggested_at)),
                 Tables\Columns\TextColumn::make('user.name')
                     ->searchable()
                     ->sortable()
