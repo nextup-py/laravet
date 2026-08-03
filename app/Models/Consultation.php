@@ -26,6 +26,13 @@ class Consultation extends Model
         'user_id', // ID del usuario (veterinario) que creó la consulta
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'consultation_date' => 'date',
+        ];
+    }
+
     /**
      * Una consulta pertenece a una mascota.
      * Esta relación define que cada consulta está asociada con una mascota específica.

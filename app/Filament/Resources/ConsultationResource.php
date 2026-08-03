@@ -55,7 +55,10 @@ class ConsultationResource extends Resource
             ->schema([
                 Forms\Components\Select::make('pet_id')
                     ->label('Mascota')
-                    ->relationship('pet', 'name')
+                    ->relationship('pet', 'name', modifyQueryUsing: fn (Builder $query, ?Consultation $record) => $query->where(
+                        fn (Builder $q) => $q->where('active', true)
+                            ->when($record?->pet_id, fn (Builder $q, $petId) => $q->orWhere('id', $petId))
+                    ))
                     ->searchable(['name', 'id'])
                     ->preload()
                     ->live()
@@ -70,6 +73,7 @@ class ConsultationResource extends Resource
                     ->label('Anamnesis')
                     ->columnSpanFull()
                     ->autosize()
+                    ->maxLength(5000)
                     ->required(),
                 Forms\Components\Actions::make([
                     Forms\Components\Actions\Action::make('aiSuggest')
@@ -112,16 +116,19 @@ class ConsultationResource extends Resource
                     ->label('Diagnóstico')
                     ->columnSpanFull()
                     ->autosize()
+                    ->maxLength(5000)
                     ->required(),
                 Forms\Components\Textarea::make('treatment')
                     ->label('Tratamiento')
                     ->columnSpanFull()
                     ->autosize()
+                    ->maxLength(5000)
                     ->required(),
                 Forms\Components\Textarea::make('observation')
                     ->label('Observación')
                     ->columnSpanFull()
-                    ->autosize(),
+                    ->autosize()
+                    ->maxLength(5000),
             ]);
     }
 
@@ -145,7 +152,8 @@ class ConsultationResource extends Resource
                 Tables\Columns\TextColumn::make('diagnosis')
                     ->label('Diagnóstico')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->limit(60),
                 Tables\Columns\TextColumn::make('user.name')
                     ->searchable()
                     ->sortable()
@@ -160,16 +168,16 @@ class ConsultationResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\Filter::make('created_at')
-                    ->label('Creado a las')
+                Tables\Filters\Filter::make('consultation_date')
+                    ->label('Fecha de consulta')
                     ->form([
                         Forms\Components\DatePicker::make('from')->label('Desde')->native(false),
                         Forms\Components\DatePicker::make('until')->label('Hasta')->native(false),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
-                            ->when($data['from'], fn (Builder $query, $date) => $query->whereDate('created_at', '>=', $date))
-                            ->when($data['until'], fn (Builder $query, $date) => $query->whereDate('created_at', '<=', $date));
+                            ->when($data['from'], fn (Builder $query, $date) => $query->whereDate('consultation_date', '>=', $date))
+                            ->when($data['until'], fn (Builder $query, $date) => $query->whereDate('consultation_date', '<=', $date));
                     }),
             ])
             ->actions([

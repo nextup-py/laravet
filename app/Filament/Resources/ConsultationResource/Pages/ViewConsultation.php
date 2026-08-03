@@ -29,6 +29,7 @@ class ViewConsultation extends ViewRecord
                     ->schema([
                         TextEntry::make('pet.name')->label('Mascota'),
                         TextEntry::make('user.name')->label('Veterinario'),
+                        TextEntry::make('consultation_date')->label('Fecha de consulta')->date(),
                     ]),
 
                 Section::make('Consulta')

@@ -56,6 +56,7 @@ class ConsultationsRelationManager extends RelationManager
                     ->label('Anamnesis')
                     ->columnSpanFull()
                     ->autosize()
+                    ->maxLength(5000)
                     ->required(),
                 Forms\Components\Actions::make([
                     Forms\Components\Actions\Action::make('aiSuggest')
@@ -88,16 +89,19 @@ class ConsultationsRelationManager extends RelationManager
                     ->label('Diagnóstico')
                     ->columnSpanFull()
                     ->autosize()
+                    ->maxLength(5000)
                     ->required(),
                 Forms\Components\Textarea::make('treatment')
                     ->label('Tratamiento')
                     ->columnSpanFull()
                     ->autosize()
+                    ->maxLength(5000)
                     ->required(),
                 Forms\Components\Textarea::make('observation')
                     ->label('Observación')
                     ->columnSpanFull()
-                    ->autosize(),
+                    ->autosize()
+                    ->maxLength(5000),
             ]);
     }
 
