@@ -6,6 +6,7 @@ use App\Filament\Concerns\ClinicRoles;
 use App\Filament\Concerns\HasClinicResourceAuthorization;
 use App\Filament\Resources\ConsultationResource\Pages;
 use App\Models\Consultation;
+use App\Models\Pet;
 use App\Services\AIDiagnosticService;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -43,17 +44,28 @@ class ConsultationResource extends Resource
         return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
     }
 
+    protected static function aiSuggestOverwritesExisting(Get $get): bool
+    {
+        return filled($get('diagnosis')) || filled($get('treatment'));
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\Select::make('pet_id')
-                    ->label('Pet id')
+                    ->label('Mascota')
                     ->relationship('pet', 'name')
                     ->searchable(['name', 'id'])
                     ->preload()
                     ->live()
                     ->required(),
+                Forms\Components\DatePicker::make('consultation_date')
+                    ->label('Fecha de consulta')
+                    ->required()
+                    ->native(false)
+                    ->maxDate(now())
+                    ->default(now()),
                 Forms\Components\Textarea::make('anamnesis')
                     ->label('Anamnesis')
                     ->columnSpanFull()
@@ -62,11 +74,25 @@ class ConsultationResource extends Resource
                 Forms\Components\Actions::make([
                     Forms\Components\Actions\Action::make('aiSuggest')
                         ->label('Asistir con IA')
+                        ->modalHeading(fn (Get $get) => static::aiSuggestOverwritesExisting($get) ? 'Sobrescribir sugerencia existente' : null)
+                        ->modalDescription(fn (Get $get) => static::aiSuggestOverwritesExisting($get) ? 'Ya hay contenido en Diagnóstico o Tratamiento. ¿Querés reemplazarlo con la sugerencia de la IA?' : null)
+                        ->modalSubmitActionLabel(fn (Get $get) => static::aiSuggestOverwritesExisting($get) ? 'Sí, sobrescribir' : null)
+                        ->requiresConfirmation(fn (Get $get) => static::aiSuggestOverwritesExisting($get))
                         ->icon('heroicon-o-sparkles')
                         ->color('info')
-                        ->action(function (Get $get, Set $set, $record) {
+                        ->action(function (Get $get, Set $set) {
                             try {
-                                $pet = $record?->pet;
+                                $pet = Pet::find($get('pet_id'));
+
+                                if (! $pet) {
+                                    Notification::make()
+                                        ->title('Seleccioná una mascota primero')
+                                        ->warning()
+                                        ->send();
+
+                                    return;
+                                }
+
                                 $result = app(AIDiagnosticService::class)->suggest($pet, $get('anamnesis'));
                                 $set('diagnosis', $result['diagnosis']);
                                 $set('treatment', $result['treatment']);
@@ -80,7 +106,7 @@ class ConsultationResource extends Resource
                                     ->send();
                             }
                         })
-                        ->hidden(fn ($record) => $record === null || ! auth()->user()?->hasAnyRole(['admin', 'veterinarian'])),
+                        ->hidden(fn () => ! auth()->user()?->hasAnyRole(['admin', 'veterinarian'])),
                 ])->columnSpanFull(),
                 Forms\Components\Textarea::make('diagnosis')
                     ->label('Diagnóstico')
@@ -111,6 +137,10 @@ class ConsultationResource extends Resource
                 Tables\Columns\TextColumn::make('pet.name')
                     ->label('Mascota')
                     ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('consultation_date')
+                    ->label('Fecha de consulta')
+                    ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('diagnosis')
                     ->label('Diagnóstico')

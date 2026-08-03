@@ -37,10 +37,21 @@ class ConsultationsRelationManager extends RelationManager
         return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
     }
 
+    protected function aiSuggestOverwritesExisting(Get $get): bool
+    {
+        return filled($get('diagnosis')) || filled($get('treatment'));
+    }
+
     public function form(Form $form): Form
     {
         return $form
             ->schema([
+                Forms\Components\DatePicker::make('consultation_date')
+                    ->label('Fecha de consulta')
+                    ->required()
+                    ->native(false)
+                    ->maxDate(now())
+                    ->default(now()),
                 Forms\Components\Textarea::make('anamnesis')
                     ->label('Anamnesis')
                     ->columnSpanFull()
@@ -52,6 +63,10 @@ class ConsultationsRelationManager extends RelationManager
                         ->icon('heroicon-o-sparkles')
                         ->color('info')
                         ->hidden(fn () => ! auth()->user()?->hasAnyRole(['admin', 'veterinarian']))
+                        ->modalHeading(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Sobrescribir sugerencia existente' : null)
+                        ->modalDescription(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Ya hay contenido en Diagnóstico o Tratamiento. ¿Querés reemplazarlo con la sugerencia de la IA?' : null)
+                        ->modalSubmitActionLabel(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Sí, sobrescribir' : null)
+                        ->requiresConfirmation(fn (Get $get) => $this->aiSuggestOverwritesExisting($get))
                         ->action(function (Get $get, Set $set, $livewire) {
                             try {
                                 $pet = $livewire->getOwnerRecord();
@@ -95,6 +110,10 @@ class ConsultationsRelationManager extends RelationManager
                     ->searchable()
                     ->sortable()
                     ->numeric(),
+                Tables\Columns\TextColumn::make('consultation_date')
+                    ->label('Fecha de consulta')
+                    ->date()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('diagnosis')
                     ->label('Diagnóstico')
                     ->searchable()

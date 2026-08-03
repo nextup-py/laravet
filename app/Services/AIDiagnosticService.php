@@ -10,6 +10,10 @@ class AIDiagnosticService
 {
     public function suggest(Pet $pet, string $anamnesis): array
     {
+        if (blank(config('services.anthropic.key'))) {
+            throw new RuntimeException('ANTHROPIC_API_KEY no configurada.');
+        }
+
         $species = $pet->species->getLabel();
         $gender = $pet->gender->getLabel();
         $reproduction = $pet->reproduction->getLabel();
@@ -20,8 +24,8 @@ class AIDiagnosticService
         $response = Http::withHeaders([
             'x-api-key' => config('services.anthropic.key'),
             'anthropic-version' => '2023-06-01',
-        ])->post('https://api.anthropic.com/v1/messages', [
-            'model' => 'claude-opus-4-8',
+        ])->timeout(30)->retry(2, 500, throw: false)->post('https://api.anthropic.com/v1/messages', [
+            'model' => config('services.anthropic.model'),
             'max_tokens' => 4096,
             'system' => 'Eres un veterinario clínico experto. A partir de los datos del paciente y la anamnesis proporcionada, generá un diagnóstico presuntivo y un plan de tratamiento. Respondé ÚNICAMENTE con JSON válido con las claves "diagnosis" y "treatment", sin bloques de código Markdown ni texto adicional antes o después del JSON.',
             'messages' => [

@@ -21,6 +21,7 @@ class Consultation extends Model
         'diagnosis', // Diagnóstico del paciente
         'treatment', // Tratamiento prescrito
         'observation', // Observaciones adicionales
+        'consultation_date', // Fecha en la que ocurrió la consulta
         'pet_id', // ID de la mascota asociada a la consulta
         'user_id', // ID del usuario (veterinario) que creó la consulta
     ];
@@ -28,8 +29,6 @@ class Consultation extends Model
     /**
      * Una consulta pertenece a una mascota.
      * Esta relación define que cada consulta está asociada con una mascota específica.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function pet(): BelongsTo
     {
@@ -39,8 +38,6 @@ class Consultation extends Model
     /**
      * Una consulta pertenece a un usuario (veterinario).
      * Esta relación define que cada consulta está asociada con un veterinario específico.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function user(): BelongsTo
     {
