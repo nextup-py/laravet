@@ -59,6 +59,62 @@ it('el botón IA muestra una alerta de urgencia si la IA detecta una urgencia al
         ->assertNotified('Posible urgencia detectada');
 });
 
+it('el botón IA pide completar la anamnesis primero si está vacía en el form top-level', function () {
+    actingAsRole('veterinarian');
+    $pet = Pet::factory()->create();
+
+    Http::fake();
+
+    Livewire::test(CreateConsultation::class)
+        ->fillForm([
+            'pet_id' => $pet->id,
+            'anamnesis' => '',
+        ])
+        ->callFormComponentAction('aiSuggestAction', 'aiSuggest')
+        ->assertNotified('Completá la anamnesis primero');
+
+    Http::assertNothingSent();
+});
+
+it('el botón IA pide completar la anamnesis primero si está vacía dentro de la ficha de la mascota', function () {
+    actingAsRole('veterinarian');
+    $pet = Pet::factory()->create();
+
+    Http::fake();
+
+    Livewire::test(ConsultationsRelationManager::class, [
+        'ownerRecord' => $pet,
+        'pageClass' => EditPet::class,
+    ])
+        ->mountTableAction('create')
+        ->setTableActionData(['anamnesis' => ''])
+        ->callFormComponentAction('aiSuggestAction', 'aiSuggest', formName: 'mountedTableActionForm')
+        ->assertNotified('Completá la anamnesis primero');
+
+    Http::assertNothingSent();
+});
+
+it('el form top-level muestra el texto de ayuda y el indicador de "generando" para el botón IA', function () {
+    actingAsRole('veterinarian');
+
+    Livewire::test(CreateConsultation::class)
+        ->assertSee('Revisá siempre la sugerencia antes de guardar')
+        ->assertSeeHtml('Generando sugerencia con IA');
+});
+
+it('el form dentro de la ficha de la mascota muestra el texto de ayuda y el indicador de "generando" para el botón IA', function () {
+    actingAsRole('veterinarian');
+    $pet = Pet::factory()->create();
+
+    Livewire::test(ConsultationsRelationManager::class, [
+        'ownerRecord' => $pet,
+        'pageClass' => EditPet::class,
+    ])
+        ->mountTableAction('create')
+        ->assertSee('Revisá siempre la sugerencia antes de guardar')
+        ->assertSeeHtml('Generando sugerencia con IA');
+});
+
 it('el botón IA pide confirmación en el form top-level si ya hay diagnóstico o tratamiento cargado', function () {
     actingAsRole('veterinarian');
     $pet = Pet::factory()->create();

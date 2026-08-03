@@ -18,6 +18,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\HtmlString;
 
 /**
  * Gestión de consultas veterinarias, con diagnóstico asistido por IA.
@@ -97,6 +98,16 @@ class ConsultationResource extends Resource
                                     return;
                                 }
 
+                                if (blank($get('anamnesis'))) {
+                                    Notification::make()
+                                        ->title('Completá la anamnesis primero')
+                                        ->body('La IA necesita la anamnesis para poder sugerir un diagnóstico.')
+                                        ->warning()
+                                        ->send();
+
+                                    return;
+                                }
+
                                 $result = app(AIDiagnosticService::class)->suggest($pet, $get('anamnesis'));
                                 $set('diagnosis', $result['diagnosis']);
                                 $set('treatment', $result['treatment']);
@@ -126,6 +137,20 @@ class ConsultationResource extends Resource
                         })
                         ->hidden(fn () => ! auth()->user()?->hasAnyRole(['admin', 'veterinarian'])),
                 ])->columnSpanFull(),
+                Forms\Components\Placeholder::make('aiHelp')
+                    ->hiddenLabel()
+                    ->columnSpanFull()
+                    ->hidden(fn () => ! auth()->user()?->hasAnyRole(['admin', 'veterinarian']))
+                    ->content(new HtmlString(
+                        '<p class="text-sm text-gray-500 dark:text-gray-400">'
+                        .'La IA sugiere un diagnóstico y tratamiento en base a la anamnesis. '
+                        .'Revisá siempre la sugerencia antes de guardar — no reemplaza tu criterio profesional.'
+                        .'</p>'
+                        .'<p wire:loading wire:target="mountFormComponentAction" '
+                        .'class="text-sm font-medium text-primary-600 dark:text-primary-400 mt-1">'
+                        .'Generando sugerencia con IA… esto puede tardar unos segundos.'
+                        .'</p>'
+                    )),
                 Forms\Components\Hidden::make('ai_diagnosis_suggestion'),
                 Forms\Components\Hidden::make('ai_treatment_suggestion'),
                 Forms\Components\Hidden::make('ai_urgency'),
