@@ -7,6 +7,7 @@ use App\Filament\Concerns\HasClinicRelationManagerAuthorization;
 use App\Models\Consultation;
 use App\Services\AIDiagnosticService;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -48,106 +49,113 @@ class ConsultationsRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\DatePicker::make('consultation_date')
-                    ->label('Fecha de consulta')
-                    ->required()
-                    ->native(false)
-                    ->maxDate(now())
-                    ->default(now()),
-                Forms\Components\Textarea::make('anamnesis')
-                    ->label('Anamnesis')
-                    ->columnSpanFull()
-                    ->autosize()
-                    ->maxLength(5000)
-                    ->required(),
-                Forms\Components\Actions::make([
-                    Forms\Components\Actions\Action::make('aiSuggest')
-                        ->label('Asistir con IA')
-                        ->icon('heroicon-o-sparkles')
-                        ->color('info')
-                        ->hidden(fn () => ! auth()->user()?->hasAnyRole(['admin', 'veterinarian']))
-                        ->modalHeading(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Sobrescribir sugerencia existente' : null)
-                        ->modalDescription(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Ya hay contenido en Diagnóstico o Tratamiento. ¿Querés reemplazarlo con la sugerencia de la IA?' : null)
-                        ->modalSubmitActionLabel(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Sí, sobrescribir' : null)
-                        ->requiresConfirmation(fn (Get $get) => $this->aiSuggestOverwritesExisting($get))
-                        ->action(function (Get $get, Set $set, $livewire) {
-                            try {
-                                if (blank($get('anamnesis'))) {
-                                    Notification::make()
-                                        ->title('Completá la anamnesis primero')
-                                        ->body('La IA necesita la anamnesis para poder sugerir un diagnóstico.')
-                                        ->warning()
-                                        ->send();
+                Section::make('Consulta')
+                    ->schema([
+                        Forms\Components\DatePicker::make('consultation_date')
+                            ->label('Fecha de consulta')
+                            ->required()
+                            ->native(false)
+                            ->maxDate(now())
+                            ->default(now()),
+                        Forms\Components\Textarea::make('anamnesis')
+                            ->label('Anamnesis')
+                            ->columnSpanFull()
+                            ->autosize()
+                            ->maxLength(5000)
+                            ->helperText('Máximo 5000 caracteres.')
+                            ->required(),
+                        Forms\Components\Actions::make([
+                            Forms\Components\Actions\Action::make('aiSuggest')
+                                ->label('Asistir con IA')
+                                ->icon('heroicon-o-sparkles')
+                                ->color('info')
+                                ->hidden(fn () => ! auth()->user()?->hasAnyRole(['admin', 'veterinarian']))
+                                ->modalHeading(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Sobrescribir sugerencia existente' : null)
+                                ->modalDescription(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Ya hay contenido en Diagnóstico o Tratamiento. ¿Querés reemplazarlo con la sugerencia de la IA?' : null)
+                                ->modalSubmitActionLabel(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Sí, sobrescribir' : null)
+                                ->requiresConfirmation(fn (Get $get) => $this->aiSuggestOverwritesExisting($get))
+                                ->action(function (Get $get, Set $set, $livewire) {
+                                    try {
+                                        if (blank($get('anamnesis'))) {
+                                            Notification::make()
+                                                ->title('Completá la anamnesis primero')
+                                                ->body('La IA necesita la anamnesis para poder sugerir un diagnóstico.')
+                                                ->warning()
+                                                ->send();
 
-                                    return;
-                                }
+                                            return;
+                                        }
 
-                                $pet = $livewire->getOwnerRecord();
-                                $result = app(AIDiagnosticService::class)->suggest($pet, $get('anamnesis'));
-                                $set('diagnosis', $result['diagnosis']);
-                                $set('treatment', $result['treatment']);
-                                $set('ai_diagnosis_suggestion', $result['diagnosis']);
-                                $set('ai_treatment_suggestion', $result['treatment']);
-                                $set('ai_urgency', $result['urgency']);
-                                $set('ai_suggested_at', now());
-                                $set('ai_input_tokens', $result['input_tokens']);
-                                $set('ai_output_tokens', $result['output_tokens']);
+                                        $pet = $livewire->getOwnerRecord();
+                                        $result = app(AIDiagnosticService::class)->suggest($pet, $get('anamnesis'));
+                                        $set('diagnosis', $result['diagnosis']);
+                                        $set('treatment', $result['treatment']);
+                                        $set('ai_diagnosis_suggestion', $result['diagnosis']);
+                                        $set('ai_treatment_suggestion', $result['treatment']);
+                                        $set('ai_urgency', $result['urgency']);
+                                        $set('ai_suggested_at', now());
+                                        $set('ai_input_tokens', $result['input_tokens']);
+                                        $set('ai_output_tokens', $result['output_tokens']);
 
-                                if (in_array($result['urgency'], ['alta', 'emergencia'], true)) {
-                                    Notification::make()
-                                        ->title('Posible urgencia detectada')
-                                        ->body('La IA marcó esta consulta con urgencia "'.$result['urgency'].'". Priorizá la revisión del paciente.')
-                                        ->danger()
-                                        ->send();
-                                }
-                            } catch (\Throwable $e) {
-                                Log::error('Error en sugerencia de IA: '.$e->getMessage());
+                                        if (in_array($result['urgency'], ['alta', 'emergencia'], true)) {
+                                            Notification::make()
+                                                ->title('Posible urgencia detectada')
+                                                ->body('La IA marcó esta consulta con urgencia "'.$result['urgency'].'". Priorizá la revisión del paciente.')
+                                                ->danger()
+                                                ->send();
+                                        }
+                                    } catch (\Throwable $e) {
+                                        Log::error('Error en sugerencia de IA: '.$e->getMessage());
 
-                                Notification::make()
-                                    ->title('Error al generar sugerencia')
-                                    ->body('No se pudo generar la sugerencia. Intentá nuevamente en unos minutos.')
-                                    ->danger()
-                                    ->send();
-                            }
-                        }),
-                ])->columnSpanFull(),
-                Forms\Components\Placeholder::make('aiHelp')
-                    ->hiddenLabel()
-                    ->columnSpanFull()
-                    ->hidden(fn () => ! auth()->user()?->hasAnyRole(['admin', 'veterinarian']))
-                    ->content(new HtmlString(
-                        '<p class="text-sm text-gray-500 dark:text-gray-400">'
-                        .'La IA sugiere un diagnóstico y tratamiento en base a la anamnesis. '
-                        .'Revisá siempre la sugerencia antes de guardar — no reemplaza tu criterio profesional.'
-                        .'</p>'
-                        .'<p wire:loading wire:target="mountFormComponentAction" '
-                        .'class="text-sm font-medium text-primary-600 dark:text-primary-400 mt-1">'
-                        .'Generando sugerencia con IA… esto puede tardar unos segundos.'
-                        .'</p>'
-                    )),
-                Forms\Components\Hidden::make('ai_diagnosis_suggestion'),
-                Forms\Components\Hidden::make('ai_treatment_suggestion'),
-                Forms\Components\Hidden::make('ai_urgency'),
-                Forms\Components\Hidden::make('ai_suggested_at'),
-                Forms\Components\Hidden::make('ai_input_tokens'),
-                Forms\Components\Hidden::make('ai_output_tokens'),
-                Forms\Components\Textarea::make('diagnosis')
-                    ->label('Diagnóstico')
-                    ->columnSpanFull()
-                    ->autosize()
-                    ->maxLength(5000)
-                    ->required(),
-                Forms\Components\Textarea::make('treatment')
-                    ->label('Tratamiento')
-                    ->columnSpanFull()
-                    ->autosize()
-                    ->maxLength(5000)
-                    ->required(),
-                Forms\Components\Textarea::make('observation')
-                    ->label('Observación')
-                    ->columnSpanFull()
-                    ->autosize()
-                    ->maxLength(5000),
+                                        Notification::make()
+                                            ->title('Error al generar sugerencia')
+                                            ->body('No se pudo generar la sugerencia. Intentá nuevamente en unos minutos.')
+                                            ->danger()
+                                            ->send();
+                                    }
+                                }),
+                        ])->columnSpanFull(),
+                        Forms\Components\Placeholder::make('aiHelp')
+                            ->hiddenLabel()
+                            ->columnSpanFull()
+                            ->hidden(fn () => ! auth()->user()?->hasAnyRole(['admin', 'veterinarian']))
+                            ->content(new HtmlString(
+                                '<p class="text-sm text-gray-500 dark:text-gray-400">'
+                                .'La IA sugiere un diagnóstico y tratamiento en base a la anamnesis. '
+                                .'Revisá siempre la sugerencia antes de guardar — no reemplaza tu criterio profesional.'
+                                .'</p>'
+                                .'<p wire:loading wire:target="mountFormComponentAction" '
+                                .'class="text-sm font-medium text-primary-600 dark:text-primary-400 mt-1">'
+                                .'Generando sugerencia con IA… esto puede tardar unos segundos.'
+                                .'</p>'
+                            )),
+                        Forms\Components\Hidden::make('ai_diagnosis_suggestion'),
+                        Forms\Components\Hidden::make('ai_treatment_suggestion'),
+                        Forms\Components\Hidden::make('ai_urgency'),
+                        Forms\Components\Hidden::make('ai_suggested_at'),
+                        Forms\Components\Hidden::make('ai_input_tokens'),
+                        Forms\Components\Hidden::make('ai_output_tokens'),
+                        Forms\Components\Textarea::make('diagnosis')
+                            ->label('Diagnóstico')
+                            ->columnSpanFull()
+                            ->autosize()
+                            ->maxLength(5000)
+                            ->helperText('Máximo 5000 caracteres.')
+                            ->required(),
+                        Forms\Components\Textarea::make('treatment')
+                            ->label('Tratamiento')
+                            ->columnSpanFull()
+                            ->autosize()
+                            ->maxLength(5000)
+                            ->helperText('Máximo 5000 caracteres.')
+                            ->required(),
+                        Forms\Components\Textarea::make('observation')
+                            ->label('Observación')
+                            ->columnSpanFull()
+                            ->autosize()
+                            ->maxLength(5000)
+                            ->helperText('Máximo 5000 caracteres.'),
+                    ]),
             ]);
     }
 
@@ -173,6 +181,10 @@ class ConsultationsRelationManager extends RelationManager
                     ->label('IA')
                     ->boolean()
                     ->getStateUsing(fn (Consultation $record) => filled($record->ai_suggested_at)),
+                Tables\Columns\TextColumn::make('ai_urgency')
+                    ->label('Urgencia IA')
+                    ->badge()
+                    ->placeholder('—'),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Usuario')
                     ->searchable()
@@ -189,6 +201,7 @@ class ConsultationsRelationManager extends RelationManager
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('consultation_date', 'desc')
             ->filters([
                 Tables\Filters\Filter::make('created_at')
                     ->label('Creado a las')
