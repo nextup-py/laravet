@@ -57,6 +57,7 @@ class AdminPanelProvider extends PanelProvider
             ->spa()
             ->profile(isSimple: false)
             ->sidebarCollapsibleOnDesktop()
+            ->readOnlyRelationManagersOnResourceViewPagesByDefault(false)
             ->brandName($brandName)
             ->brandLogo($brandLogo)
             ->favicon($favicon)
