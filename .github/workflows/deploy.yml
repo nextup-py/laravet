@@ -13,6 +13,7 @@ jobs:
       environment_name: laravet
       run_tests: true
       run_migrations: true
+      php_version: '8.4'
     secrets:
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_PORT: ${{ secrets.SSH_PORT }}
