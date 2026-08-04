@@ -119,14 +119,15 @@ class ConsultationSeeder extends Seeder
             $vet = $vets->random();
 
             Consultation::create([
-                'anamnesis'   => $anamnesis,
-                'diagnosis'   => $diagnosis,
-                'treatment'   => $treatment,
+                'anamnesis' => $anamnesis,
+                'diagnosis' => $diagnosis,
+                'treatment' => $treatment,
                 'observation' => $observation,
-                'pet_id'      => $pet->id,
-                'user_id'     => $vet->id,
-                'created_at'  => now()->subDays($daysAgo),
-                'updated_at'  => now()->subDays($daysAgo),
+                'consultation_date' => now()->subDays($daysAgo)->toDateString(),
+                'pet_id' => $pet->id,
+                'user_id' => $vet->id,
+                'created_at' => now()->subDays($daysAgo),
+                'updated_at' => now()->subDays($daysAgo),
             ]);
         }
     }

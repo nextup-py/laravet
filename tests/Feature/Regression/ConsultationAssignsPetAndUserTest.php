@@ -11,6 +11,7 @@ it('crear una consulta desde el listado top-level asigna pet_id y user_id', func
     Livewire::test(CreateConsultation::class)
         ->fillForm([
             'pet_id' => $pet->id,
+            'consultation_date' => now()->format('Y-m-d'),
             'anamnesis' => 'Anamnesis de prueba',
             'diagnosis' => 'Diagnóstico de prueba',
             'treatment' => 'Tratamiento de prueba',

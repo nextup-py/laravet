@@ -2,14 +2,20 @@
 
 namespace App\Services;
 
+use App\Enums\AiUrgencyLevel;
 use App\Models\Pet;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class AIDiagnosticService
 {
     public function suggest(Pet $pet, string $anamnesis): array
     {
+        if (blank(config('services.anthropic.key'))) {
+            throw new RuntimeException('ANTHROPIC_API_KEY no configurada.');
+        }
+
         $species = $pet->species->getLabel();
         $gender = $pet->gender->getLabel();
         $reproduction = $pet->reproduction->getLabel();
@@ -20,10 +26,10 @@ class AIDiagnosticService
         $response = Http::withHeaders([
             'x-api-key' => config('services.anthropic.key'),
             'anthropic-version' => '2023-06-01',
-        ])->post('https://api.anthropic.com/v1/messages', [
-            'model' => 'claude-opus-4-8',
+        ])->timeout(30)->retry(2, 500, throw: false)->post('https://api.anthropic.com/v1/messages', [
+            'model' => config('services.anthropic.model'),
             'max_tokens' => 4096,
-            'system' => 'Eres un veterinario clínico experto. A partir de los datos del paciente y la anamnesis proporcionada, generá un diagnóstico presuntivo y un plan de tratamiento. Respondé ÚNICAMENTE con JSON válido con las claves "diagnosis" y "treatment", sin bloques de código Markdown ni texto adicional antes o después del JSON.',
+            'system' => 'Eres un veterinario clínico experto asistiendo a otro veterinario, no al dueño de la mascota. A partir de los datos del paciente y la anamnesis proporcionada, generá un diagnóstico presuntivo, un plan de tratamiento, y un nivel de urgencia. El diagnóstico es una sugerencia que el veterinario tratante debe confirmar con su propio criterio clínico antes de aplicarla. Si los síntomas descriptos sugieren una condición que pone en riesgo la vida del paciente o requiere atención inmediata, marcá la urgencia como "alta" o "emergencia" y mencionalo explícitamente en el diagnóstico. Respondé ÚNICAMENTE con JSON válido con las claves "diagnosis", "treatment" y "urgency" (uno de: "baja", "media", "alta", "emergencia"), sin bloques de código Markdown ni texto adicional antes o después del JSON.',
             'messages' => [
                 ['role' => 'user', 'content' => $userPrompt],
             ],
@@ -43,6 +49,18 @@ class AIDiagnosticService
             throw new RuntimeException('La respuesta de la IA no tiene el formato esperado.');
         }
 
-        return $result;
+        $urgency = AiUrgencyLevel::tryFrom($result['urgency'] ?? '');
+
+        if (is_null($urgency)) {
+            Log::warning('La IA no devolvió un nivel de urgencia válido.', ['urgency' => $result['urgency'] ?? null]);
+        }
+
+        return [
+            'diagnosis' => $result['diagnosis'],
+            'treatment' => $result['treatment'],
+            'urgency' => $urgency?->value,
+            'input_tokens' => $response->json('usage.input_tokens'),
+            'output_tokens' => $response->json('usage.output_tokens'),
+        ];
     }
 }

@@ -59,9 +59,9 @@ El widget `PetSpeciesOverview` muestra estadísticas de especies en el dashboard
 
 ### Diagnóstico asistido por IA
 
-`app/Services/AIDiagnosticService.php` encapsula la integración con la API de Claude (Anthropic). El método `suggest(Pet $pet, string $anamnesis): array` construye un prompt con los datos clínicos de la mascota (especie, raza, edad, peso, género, reproducción) y la anamnesis del veterinario, llama a `claude-opus-4-7` y retorna `['diagnosis' => '...', 'treatment' => '...']` en JSON.
+`app/Services/AIDiagnosticService.php` encapsula la integración con la API de Claude (Anthropic). El método `suggest(Pet $pet, string $anamnesis): array` construye un prompt con los datos clínicos de la mascota (especie, raza, edad, peso, género, reproducción) y la anamnesis del veterinario, llama al modelo configurado en `config('services.anthropic.model')` (env `ANTHROPIC_MODEL`, default `claude-opus-4-8`) y retorna `['diagnosis' => '...', 'treatment' => '...']` en JSON.
 
-El botón **"Asistir con IA"** aparece en el formulario de consulta dentro de `ConsultationsRelationManager` (flujo principal) y en `ConsultationResource` (solo en edición, cuando ya existe el registro con pet asociado). Al presionarlo, pre-rellena los campos Diagnóstico y Tratamiento — el veterinario puede editar antes de guardar.
+El botón **"Asistir con IA"** aparece en el formulario de consulta tanto en `ConsultationsRelationManager` como en `ConsultationResource`, en creación y edición. Al presionarlo, pre-rellena los campos Diagnóstico y Tratamiento — el veterinario puede editar antes de guardar. Si esos campos ya tienen contenido, se pide confirmación antes de sobrescribirlos.
 
 Requiere `ANTHROPIC_API_KEY` en `.env`. La key se obtiene en [console.anthropic.com](https://console.anthropic.com).
 

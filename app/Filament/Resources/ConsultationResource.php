@@ -6,8 +6,10 @@ use App\Filament\Concerns\ClinicRoles;
 use App\Filament\Concerns\HasClinicResourceAuthorization;
 use App\Filament\Resources\ConsultationResource\Pages;
 use App\Models\Consultation;
+use App\Models\Pet;
 use App\Services\AIDiagnosticService;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -17,6 +19,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\HtmlString;
 
 /**
  * Gestión de consultas veterinarias, con diagnóstico asistido por IA.
@@ -43,59 +46,146 @@ class ConsultationResource extends Resource
         return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
     }
 
+    protected static function aiSuggestOverwritesExisting(Get $get): bool
+    {
+        return filled($get('diagnosis')) || filled($get('treatment'));
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('pet_id')
-                    ->label('Pet id')
-                    ->relationship('pet', 'name')
-                    ->searchable(['name', 'id'])
-                    ->preload()
-                    ->live()
-                    ->required(),
-                Forms\Components\Textarea::make('anamnesis')
-                    ->label('Anamnesis')
-                    ->columnSpanFull()
-                    ->autosize()
-                    ->required(),
-                Forms\Components\Actions::make([
-                    Forms\Components\Actions\Action::make('aiSuggest')
-                        ->label('Asistir con IA')
-                        ->icon('heroicon-o-sparkles')
-                        ->color('info')
-                        ->action(function (Get $get, Set $set, $record) {
-                            try {
-                                $pet = $record?->pet;
-                                $result = app(AIDiagnosticService::class)->suggest($pet, $get('anamnesis'));
-                                $set('diagnosis', $result['diagnosis']);
-                                $set('treatment', $result['treatment']);
-                            } catch (\Throwable $e) {
-                                Log::error('Error en sugerencia de IA: '.$e->getMessage());
+                Section::make('Información general')
+                    ->columns(2)
+                    ->schema([
+                        Forms\Components\Select::make('pet_id')
+                            ->label('Mascota')
+                            ->relationship('pet', 'name', modifyQueryUsing: fn (Builder $query, ?Consultation $record) => $query->where(
+                                fn (Builder $q) => $q->where('active', true)
+                                    ->when($record?->pet_id, fn (Builder $q, $petId) => $q->orWhere('id', $petId))
+                            ))
+                            ->searchable(['name', 'id'])
+                            ->preload()
+                            ->live()
+                            ->required(),
+                        Forms\Components\DatePicker::make('consultation_date')
+                            ->label('Fecha de consulta')
+                            ->required()
+                            ->native(false)
+                            ->maxDate(now())
+                            ->default(now()),
+                    ]),
+                Section::make('Consulta')
+                    ->schema([
+                        Forms\Components\Textarea::make('anamnesis')
+                            ->label('Anamnesis')
+                            ->columnSpanFull()
+                            ->autosize()
+                            ->maxLength(5000)
+                            ->helperText('Máximo 5000 caracteres.')
+                            ->required(),
+                        Forms\Components\Actions::make([
+                            Forms\Components\Actions\Action::make('aiSuggest')
+                                ->label('Asistir con IA')
+                                ->modalHeading(fn (Get $get) => static::aiSuggestOverwritesExisting($get) ? 'Sobrescribir sugerencia existente' : null)
+                                ->modalDescription(fn (Get $get) => static::aiSuggestOverwritesExisting($get) ? 'Ya hay contenido en Diagnóstico o Tratamiento. ¿Querés reemplazarlo con la sugerencia de la IA?' : null)
+                                ->modalSubmitActionLabel(fn (Get $get) => static::aiSuggestOverwritesExisting($get) ? 'Sí, sobrescribir' : null)
+                                ->requiresConfirmation(fn (Get $get) => static::aiSuggestOverwritesExisting($get))
+                                ->icon('heroicon-o-sparkles')
+                                ->color('info')
+                                ->action(function (Get $get, Set $set) {
+                                    try {
+                                        $pet = Pet::find($get('pet_id'));
 
-                                Notification::make()
-                                    ->title('Error al generar sugerencia')
-                                    ->body('No se pudo generar la sugerencia. Intentá nuevamente en unos minutos.')
-                                    ->danger()
-                                    ->send();
-                            }
-                        })
-                        ->hidden(fn ($record) => $record === null || ! auth()->user()?->hasAnyRole(['admin', 'veterinarian'])),
-                ])->columnSpanFull(),
-                Forms\Components\Textarea::make('diagnosis')
-                    ->label('Diagnóstico')
-                    ->columnSpanFull()
-                    ->autosize()
-                    ->required(),
-                Forms\Components\Textarea::make('treatment')
-                    ->label('Tratamiento')
-                    ->columnSpanFull()
-                    ->autosize()
-                    ->required(),
-                Forms\Components\Textarea::make('observation')
-                    ->label('Observación')
-                    ->columnSpanFull()
-                    ->autosize(),
+                                        if (! $pet) {
+                                            Notification::make()
+                                                ->title('Seleccioná una mascota primero')
+                                                ->warning()
+                                                ->send();
+
+                                            return;
+                                        }
+
+                                        if (blank($get('anamnesis'))) {
+                                            Notification::make()
+                                                ->title('Completá la anamnesis primero')
+                                                ->body('La IA necesita la anamnesis para poder sugerir un diagnóstico.')
+                                                ->warning()
+                                                ->send();
+
+                                            return;
+                                        }
+
+                                        $result = app(AIDiagnosticService::class)->suggest($pet, $get('anamnesis'));
+                                        $set('diagnosis', $result['diagnosis']);
+                                        $set('treatment', $result['treatment']);
+                                        $set('ai_diagnosis_suggestion', $result['diagnosis']);
+                                        $set('ai_treatment_suggestion', $result['treatment']);
+                                        $set('ai_urgency', $result['urgency']);
+                                        $set('ai_suggested_at', now());
+                                        $set('ai_input_tokens', $result['input_tokens']);
+                                        $set('ai_output_tokens', $result['output_tokens']);
+
+                                        if (in_array($result['urgency'], ['alta', 'emergencia'], true)) {
+                                            Notification::make()
+                                                ->title('Posible urgencia detectada')
+                                                ->body('La IA marcó esta consulta con urgencia "'.$result['urgency'].'". Priorizá la revisión del paciente.')
+                                                ->danger()
+                                                ->send();
+                                        }
+                                    } catch (\Throwable $e) {
+                                        Log::error('Error en sugerencia de IA: '.$e->getMessage());
+
+                                        Notification::make()
+                                            ->title('Error al generar sugerencia')
+                                            ->body('No se pudo generar la sugerencia. Intentá nuevamente en unos minutos.')
+                                            ->danger()
+                                            ->send();
+                                    }
+                                })
+                                ->hidden(fn () => ! auth()->user()?->hasAnyRole(['admin', 'veterinarian'])),
+                        ])->columnSpanFull(),
+                        Forms\Components\Placeholder::make('aiHelp')
+                            ->hiddenLabel()
+                            ->columnSpanFull()
+                            ->hidden(fn () => ! auth()->user()?->hasAnyRole(['admin', 'veterinarian']))
+                            ->content(new HtmlString(
+                                '<p class="text-sm text-gray-500 dark:text-gray-400">'
+                                .'La IA sugiere un diagnóstico y tratamiento en base a la anamnesis. '
+                                .'Revisá siempre la sugerencia antes de guardar — no reemplaza tu criterio profesional.'
+                                .'</p>'
+                                .'<p wire:loading wire:target="mountFormComponentAction" '
+                                .'class="text-sm font-medium text-primary-600 dark:text-primary-400 mt-1">'
+                                .'Generando sugerencia con IA… esto puede tardar unos segundos.'
+                                .'</p>'
+                            )),
+                        Forms\Components\Hidden::make('ai_diagnosis_suggestion'),
+                        Forms\Components\Hidden::make('ai_treatment_suggestion'),
+                        Forms\Components\Hidden::make('ai_urgency'),
+                        Forms\Components\Hidden::make('ai_suggested_at'),
+                        Forms\Components\Hidden::make('ai_input_tokens'),
+                        Forms\Components\Hidden::make('ai_output_tokens'),
+                        Forms\Components\Textarea::make('diagnosis')
+                            ->label('Diagnóstico')
+                            ->columnSpanFull()
+                            ->autosize()
+                            ->maxLength(5000)
+                            ->helperText('Máximo 5000 caracteres.')
+                            ->required(),
+                        Forms\Components\Textarea::make('treatment')
+                            ->label('Tratamiento')
+                            ->columnSpanFull()
+                            ->autosize()
+                            ->maxLength(5000)
+                            ->helperText('Máximo 5000 caracteres.')
+                            ->required(),
+                        Forms\Components\Textarea::make('observation')
+                            ->label('Observación')
+                            ->columnSpanFull()
+                            ->autosize()
+                            ->maxLength(5000)
+                            ->helperText('Máximo 5000 caracteres.'),
+                    ]),
             ]);
     }
 
@@ -112,11 +202,25 @@ class ConsultationResource extends Resource
                     ->label('Mascota')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('consultation_date')
+                    ->label('Fecha de consulta')
+                    ->date()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('diagnosis')
                     ->label('Diagnóstico')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->limit(60),
+                Tables\Columns\IconColumn::make('ai_suggested_at')
+                    ->label('IA')
+                    ->boolean()
+                    ->getStateUsing(fn (Consultation $record) => filled($record->ai_suggested_at)),
+                Tables\Columns\TextColumn::make('ai_urgency')
+                    ->label('Urgencia IA')
+                    ->badge()
+                    ->placeholder('—'),
                 Tables\Columns\TextColumn::make('user.name')
+                    ->label('Veterinario')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -129,17 +233,18 @@ class ConsultationResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('consultation_date', 'desc')
             ->filters([
-                Tables\Filters\Filter::make('created_at')
-                    ->label('Creado a las')
+                Tables\Filters\Filter::make('consultation_date')
+                    ->label('Fecha de consulta')
                     ->form([
                         Forms\Components\DatePicker::make('from')->label('Desde')->native(false),
                         Forms\Components\DatePicker::make('until')->label('Hasta')->native(false),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
-                            ->when($data['from'], fn (Builder $query, $date) => $query->whereDate('created_at', '>=', $date))
-                            ->when($data['until'], fn (Builder $query, $date) => $query->whereDate('created_at', '<=', $date));
+                            ->when($data['from'], fn (Builder $query, $date) => $query->whereDate('consultation_date', '>=', $date))
+                            ->when($data['until'], fn (Builder $query, $date) => $query->whereDate('consultation_date', '<=', $date));
                     }),
             ])
             ->actions([

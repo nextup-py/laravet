@@ -21,6 +21,7 @@ class ConsultationFactory extends Factory
             'diagnosis' => fake()->sentence(8),
             'treatment' => fake()->sentence(10),
             'observation' => fake()->optional()->sentence(),
+            'consultation_date' => fake()->dateTimeBetween('-30 days', 'now'),
             'pet_id' => Pet::factory(),
             'user_id' => User::factory(),
         ];

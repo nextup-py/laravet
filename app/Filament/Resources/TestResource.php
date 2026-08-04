@@ -12,6 +12,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Gestión de pruebas laboratoriales realizadas a las mascotas.
@@ -67,7 +68,10 @@ class TestResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('pet_id')
                             ->label('Pet id')
-                            ->relationship('pet', 'name')
+                            ->relationship('pet', 'name', modifyQueryUsing: fn (Builder $query, ?Test $record) => $query->where(
+                                fn (Builder $q) => $q->where('active', true)
+                                    ->when($record?->pet_id, fn (Builder $q, $petId) => $q->orWhere('id', $petId))
+                            ))
                             ->searchable(['name', 'id'])
                             ->preload()
                             ->live()

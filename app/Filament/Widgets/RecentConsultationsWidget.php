@@ -26,7 +26,7 @@ class RecentConsultationsWidget extends BaseWidget
             ->query(
                 Consultation::query()
                     ->with(['pet', 'user'])
-                    ->latest()
+                    ->latest('consultation_date')
                     ->limit(5)
             )
             ->columns([
@@ -37,9 +37,9 @@ class RecentConsultationsWidget extends BaseWidget
                     ->limit(60),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Veterinario'),
-                Tables\Columns\TextColumn::make('created_at')
+                Tables\Columns\TextColumn::make('consultation_date')
                     ->label('Fecha')
-                    ->dateTime('d/m/Y H:i')
+                    ->date('d/m/Y')
                     ->sortable(),
             ])
             ->recordUrl(fn (Consultation $record) => ConsultationResource::getUrl('view', ['record' => $record]))
