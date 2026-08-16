@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\ClinicRoles;
 use App\Settings\ClinicSettings;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -30,7 +31,7 @@ class ClinicSettingsPage extends Page implements HasForms
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->hasRole('admin') ?? false;
+        return auth()->user()?->hasRole(ClinicRoles::ADMIN) ?? false;
     }
 
     public function mount(): void

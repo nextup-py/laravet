@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Filament\Concerns\ClinicRoles;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -107,6 +108,6 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->hasAnyRole(['admin', 'veterinarian', 'assistant']);
+        return $this->hasAnyRole(ClinicRoles::ALL_STAFF);
     }
 }

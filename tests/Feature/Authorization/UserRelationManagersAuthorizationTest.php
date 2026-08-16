@@ -12,27 +12,27 @@ use Livewire\Livewire;
 
 /**
  * Documenta un gap de defensa-en-profundidad encontrado en el security review:
- * PetsRelationManager y VaccinationsRelationManager (dentro de UserResource) no
- * usan ningún trait de autorización, y no existe Policy para Pet ni Vaccination.
- * Hoy NO es explotable porque ninguno de los dos registra acciones de
- * crear/editar/eliminar en su table() (solo ->columns()) — si alguien agrega
- * esas acciones a futuro sin también agregar el trait, quedarían sin
- * restricción real de rol. Este test debe empezar a fallar (toHaveKey pasa a
- * ser cierto) el día que se corrija agregando el trait correspondiente.
+ * no existe Policy de Laravel para Pet ni Vaccination — toda su autorización
+ * depende de que el código de Filament la implemente explícitamente. Como
+ * refuerzo, PetsRelationManager y VaccinationsRelationManager (dentro de
+ * UserResource) ahora sí usan HasClinicRelationManagerAuthorization (antes
+ * tenían un canViewAny() manual y nada más), así que si alguien les agrega
+ * acciones de crear/editar/eliminar a futuro, quedan protegidas por el mismo
+ * criterio de roles que el resto del panel en vez de quedar abiertas.
  */
 it('DOCUMENTA EL GAP: no existe Policy para Pet ni Vaccination', function () {
     expect(Gate::getPolicyFor(Pet::class))->toBeNull()
         ->and(Gate::getPolicyFor(Vaccination::class))->toBeNull();
 });
 
-it('DOCUMENTA EL GAP: las RelationManagers de UserResource no usan el trait de autorización clínica', function () {
+it('las RelationManagers de UserResource usan el trait de autorización clínica', function () {
     expect(class_uses(PetsRelationManager::class))
-        ->not->toHaveKey(HasClinicRelationManagerAuthorization::class)
+        ->toHaveKey(HasClinicRelationManagerAuthorization::class)
         ->and(class_uses(VaccinationsRelationManager::class))
-        ->not->toHaveKey(HasClinicRelationManagerAuthorization::class);
+        ->toHaveKey(HasClinicRelationManagerAuthorization::class);
 });
 
-it('confirma que hoy no es explotable: ninguna de las dos RelationManagers registra acciones de crear/editar/eliminar', function () {
+it('siguen sin registrar acciones de crear/editar/eliminar (permanecen de solo lectura)', function () {
     actingAsRole('admin');
     $targetUser = User::factory()->create();
     Pet::factory()->create(['user_id' => $targetUser->id]);

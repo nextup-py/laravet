@@ -65,6 +65,14 @@ El botón **"Asistir con IA"** aparece en el formulario de consulta tanto en `Co
 
 Requiere `ANTHROPIC_API_KEY` en `.env`. La key se obtiene en [console.anthropic.com](https://console.anthropic.com).
 
+### Roles y autorización
+
+Tres roles vía Spatie Laravel-Permission, definidos en `app/Filament/Concerns/ClinicRoles.php`: `ADMIN`, `VETERINARIAN`, `ASSISTANT`. Esa clase también expone `ClinicRoles::CLINICAL_STAFF` (`[ADMIN, VETERINARIAN]`) y `ClinicRoles::ALL_STAFF` (los tres) — usar estas constantes en vez de escribir arrays de strings de rol a mano.
+
+La autorización de cada Resource/RelationManager vive en traits de `app/Filament/Concerns/`, no en Policies de Laravel (no existen — toda la autorización real depende de que el código de Filament la implemente explícitamente):
+- `HasClinicResourceAuthorization` / `HasClinicRelationManagerAuthorization`: criterio por defecto para recursos clínicos — ver/crear/editar con `ALL_STAFF`, eliminar con `CLINICAL_STAFF`. Los Resources que restringen crear/editar a `CLINICAL_STAFF` (ej. `ConsultationResource`) sobrescriben `createRoles()`/`editRoles()`.
+- `HasAdminOnlyResourceAuthorization` / `HasAdminOnlyRelationManagerAuthorization`: todo restringido a `ADMIN` (usado por `City`, `Department`, `Neighborhood`, `User`).
+
 ### Tareas programadas
 
 `routes/console.php` define el comando `send:vaccination-notifications` que corre cada minuto para recordatorios de vacunación.
@@ -108,3 +116,4 @@ correr el seeder por primera vez, ya no es fija).
 - Estilo de imports (dos patrones distintos, según el paquete):
   - **Sub-namespaces de Filament** (`Forms`, `Tables`, `Infolists`): se importa el namespace padre (`use Filament\Forms;`, `use Filament\Tables;`, `use Filament\Infolists;`) y se referencia el componente completo, ej. `Forms\Components\Select::make()`, `Tables\Columns\TextColumn::make()`, `Tables\Actions\EditAction::make()`, `Infolists\Components\TextEntry::make()`. No se importa cada componente individual.
   - **Facades de Illuminate** (`Illuminate\Support\Facades\*`) y el resto del código (modelos, enums, servicios propios): se importa la clase individual arriba, ej. `use Illuminate\Support\Facades\Auth;`, y se usa `Auth::id()` directo.
+- Las acciones de fila en las tablas de Filament se agrupan en un menú desplegable con `Tables\Actions\ActionGroup::make([...])` (Ver/Editar/Eliminar), en vez de íconos sueltos. Todos los Resources/RelationManagers del panel siguen este patrón.

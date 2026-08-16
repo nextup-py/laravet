@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ConsultationResource\Pages;
 
+use App\Filament\Concerns\ClinicRoles;
 use App\Filament\Resources\ConsultationResource;
 use App\Filament\Resources\PetResource;
 use App\Filament\Resources\UserResource;
@@ -36,7 +37,7 @@ class ViewConsultation extends ViewRecord
                             ->url(fn (Consultation $record) => PetResource::getUrl('view', ['record' => $record->pet_id])),
                         TextEntry::make('user.name')
                             ->label('Veterinario')
-                            ->url(fn (Consultation $record) => auth()->user()?->hasRole('admin')
+                            ->url(fn (Consultation $record) => auth()->user()?->hasRole(ClinicRoles::ADMIN)
                                 ? UserResource::getUrl('view', ['record' => $record->user_id])
                                 : null),
                         TextEntry::make('consultation_date')->label('Fecha de consulta')->date(),
