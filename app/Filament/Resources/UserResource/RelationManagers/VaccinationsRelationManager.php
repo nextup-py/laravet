@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\UserResource\RelationManagers;
 
-use App\Filament\Concerns\ClinicRoles;
+use App\Filament\Concerns\HasClinicRelationManagerAuthorization;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
@@ -13,14 +13,11 @@ use Filament\Tables\Table;
  */
 class VaccinationsRelationManager extends RelationManager
 {
+    use HasClinicRelationManagerAuthorization;
+
     protected static string $relationship = 'vaccinations';
 
     protected static ?string $title = 'Vacunaciones registradas';
-
-    public function canViewAny(): bool
-    {
-        return auth()->user()?->hasAnyRole(ClinicRoles::ALL_STAFF) ?? false;
-    }
 
     public function form(Form $form): Form
     {
