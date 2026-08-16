@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PetResource\RelationManagers;
 
+use App\Enums\AiUsageStatus;
 use App\Filament\Concerns\ClinicRoles;
 use App\Filament\Concerns\HasClinicRelationManagerAuthorization;
 use App\Models\Consultation;
@@ -43,6 +44,66 @@ class ConsultationsRelationManager extends RelationManager
     protected function aiSuggestOverwritesExisting(Get $get): bool
     {
         return filled($get('diagnosis')) || filled($get('treatment'));
+    }
+
+    protected function aiEditedHelperText(Get $get): string
+    {
+        $consultation = new Consultation([
+            'diagnosis' => $get('diagnosis'),
+            'treatment' => $get('treatment'),
+            'ai_diagnosis_suggestion' => $get('ai_diagnosis_suggestion'),
+            'ai_treatment_suggestion' => $get('ai_treatment_suggestion'),
+            'ai_suggested_at' => $get('ai_suggested_at'),
+        ]);
+
+        return $consultation->aiUsageStatus() === AiUsageStatus::Edited
+            ? '✏️ Editado respecto a la sugerencia de la IA. Máximo 5000 caracteres.'
+            : 'Máximo 5000 caracteres.';
+    }
+
+    protected function aiUrgencyBadge(?string $urgency): HtmlString
+    {
+        $labels = [
+            'baja' => 'Baja',
+            'media' => 'Media',
+            'alta' => 'Alta',
+            'emergencia' => 'Emergencia',
+        ];
+
+        $classes = [
+            'baja' => 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300',
+            'media' => 'bg-info-100 text-info-700 dark:bg-info-500/20 dark:text-info-300',
+            'alta' => 'bg-warning-100 text-warning-700 dark:bg-warning-500/20 dark:text-warning-300',
+            'emergencia' => 'bg-danger-100 text-danger-700 dark:bg-danger-500/20 dark:text-danger-300',
+        ];
+
+        $label = $labels[$urgency] ?? $urgency;
+        $class = $classes[$urgency] ?? $classes['baja'];
+
+        return new HtmlString(
+            '<span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium '.$class.'">'
+            .'Urgencia sugerida por la IA: '.e($label)
+            .'</span>'
+        );
+    }
+
+    protected function aiErrorMessage(\RuntimeException $e): string
+    {
+        $message = $e->getMessage();
+
+        if (str_contains($message, 'ANTHROPIC_API_KEY')) {
+            return 'La integración con IA no está configurada. Contactá al administrador del sistema.';
+        }
+
+        if (str_contains($message, 'formato esperado')) {
+            return 'La IA devolvió una respuesta inesperada. Intentá nuevamente.';
+        }
+
+        if (str_contains($message, 'conectar con la API')) {
+            return 'No se pudo conectar con el servicio de IA. Verificá tu conexión e intentá nuevamente.';
+        }
+
+        return 'No se pudo generar la sugerencia. Intentá nuevamente en unos minutos.';
     }
 
     public function form(Form $form): Form
@@ -104,12 +165,20 @@ class ConsultationsRelationManager extends RelationManager
                                                 ->danger()
                                                 ->send();
                                         }
-                                    } catch (\Throwable $e) {
+                                    } catch (\RuntimeException $e) {
                                         Log::error('Error en sugerencia de IA: '.$e->getMessage());
 
                                         Notification::make()
                                             ->title('Error al generar sugerencia')
-                                            ->body('No se pudo generar la sugerencia. Intentá nuevamente en unos minutos.')
+                                            ->body($this->aiErrorMessage($e))
+                                            ->danger()
+                                            ->send();
+                                    } catch (\Throwable $e) {
+                                        Log::error('Error inesperado en sugerencia de IA: '.$e->getMessage());
+
+                                        Notification::make()
+                                            ->title('Error al generar sugerencia')
+                                            ->body('Ocurrió un error inesperado. Intentá nuevamente en unos minutos.')
                                             ->danger()
                                             ->send();
                                     }
@@ -129,6 +198,11 @@ class ConsultationsRelationManager extends RelationManager
                                 .'Generando sugerencia con IA… esto puede tardar unos segundos.'
                                 .'</p>'
                             )),
+                        Forms\Components\Placeholder::make('aiUrgencyBadge')
+                            ->hiddenLabel()
+                            ->columnSpanFull()
+                            ->visible(fn (Get $get) => filled($get('ai_urgency')))
+                            ->content(fn (Get $get) => $this->aiUrgencyBadge($get('ai_urgency'))),
                         Forms\Components\Hidden::make('ai_diagnosis_suggestion'),
                         Forms\Components\Hidden::make('ai_treatment_suggestion'),
                         Forms\Components\Hidden::make('ai_urgency'),
@@ -140,14 +214,16 @@ class ConsultationsRelationManager extends RelationManager
                             ->columnSpanFull()
                             ->autosize()
                             ->maxLength(5000)
-                            ->helperText('Máximo 5000 caracteres.')
+                            ->live(onBlur: true)
+                            ->helperText(fn (Get $get) => $this->aiEditedHelperText($get))
                             ->required(),
                         Forms\Components\Textarea::make('treatment')
                             ->label('Tratamiento')
                             ->columnSpanFull()
                             ->autosize()
                             ->maxLength(5000)
-                            ->helperText('Máximo 5000 caracteres.')
+                            ->live(onBlur: true)
+                            ->helperText(fn (Get $get) => $this->aiEditedHelperText($get))
                             ->required(),
                         Forms\Components\Textarea::make('observation')
                             ->label('Observación')
