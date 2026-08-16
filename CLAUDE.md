@@ -105,3 +105,6 @@ correr el seeder por primera vez, ya no es fija).
 - Las imágenes de mascotas se suben con el editor de imágenes de Filament.
 - La base de datos por defecto es SQLite (`database/database.sqlite`). Para MySQL, configurar `DB_*` en `.env`.
 - Los seeders usan queries SQL con collation de MySQL para búsquedas de ciudades con acentos (ej: "Itauguá").
+- Estilo de imports (dos patrones distintos, según el paquete):
+  - **Sub-namespaces de Filament** (`Forms`, `Tables`, `Infolists`): se importa el namespace padre (`use Filament\Forms;`, `use Filament\Tables;`, `use Filament\Infolists;`) y se referencia el componente completo, ej. `Forms\Components\Select::make()`, `Tables\Columns\TextColumn::make()`, `Tables\Actions\EditAction::make()`, `Infolists\Components\TextEntry::make()`. No se importa cada componente individual.
+  - **Facades de Illuminate** (`Illuminate\Support\Facades\*`) y el resto del código (modelos, enums, servicios propios): se importa la clase individual arriba, ej. `use Illuminate\Support\Facades\Auth;`, y se usa `Auth::id()` directo.
