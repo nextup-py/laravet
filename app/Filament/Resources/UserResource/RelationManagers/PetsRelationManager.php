@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\UserResource\RelationManagers;
 
+use App\Filament\Concerns\ClinicRoles;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
@@ -18,7 +19,7 @@ class PetsRelationManager extends RelationManager
 
     public function canViewAny(): bool
     {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
+        return auth()->user()?->hasAnyRole(ClinicRoles::ALL_STAFF) ?? false;
     }
 
     public function form(Form $form): Form

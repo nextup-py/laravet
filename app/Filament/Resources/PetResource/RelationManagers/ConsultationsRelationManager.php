@@ -130,7 +130,7 @@ class ConsultationsRelationManager extends RelationManager
                                 ->label('Asistir con IA')
                                 ->icon('heroicon-o-sparkles')
                                 ->color('info')
-                                ->hidden(fn () => ! auth()->user()?->hasAnyRole(['admin', 'veterinarian']))
+                                ->hidden(fn () => ! auth()->user()?->hasAnyRole(ClinicRoles::CLINICAL_STAFF))
                                 ->modalHeading(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Sobrescribir sugerencia existente' : null)
                                 ->modalDescription(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Ya hay contenido en Diagnóstico o Tratamiento. ¿Querés reemplazarlo con la sugerencia de la IA?' : null)
                                 ->modalSubmitActionLabel(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Sí, sobrescribir' : null)
@@ -187,7 +187,7 @@ class ConsultationsRelationManager extends RelationManager
                         Forms\Components\Placeholder::make('aiHelp')
                             ->hiddenLabel()
                             ->columnSpanFull()
-                            ->hidden(fn () => ! auth()->user()?->hasAnyRole(['admin', 'veterinarian']))
+                            ->hidden(fn () => ! auth()->user()?->hasAnyRole(ClinicRoles::CLINICAL_STAFF))
                             ->content(new HtmlString(
                                 '<p class="text-sm text-gray-500 dark:text-gray-400">'
                                 .'La IA sugiere un diagnóstico y tratamiento en base a la anamnesis. '

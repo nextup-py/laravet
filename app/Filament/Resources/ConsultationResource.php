@@ -212,12 +212,12 @@ class ConsultationResource extends Resource
                                             ->send();
                                     }
                                 })
-                                ->hidden(fn () => ! auth()->user()?->hasAnyRole(['admin', 'veterinarian'])),
+                                ->hidden(fn () => ! auth()->user()?->hasAnyRole(ClinicRoles::CLINICAL_STAFF)),
                         ])->columnSpanFull(),
                         Forms\Components\Placeholder::make('aiHelp')
                             ->hiddenLabel()
                             ->columnSpanFull()
-                            ->hidden(fn () => ! auth()->user()?->hasAnyRole(['admin', 'veterinarian']))
+                            ->hidden(fn () => ! auth()->user()?->hasAnyRole(ClinicRoles::CLINICAL_STAFF))
                             ->content(new HtmlString(
                                 '<p class="text-sm text-gray-500 dark:text-gray-400">'
                                 .'La IA sugiere un diagnóstico y tratamiento en base a la anamnesis. '

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Concerns\ClinicRoles;
 use App\Filament\Resources\ConsultationResource;
 use App\Models\Consultation;
 use Filament\Tables;
@@ -16,7 +17,7 @@ class RecentConsultationsWidget extends BaseWidget
 
     public static function canView(): bool
     {
-        return auth()->user()?->hasAnyRole(['admin', 'veterinarian', 'assistant']) ?? false;
+        return auth()->user()?->hasAnyRole(ClinicRoles::ALL_STAFF) ?? false;
     }
 
     public function table(Table $table): Table
