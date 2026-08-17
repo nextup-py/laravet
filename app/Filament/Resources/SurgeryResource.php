@@ -23,6 +23,8 @@ class SurgeryResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-scissors';
 
+    protected static ?int $navigationSort = 3;
+
     protected static ?string $modelLabel = 'cirugía';
 
     public static function typeOptions(): array

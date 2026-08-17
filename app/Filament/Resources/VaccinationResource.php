@@ -22,6 +22,8 @@ class VaccinationResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
 
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $modelLabel = 'vacunación';
 
     protected static ?string $pluralModelLabel = 'vacunaciones';

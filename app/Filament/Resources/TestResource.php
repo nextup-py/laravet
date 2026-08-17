@@ -23,6 +23,8 @@ class TestResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-beaker';
 
+    protected static ?int $navigationSort = 4;
+
     protected static ?string $modelLabel = 'prueba laboratorial';
 
     protected static ?string $pluralModelLabel = 'pruebas laboratoriales';
