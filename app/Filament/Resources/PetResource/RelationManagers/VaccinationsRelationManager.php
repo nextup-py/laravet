@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\PetResource\RelationManagers;
 
-use App\Filament\Concerns\ClinicRoles;
-use App\Filament\Concerns\HasClinicRelationManagerAuthorization;
 use App\Filament\Resources\VaccinationResource;
 use App\Services\PdfGeneratorService;
 use Filament\Forms;
@@ -16,23 +14,11 @@ use Illuminate\Support\Facades\Auth;
 
 class VaccinationsRelationManager extends RelationManager
 {
-    use HasClinicRelationManagerAuthorization;
-
     protected static string $relationship = 'vaccinations';
 
     protected static ?string $modelLabel = 'vacunación';
 
     protected static ?string $title = 'Vacunaciones';
-
-    protected function createRoles(): array
-    {
-        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
-    }
-
-    protected function editRoles(): array
-    {
-        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
-    }
 
     public function form(Form $form): Form
     {

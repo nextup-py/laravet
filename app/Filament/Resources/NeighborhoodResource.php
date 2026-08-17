@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Concerns\HasAdminOnlyResourceAuthorization;
 use App\Filament\Resources\NeighborhoodResource\Pages;
 use App\Models\Neighborhood;
 use Filament\Forms;
@@ -16,8 +15,6 @@ use Filament\Tables\Table;
  */
 class NeighborhoodResource extends Resource
 {
-    use HasAdminOnlyResourceAuthorization;
-
     protected static ?string $model = Neighborhood::class;
 
     protected static ?string $navigationGroup = 'Gestión del sistema';

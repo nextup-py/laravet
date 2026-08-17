@@ -1,6 +1,5 @@
 <?php
 
-use App\Filament\Concerns\HasClinicRelationManagerAuthorization;
 use App\Filament\Resources\UserResource\Pages\ViewUser;
 use App\Filament\Resources\UserResource\RelationManagers\PetsRelationManager;
 use App\Filament\Resources\UserResource\RelationManagers\VaccinationsRelationManager;
@@ -11,25 +10,31 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 
 /**
- * Documenta un gap de defensa-en-profundidad encontrado en el security review:
- * no existe Policy de Laravel para Pet ni Vaccination — toda su autorización
- * depende de que el código de Filament la implemente explícitamente. Como
- * refuerzo, PetsRelationManager y VaccinationsRelationManager (dentro de
- * UserResource) ahora sí usan HasClinicRelationManagerAuthorization (antes
- * tenían un canViewAny() manual y nada más), así que si alguien les agrega
- * acciones de crear/editar/eliminar a futuro, quedan protegidas por el mismo
- * criterio de roles que el resto del panel en vez de quedar abiertas.
+ * Este archivo documentaba un gap de defensa-en-profundidad: no existía Policy
+ * de Laravel para Pet ni Vaccination, así que si alguien agregaba acciones de
+ * crear/editar/eliminar a PetsRelationManager/VaccinationsRelationManager
+ * (dentro de UserResource) sin acordarse de protegerlas, quedaban abiertas.
+ * `php artisan shield:generate` resolvió esto generando Policies reales para
+ * todos los modelos con Resource — ahora se confirma que existen y que el
+ * criterio de roles se respeta en la práctica.
  */
-it('DOCUMENTA EL GAP: no existe Policy para Pet ni Vaccination', function () {
-    expect(Gate::getPolicyFor(Pet::class))->toBeNull()
-        ->and(Gate::getPolicyFor(Vaccination::class))->toBeNull();
+it('existe Policy para Pet y Vaccination', function () {
+    expect(Gate::getPolicyFor(Pet::class))->not->toBeNull()
+        ->and(Gate::getPolicyFor(Vaccination::class))->not->toBeNull();
 });
 
-it('las RelationManagers de UserResource usan el trait de autorización clínica', function () {
-    expect(class_uses(PetsRelationManager::class))
-        ->toHaveKey(HasClinicRelationManagerAuthorization::class)
-        ->and(class_uses(VaccinationsRelationManager::class))
-        ->toHaveKey(HasClinicRelationManagerAuthorization::class);
+it('un asistente puede ver y editar mascotas, pero no eliminarlas ni tocar vacunaciones ajenas', function () {
+    actingAsRole('assistant');
+    $targetUser = User::factory()->create();
+    $pet = Pet::factory()->create(['user_id' => $targetUser->id]);
+    $vaccination = Vaccination::factory()->create(['user_id' => $targetUser->id]);
+
+    expect(Gate::allows('view', $pet))->toBeTrue()
+        ->and(Gate::allows('update', $pet))->toBeTrue()
+        ->and(Gate::allows('delete', $pet))->toBeFalse()
+        ->and(Gate::allows('view', $vaccination))->toBeTrue()
+        ->and(Gate::allows('update', $vaccination))->toBeFalse()
+        ->and(Gate::allows('delete', $vaccination))->toBeFalse();
 });
 
 it('siguen sin registrar acciones de crear/editar/eliminar (permanecen de solo lectura)', function () {

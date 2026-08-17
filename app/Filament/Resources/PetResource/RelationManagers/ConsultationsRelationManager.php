@@ -3,8 +3,6 @@
 namespace App\Filament\Resources\PetResource\RelationManagers;
 
 use App\Enums\AiUsageStatus;
-use App\Filament\Concerns\ClinicRoles;
-use App\Filament\Concerns\HasClinicRelationManagerAuthorization;
 use App\Models\Consultation;
 use App\Services\AIDiagnosticService;
 use Filament\Forms;
@@ -23,23 +21,11 @@ use Illuminate\Support\HtmlString;
 
 class ConsultationsRelationManager extends RelationManager
 {
-    use HasClinicRelationManagerAuthorization;
-
     protected static string $relationship = 'consultations';
 
     protected static ?string $modelLabel = 'consulta';
 
     protected static ?string $title = 'Consultas';
-
-    protected function createRoles(): array
-    {
-        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
-    }
-
-    protected function editRoles(): array
-    {
-        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
-    }
 
     protected function aiSuggestOverwritesExisting(Get $get): bool
     {
@@ -130,7 +116,7 @@ class ConsultationsRelationManager extends RelationManager
                                 ->label('Asistir con IA')
                                 ->icon('heroicon-o-sparkles')
                                 ->color('info')
-                                ->hidden(fn () => ! auth()->user()?->hasAnyRole(ClinicRoles::CLINICAL_STAFF))
+                                ->hidden(fn () => ! auth()->user()?->can('use_ai_diagnostics'))
                                 ->modalHeading(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Sobrescribir sugerencia existente' : null)
                                 ->modalDescription(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Ya hay contenido en Diagnóstico o Tratamiento. ¿Querés reemplazarlo con la sugerencia de la IA?' : null)
                                 ->modalSubmitActionLabel(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Sí, sobrescribir' : null)
@@ -187,7 +173,7 @@ class ConsultationsRelationManager extends RelationManager
                         Forms\Components\Placeholder::make('aiHelp')
                             ->hiddenLabel()
                             ->columnSpanFull()
-                            ->hidden(fn () => ! auth()->user()?->hasAnyRole(ClinicRoles::CLINICAL_STAFF))
+                            ->hidden(fn () => ! auth()->user()?->can('use_ai_diagnostics'))
                             ->content(new HtmlString(
                                 '<p class="text-sm text-gray-500 dark:text-gray-400">'
                                 .'La IA sugiere un diagnóstico y tratamiento en base a la anamnesis. '

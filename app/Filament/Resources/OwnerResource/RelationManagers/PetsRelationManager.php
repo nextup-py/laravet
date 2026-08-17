@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\OwnerResource\RelationManagers;
 
-use App\Filament\Concerns\HasClinicRelationManagerAuthorization;
 use App\Filament\Resources\PetResource;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -12,8 +11,6 @@ use Illuminate\Support\Facades\Auth;
 
 class PetsRelationManager extends RelationManager
 {
-    use HasClinicRelationManagerAuthorization;
-
     protected static string $relationship = 'pets';
 
     protected static ?string $modelLabel = 'mascota';

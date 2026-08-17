@@ -3,8 +3,9 @@
 namespace App\Filament\Concerns;
 
 /**
- * Nombres de los roles de Spatie Permission usados en todo el panel de Filament.
- * Centraliza los strings de rol para no repetirlos en cada Resource/RelationManager.
+ * Nombres de los roles por defecto sembrados por RolesAndPermissionsSeeder.
+ * Los permisos reales (qué puede hacer cada rol) viven en la base de datos,
+ * gestionables desde "Configuración → Roles y permisos" — ver CLAUDE.md.
  */
 final class ClinicRoles
 {
@@ -13,10 +14,4 @@ final class ClinicRoles
     public const VETERINARIAN = 'veterinarian';
 
     public const ASSISTANT = 'assistant';
-
-    /** Roles con acceso a funciones clínicas sensibles (ej. diagnóstico asistido por IA). */
-    public const CLINICAL_STAFF = [self::ADMIN, self::VETERINARIAN];
-
-    /** Todos los roles con acceso al panel. */
-    public const ALL_STAFF = [self::ADMIN, self::VETERINARIAN, self::ASSISTANT];
 }

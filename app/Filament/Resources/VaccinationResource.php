@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Concerns\ClinicRoles;
-use App\Filament\Concerns\HasClinicResourceAuthorization;
 use App\Filament\Resources\VaccinationResource\Pages;
 use App\Models\Vaccination;
 use Filament\Forms;
@@ -18,8 +16,6 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class VaccinationResource extends Resource
 {
-    use HasClinicResourceAuthorization;
-
     protected static ?string $model = Vaccination::class;
 
     protected static ?string $navigationGroup = 'Historial clínico';
@@ -29,16 +25,6 @@ class VaccinationResource extends Resource
     protected static ?string $modelLabel = 'vacunación';
 
     protected static ?string $pluralModelLabel = 'vacunaciones';
-
-    protected static function createRoles(): array
-    {
-        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
-    }
-
-    protected static function editRoles(): array
-    {
-        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
-    }
 
     public static function getNavigationBadge(): ?string
     {

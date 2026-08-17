@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\CityResource\RelationManagers;
 
-use App\Filament\Concerns\HasAdminOnlyRelationManagerAuthorization;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -11,8 +10,6 @@ use Filament\Tables\Table;
 
 class NeighborhoodsRelationManager extends RelationManager
 {
-    use HasAdminOnlyRelationManagerAuthorization;
-
     protected static string $relationship = 'neighborhoods';
 
     protected static ?string $modelLabel = 'barrio';

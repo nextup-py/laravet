@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\PetResource\RelationManagers;
 
-use App\Filament\Concerns\ClinicRoles;
-use App\Filament\Concerns\HasClinicRelationManagerAuthorization;
 use App\Filament\Resources\SurgeryResource;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -15,23 +13,11 @@ use Illuminate\Support\Facades\Auth;
 
 class SurgeriesRelationManager extends RelationManager
 {
-    use HasClinicRelationManagerAuthorization;
-
     protected static string $relationship = 'surgeries';
 
     protected static ?string $modelLabel = 'cirugía';
 
     protected static ?string $title = 'Cirugías';
-
-    protected function createRoles(): array
-    {
-        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
-    }
-
-    protected function editRoles(): array
-    {
-        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
-    }
 
     public function form(Form $form): Form
     {

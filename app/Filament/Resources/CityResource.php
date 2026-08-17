@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Concerns\HasAdminOnlyResourceAuthorization;
 use App\Filament\Resources\CityResource\Pages;
 use App\Filament\Resources\CityResource\RelationManagers;
 use App\Models\City;
@@ -17,8 +16,6 @@ use Filament\Tables\Table;
  */
 class CityResource extends Resource
 {
-    use HasAdminOnlyResourceAuthorization;
-
     protected static ?string $model = City::class;
 
     protected static ?string $navigationGroup = 'Gestión del sistema';
