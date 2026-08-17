@@ -28,6 +28,8 @@ class OwnerResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user';
 
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $modelLabel = 'propietario';
 
     public static function form(Form $form): Form

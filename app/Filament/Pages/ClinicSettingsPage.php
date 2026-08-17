@@ -19,6 +19,8 @@ class ClinicSettingsPage extends Page implements HasForms
 
     protected static ?string $navigationGroup = 'Configuración';
 
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $navigationLabel = 'Datos de la clínica';
 
     protected static ?string $title = 'Datos de la clínica';

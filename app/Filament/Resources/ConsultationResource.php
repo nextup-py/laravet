@@ -31,6 +31,8 @@ class ConsultationResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $modelLabel = 'consulta';
 
     protected static function aiSuggestOverwritesExisting(Get $get): bool

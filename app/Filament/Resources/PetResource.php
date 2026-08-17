@@ -27,6 +27,8 @@ class PetResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-identification';
 
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $modelLabel = 'mascota';
 
     /**

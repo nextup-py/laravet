@@ -17,11 +17,11 @@ class NeighborhoodResource extends Resource
 {
     protected static ?string $model = Neighborhood::class;
 
-    protected static ?string $navigationGroup = 'Gestión del sistema';
+    protected static ?string $navigationGroup = 'Configuración';
 
     protected static ?string $navigationIcon = 'heroicon-o-home-modern';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 6;
 
     protected static ?string $modelLabel = 'barrio';
 
