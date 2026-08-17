@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Concerns\ClinicRoles;
-use App\Filament\Concerns\HasClinicResourceAuthorization;
 use App\Filament\Resources\TestResource\Pages;
 use App\Models\Test;
 use Filament\Forms;
@@ -19,8 +17,6 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class TestResource extends Resource
 {
-    use HasClinicResourceAuthorization;
-
     protected static ?string $model = Test::class;
 
     protected static ?string $navigationGroup = 'Historial clínico';
@@ -30,16 +26,6 @@ class TestResource extends Resource
     protected static ?string $modelLabel = 'prueba laboratorial';
 
     protected static ?string $pluralModelLabel = 'pruebas laboratoriales';
-
-    protected static function createRoles(): array
-    {
-        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
-    }
-
-    protected static function editRoles(): array
-    {
-        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
-    }
 
     public static function typeOptions(): array
     {

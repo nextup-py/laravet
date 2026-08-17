@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Concerns\HasAdminOnlyResourceAuthorization;
+use App\Filament\Concerns\ClinicRoles;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\City;
@@ -17,14 +17,13 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
+use Spatie\Permission\Models\Role;
 
 /**
  * Gestión de usuarios del panel (veterinarios, asistentes y administradores).
  */
 class UserResource extends Resource
 {
-    use HasAdminOnlyResourceAuthorization;
-
     protected static ?string $model = User::class;
 
     protected static ?string $navigationGroup = 'Administración';
@@ -37,14 +36,24 @@ class UserResource extends Resource
 
     /**
      * Opciones de rol reutilizadas por el formulario, la columna y el filtro de rol.
+     * Lee los roles reales de la base de datos (gestionables desde "Configuración
+     * → Roles y permisos"), así que un rol nuevo que cree un admin aparece acá sin
+     * tocar código. Los 3 roles sembrados por defecto muestran un label en español;
+     * cualquier rol custom muestra su nombre tal cual lo escribió el admin.
      */
     public static function roleOptions(): array
     {
-        return [
-            'admin' => 'Administrador',
-            'veterinarian' => 'Veterinario',
-            'assistant' => 'Asistente',
+        $defaultLabels = [
+            ClinicRoles::ADMIN => 'Administrador',
+            ClinicRoles::VETERINARIAN => 'Veterinario',
+            ClinicRoles::ASSISTANT => 'Asistente',
         ];
+
+        return Role::query()
+            ->orderBy('name')
+            ->pluck('name')
+            ->mapWithKeys(fn (string $name): array => [$name => $defaultLabels[$name] ?? $name])
+            ->all();
     }
 
     public static function form(Form $form): Form

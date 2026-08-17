@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Concerns\ClinicRoles;
-use App\Filament\Concerns\HasClinicResourceAuthorization;
 use App\Filament\Resources\SurgeryResource\Pages;
 use App\Models\Surgery;
 use Filament\Forms;
@@ -19,8 +17,6 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class SurgeryResource extends Resource
 {
-    use HasClinicResourceAuthorization;
-
     protected static ?string $model = Surgery::class;
 
     protected static ?string $navigationGroup = 'Historial clínico';
@@ -28,16 +24,6 @@ class SurgeryResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-scissors';
 
     protected static ?string $modelLabel = 'cirugía';
-
-    protected static function createRoles(): array
-    {
-        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
-    }
-
-    protected static function editRoles(): array
-    {
-        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
-    }
 
     public static function typeOptions(): array
     {

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Filament\Concerns\ClinicRoles;
 use App\Filament\Resources\VaccinationResource;
 use App\Models\Vaccination;
 use Filament\Tables;
@@ -15,11 +14,6 @@ class UpcomingVaccinationsWidget extends BaseWidget
     protected static ?int $sort = 1;
 
     protected int|string|array $columnSpan = 'full';
-
-    public static function canView(): bool
-    {
-        return auth()->user()?->hasAnyRole(ClinicRoles::ALL_STAFF) ?? false;
-    }
 
     public function table(Table $table): Table
     {

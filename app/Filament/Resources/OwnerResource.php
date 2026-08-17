@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Concerns\HasClinicResourceAuthorization;
 use App\Filament\Resources\OwnerResource\Pages;
 use App\Filament\Resources\OwnerResource\RelationManagers;
 use App\Models\City;
@@ -23,8 +22,6 @@ use Illuminate\Support\Collection;
  */
 class OwnerResource extends Resource
 {
-    use HasClinicResourceAuthorization;
-
     protected static ?string $model = Owner::class;
 
     protected static ?string $navigationGroup = 'Pacientes';

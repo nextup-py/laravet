@@ -3,8 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Enums\AiUsageStatus;
-use App\Filament\Concerns\ClinicRoles;
-use App\Filament\Concerns\HasClinicResourceAuthorization;
 use App\Filament\Resources\ConsultationResource\Pages;
 use App\Models\Consultation;
 use App\Models\Pet;
@@ -27,8 +25,6 @@ use Illuminate\Support\HtmlString;
  */
 class ConsultationResource extends Resource
 {
-    use HasClinicResourceAuthorization;
-
     protected static ?string $model = Consultation::class;
 
     protected static ?string $navigationGroup = 'Historial clínico';
@@ -36,16 +32,6 @@ class ConsultationResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
     protected static ?string $modelLabel = 'consulta';
-
-    protected static function createRoles(): array
-    {
-        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
-    }
-
-    protected static function editRoles(): array
-    {
-        return [ClinicRoles::ADMIN, ClinicRoles::VETERINARIAN];
-    }
 
     protected static function aiSuggestOverwritesExisting(Get $get): bool
     {
@@ -212,12 +198,12 @@ class ConsultationResource extends Resource
                                             ->send();
                                     }
                                 })
-                                ->hidden(fn () => ! auth()->user()?->hasAnyRole(ClinicRoles::CLINICAL_STAFF)),
+                                ->hidden(fn () => ! auth()->user()?->can('use_ai_diagnostics')),
                         ])->columnSpanFull(),
                         Forms\Components\Placeholder::make('aiHelp')
                             ->hiddenLabel()
                             ->columnSpanFull()
-                            ->hidden(fn () => ! auth()->user()?->hasAnyRole(ClinicRoles::CLINICAL_STAFF))
+                            ->hidden(fn () => ! auth()->user()?->can('use_ai_diagnostics'))
                             ->content(new HtmlString(
                                 '<p class="text-sm text-gray-500 dark:text-gray-400">'
                                 .'La IA sugiere un diagnóstico y tratamiento en base a la anamnesis. '

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Concerns\HasAdminOnlyResourceAuthorization;
 use App\Filament\Resources\DepartmentResource\Pages;
 use App\Filament\Resources\DepartmentResource\RelationManagers;
 use App\Models\Department;
@@ -17,8 +16,6 @@ use Filament\Tables\Table;
  */
 class DepartmentResource extends Resource
 {
-    use HasAdminOnlyResourceAuthorization;
-
     protected static ?string $model = Department::class;
 
     protected static ?string $navigationGroup = 'Gestión del sistema';
