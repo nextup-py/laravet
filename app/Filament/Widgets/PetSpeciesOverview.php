@@ -9,6 +9,13 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class PetSpeciesOverview extends BaseWidget
 {
+    protected static ?int $sort = 0;
+
+    public static function canView(): bool
+    {
+        return auth()->user()?->can('view_any_pet') ?? false;
+    }
+
     protected function getStats(): array
     {
         return [

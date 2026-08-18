@@ -10,14 +10,21 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class RecentConsultationsWidget extends BaseWidget
 {
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 5;
 
     protected int|string|array $columnSpan = 'full';
+
+    public static function canView(): bool
+    {
+        return auth()->user()?->can('view_any_consultation') ?? false;
+    }
 
     public function table(Table $table): Table
     {
         return $table
             ->heading('Consultas recientes')
+            ->emptyStateHeading('Todavía no hay consultas registradas')
+            ->emptyStateIcon('heroicon-o-chat-bubble-left-right')
             ->query(
                 Consultation::query()
                     ->with(['pet', 'user'])
