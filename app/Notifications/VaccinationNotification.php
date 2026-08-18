@@ -3,21 +3,24 @@
 namespace App\Notifications;
 
 use App\Filament\Resources\PetResource;
+use App\Models\Vaccination;
 use App\Settings\ClinicSettings;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Queue\SerializesModels;
 
-class VaccinationNotification extends Notification
+class VaccinationNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, SerializesModels;
 
-    protected $vaccination;
+    protected Vaccination $vaccination;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($vaccination)
+    public function __construct(Vaccination $vaccination)
     {
         $this->vaccination = $vaccination;
     }
