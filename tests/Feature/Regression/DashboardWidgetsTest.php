@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\PetSpecies;
 use App\Filament\Widgets\PetSpeciesOverview;
 use App\Filament\Widgets\RecentConsultationsWidget;
 use App\Filament\Widgets\TestsWithoutResultWidget;
@@ -24,6 +25,21 @@ function callProtected(object $instance, string $method): mixed
 
     return $reflection->invoke($instance);
 }
+
+it('el gráfico de especies incluye las 8 especies del enum, no solo caninos y felinos', function () {
+    actingAsRole('veterinarian');
+    Pet::factory()->create(['species' => PetSpecies::Reptil]);
+    Pet::factory()->create(['species' => PetSpecies::Reptil]);
+    Pet::factory()->create(['species' => PetSpecies::Canino]);
+
+    $data = callProtected(Livewire::test(PetSpeciesOverview::class)->instance(), 'getData');
+
+    expect($data['labels'])->toHaveCount(8)
+        ->and($data['labels'])->toContain('Reptil', 'Canino', 'Bovino', 'Pez');
+
+    $reptilIndex = array_search('Reptil', $data['labels']);
+    expect($data['datasets'][0]['data'][$reptilIndex])->toBe(2);
+});
 
 it('Surgery::upcoming() incluye cirugías programadas dentro de los próximos 7 días, no las pasadas', function () {
     $futura = Surgery::factory()->create(['date' => now()->addDays(3)]);

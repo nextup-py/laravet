@@ -51,6 +51,7 @@ class UpcomingVaccinationsWidget extends BaseWidget
                     })
                     ->sortable(),
             ])
-            ->paginated([5, 10, 25]);
+            ->paginated([5, 10, 25])
+            ->defaultPaginationPageOption(5);
     }
 }

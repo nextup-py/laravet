@@ -45,6 +45,7 @@ class UpcomingSurgeriesWidget extends BaseWidget
                     ->date('d/m/Y')
                     ->sortable(),
             ])
-            ->paginated([5, 10, 25]);
+            ->paginated([5, 10, 25])
+            ->defaultPaginationPageOption(5);
     }
 }
