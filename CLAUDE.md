@@ -55,7 +55,15 @@ Los recursos principales son `PetResource` y `OwnerResource`. `PetResource` agru
 
 `ConsultationResource`, `SurgeryResource` y `TestResource` usan página tipo `ManageRecords` (sin List/Create/Edit separados). `VaccinationResource` tiene páginas Create y Edit propias.
 
-El widget `PetSpeciesOverview` muestra estadísticas de especies en el dashboard.
+### Dashboard
+
+Widgets en `app/Filament/Widgets/`, todos con `canView()` gateado por permiso de Shield (`auth()->user()?->can('view_any_x')`) — un usuario solo ve el widget si tiene permiso de ver ese recurso, sin necesidad de tocar código cuando cambian los permisos de un rol:
+
+- `PetSpeciesOverview` — stats de cantidad de mascotas por especie (`view_any_pet`).
+- `TodayOverviewWidget` — KPIs del día: consultas de hoy, cirugías próximas (`Surgery::scopeUpcoming()`), pruebas sin resultado (`Test::scopeWithoutResult()`). A diferencia de los demás, cada stat se agrega al array solo si el usuario tiene el permiso correspondiente (`view_any_consultation`/`view_any_surgery`/`view_any_test`) — un usuario puede ver algunos KPIs de la fila y no otros, no es todo-o-nada como en los widgets de tabla.
+- `UpcomingVaccinationsWidget` / `UpcomingSurgeriesWidget` / `TestsWithoutResultWidget` / `RecentConsultationsWidget` — tablas de seguimiento operativo, cada una gateada por el permiso `view_any_x` de su modelo.
+
+Todos se descubren automáticamente vía `discoverWidgets` en `AdminPanelProvider` — no hace falta registrarlos a mano, solo `AccountWidget` (core de Filament) está en el array `->widgets([...])`.
 
 ### Diagnóstico asistido por IA
 

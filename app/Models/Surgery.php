@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,12 +25,9 @@ class Surgery extends Model
         'user_id', // ID del veterinario que realizó la cirugía
     ];
 
-
     /**
      * Una cirugía pertenece a una mascota.
      * Esta relación define que cada cirugía está asociada con una mascota específica.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function pet(): BelongsTo
     {
@@ -39,11 +37,17 @@ class Surgery extends Model
     /**
      * Una cirugía pertenece a un usuario (veterinario).
      * Esta relación define que cada cirugía está asociada con un veterinario específico.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Cirugías programadas dentro de los próximos $days días (no incluye pasadas).
+     */
+    public function scopeUpcoming(Builder $query, int $days = 7): Builder
+    {
+        return $query->whereBetween('date', [now()->startOfDay(), now()->addDays($days)->endOfDay()]);
     }
 }

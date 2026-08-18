@@ -11,14 +11,21 @@ use Illuminate\Support\Carbon;
 
 class UpcomingVaccinationsWidget extends BaseWidget
 {
-    protected static ?int $sort = 1;
+    protected static ?int $sort = 3;
 
     protected int|string|array $columnSpan = 'full';
+
+    public static function canView(): bool
+    {
+        return auth()->user()?->can('view_any_vaccination') ?? false;
+    }
 
     public function table(Table $table): Table
     {
         return $table
             ->heading('Vacunas próximas a vencer')
+            ->emptyStateHeading('No hay vacunas próximas a vencer')
+            ->emptyStateIcon('heroicon-o-shield-check')
             ->query(
                 Vaccination::query()
                     ->with(['pet', 'pet.owner'])
@@ -44,6 +51,7 @@ class UpcomingVaccinationsWidget extends BaseWidget
                     })
                     ->sortable(),
             ])
-            ->paginated([5, 10, 25]);
+            ->paginated([5, 10, 25])
+            ->defaultPaginationPageOption(5);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -48,5 +49,13 @@ class Test extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Exámenes registrados a los que todavía no se les cargó el resultado (archivo).
+     */
+    public function scopeWithoutResult(Builder $query): Builder
+    {
+        return $query->whereNull('result');
     }
 }
