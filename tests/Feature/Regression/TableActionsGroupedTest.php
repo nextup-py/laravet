@@ -8,10 +8,12 @@ use App\Models\Pet;
 use Livewire\Livewire;
 
 /**
- * Las acciones de fila (Ver/Editar/Eliminar) están agrupadas dentro de un
- * Tables\Actions\ActionGroup para reducir el ruido visual. Este test confirma
- * que, aun agrupadas, siguen siendo accesibles y funcionales por su nombre —
- * si alguien las desagrupa o les cambia el nombre sin querer, esto lo detecta.
+ * Ver/Editar están agrupadas dentro de un Tables\Actions\ActionGroup para
+ * reducir el ruido visual. Este test confirma que, aun agrupadas, siguen
+ * siendo accesibles y funcionales por su nombre — si alguien las desagrupa o
+ * les cambia el nombre sin querer, esto lo detecta. "Eliminar" ya no vive acá
+ * (ver RowActionsDeleteRelocatedTest.php) — se movió deliberadamente fuera de
+ * la fila de tabla para reducir el riesgo de borrado accidental.
  */
 it('las acciones de fila siguen existiendo y habilitadas dentro del ActionGroup en el form top-level', function () {
     actingAsRole('veterinarian');
@@ -20,10 +22,9 @@ it('las acciones de fila siguen existiendo y habilitadas dentro del ActionGroup 
     Livewire::test(ListConsultations::class)
         ->assertTableActionExists('view')
         ->assertTableActionExists('edit')
-        ->assertTableActionExists('delete')
+        ->assertTableActionDoesNotExist('delete')
         ->assertTableActionEnabled('view', $consultation)
-        ->assertTableActionEnabled('edit', $consultation)
-        ->assertTableActionEnabled('delete', $consultation);
+        ->assertTableActionEnabled('edit', $consultation);
 });
 
 it('las acciones de fila siguen existiendo y habilitadas dentro del ActionGroup en la ficha de la mascota', function () {
@@ -36,7 +37,6 @@ it('las acciones de fila siguen existiendo y habilitadas dentro del ActionGroup 
         'pageClass' => EditPet::class,
     ])
         ->assertTableActionExists('edit')
-        ->assertTableActionExists('delete')
-        ->assertTableActionEnabled('edit', $consultation)
-        ->assertTableActionEnabled('delete', $consultation);
+        ->assertTableActionDoesNotExist('delete')
+        ->assertTableActionEnabled('edit', $consultation);
 });
