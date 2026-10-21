@@ -10,6 +10,7 @@
  *   >>> $demo();                          // dry-run (default): simula, cuenta y revierte
  *   >>> $demo(dryRun: false);             // escribe de verdad
  *   >>> $demo(cleanup: true, dryRun: false);  // borra SOLO lo que sembró este script
+ *   >>> $demo(dryRun: false, vetEmails: ['a@x.com']);  // atribuye los registros solo a esos usuarios
  *
  * Seguridad:
  *  - Todo corre en una transacción; el dry-run siempre hace rollback.
@@ -40,7 +41,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
-return function (bool $dryRun = true, bool $allowExisting = false, bool $cleanup = false): array {
+return function (bool $dryRun = true, bool $allowExisting = false, bool $cleanup = false, array $vetEmails = []): array {
     $demoDomain = '@example.com';
     $pdfDir = 'demo-2026';
     $pdfDisk = config('filament.default_filesystem_disk', 'public');
@@ -127,7 +128,12 @@ return function (bool $dryRun = true, bool $allowExisting = false, bool $cleanup
     // --------------------------------------------------------------- veterinarios
     DB::beginTransaction(); // incluye la creación de veterinarios: el dry-run también la revierte
     $createdVets = [];
-    $vets = User::role('veterinarian')->get();
+    $vets = $vetEmails !== [] ? User::whereIn('email', $vetEmails)->get() : User::role('veterinarian')->get();
+    if ($vetEmails !== [] && $vets->count() !== count($vetEmails)) {
+        DB::rollBack();
+
+        return ['abortado' => 'Algún email de vetEmails no existe en users.'];
+    }
     if ($vets->isEmpty()) {
         foreach ([
             ['Dra. María González', 'maria.gonzalez@mbopivet.com.py'],

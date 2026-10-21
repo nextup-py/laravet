@@ -106,3 +106,17 @@ it('no mezcla datos con una clínica que ya tiene propietarios reales salvo que 
     expect($result['modo'])->toBe('ESCRITO')
         ->and(Owner::count())->toBe(26);
 });
+
+it('atribuye los registros solo a los veterinarios indicados', function () {
+    $vet = User::factory()->create(['email' => 'solo@clinica.com.py']);
+    $vet->assignRole('veterinarian');
+    $other = User::factory()->create(['email' => 'otro@clinica.com.py']);
+    $other->assignRole('veterinarian');
+
+    expect(($this->demo)(dryRun: false, vetEmails: ['inexistente@clinica.com.py']))->toHaveKey('abortado');
+
+    ($this->demo)(dryRun: false, vetEmails: ['solo@clinica.com.py']);
+
+    expect(Consultation::pluck('user_id')->unique()->all())->toBe([$vet->id])
+        ->and(Pet::pluck('user_id')->unique()->all())->toBe([$vet->id]);
+});
