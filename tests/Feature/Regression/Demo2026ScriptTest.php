@@ -31,30 +31,32 @@ it('siembra datos coherentes entre febrero y octubre de 2026', function () {
     $result = ($this->demo)(dryRun: false);
 
     expect($result['registros'])->toMatchArray([
-        'propietarios' => 25,
-        'mascotas' => 40,
+        'propietarios' => 70,
+        'mascotas' => 113,
     ])
-        ->and(Owner::count())->toBe(25)
-        ->and(Pet::count())->toBe(40)
+        ->and(Owner::count())->toBe(70)
+        ->and(Pet::count())->toBe(113)
         ->and(Owner::where('email', 'not like', '%@example.com')->count())->toBe(0);
 
     // consultas: dentro del rango, ninguna futura ni anterior al nacimiento de la mascota
-    expect(Consultation::count())->toBeBetween(100, 135)
+    // promedio mensual de ~70 consultas (feb a oct = 9 meses)
+    expect(Consultation::count())->toBeBetween(615, 645)
         ->and(substr(Consultation::min('consultation_date'), 0, 10))->toBeGreaterThanOrEqual('2026-02-02')
         ->and(substr(Consultation::max('consultation_date'), 0, 10))->toBeLessThanOrEqual('2026-10-21');
+    expect(Consultation::all()->every(fn ($c) => $c->created_at->hour >= 8 && $c->created_at->hour <= 16))->toBeTrue();
     expect(Consultation::with('pet')->get()->filter(fn ($c) => $c->consultation_date->lt($c->pet->birthdate))->count())->toBe(0);
 
     // IA: solo desde junio, con rastro completo y por veterinarios con el permiso
     $ai = Consultation::whereNotNull('ai_suggested_at')->get();
-    expect($ai->count())->toBeBetween(20, 45)
-        ->and($ai->every(fn ($c) => $c->consultation_date->gte('2026-06-01')))->toBeTrue()
+    expect($ai->count())->toBeBetween(70, 130)
+        ->and($ai->every(fn ($c) => $c->consultation_date->gte('2026-08-03')))->toBeTrue()
         ->and($ai->every(fn ($c) => $c->ai_urgency !== null && $c->ai_input_tokens > 0 && $c->ai_output_tokens > 0
             && filled($c->ai_diagnosis_suggestion) && filled($c->ai_treatment_suggestion)))->toBeTrue()
         ->and($ai->every(fn ($c) => $c->user->hasPermissionTo('use_ai_diagnostics')))->toBeTrue();
     expect(Consultation::whereNull('ai_suggested_at')->whereNotNull('ai_urgency')->count())->toBe(0);
 
     // vacunas: nunca se enviaría un recordatorio real a un propietario demo
-    expect(Vaccination::count())->toBeBetween(75, 110)
+    expect(Vaccination::count())->toBeBetween(200, 330)
         ->and(Vaccination::whereNull('reminder_sent_at')->count())->toBe(0);
 
     // cirugías: la agenda futura llega hasta fin de octubre
@@ -64,7 +66,7 @@ it('siembra datos coherentes entre febrero y octubre de 2026', function () {
     // exámenes: sin fechas futuras, con PDF adjunto salvo los pendientes
     expect(Test::where('date', '>', '2026-10-21')->count())->toBe(0);
     $withoutResult = Test::withoutResult()->count();
-    expect($withoutResult)->toBeBetween(5, 12);
+    expect($withoutResult)->toBeBetween(8, 30);
     $withResult = Test::whereNotNull('result')->get();
     expect($withResult->count())->toBeGreaterThan(15)
         ->and($withResult->every(fn ($t) => Storage::disk($this->pdfDisk)->exists($t->result[0])))->toBeTrue();
@@ -80,7 +82,7 @@ it('se niega a correr dos veces y el cleanup borra solo lo demo', function () {
 
     $again = ($this->demo)(dryRun: false);
     expect($again)->toHaveKey('abortado')
-        ->and(Owner::count())->toBe(25);
+        ->and(Owner::count())->toBe(70);
 
     $real = Owner::factory()->create(['email' => 'real@clinica.com.py']);
 
@@ -104,7 +106,7 @@ it('no mezcla datos con una clínica que ya tiene propietarios reales salvo que 
     $result = ($this->demo)(dryRun: false, allowExisting: true);
 
     expect($result['modo'])->toBe('ESCRITO')
-        ->and(Owner::count())->toBe(26);
+        ->and(Owner::count())->toBe(71);
 });
 
 it('atribuye los registros solo a los veterinarios indicados', function () {
