@@ -99,7 +99,7 @@ return function (bool $dryRun = true, bool $allowExisting = false, bool $cleanup
     // ------------------------------------------------------------------ helpers
     $start = CarbonImmutable::create(2026, 2, 2);
     $today = CarbonImmutable::create(2026, 10, 21);
-    $aiSince = CarbonImmutable::create(2026, 6, 1);
+    $aiSince = CarbonImmutable::create(2026, 8, 3);
 
     $pick = fn (array $a) => $a[mt_rand(0, count($a) - 1)];
     $chance = fn (int $pct) => mt_rand(1, 100) <= $pct;
@@ -122,7 +122,7 @@ return function (bool $dryRun = true, bool $allowExisting = false, bool $cleanup
     $randDate = function (CarbonImmutable $from, CarbonImmutable $to) use ($days, $workday) {
         return $workday($from->addDays(mt_rand(0, max(0, $days($from, $to)))));
     };
-    $atTime = fn (CarbonImmutable $d) => $d->setTime(mt_rand(8, 18), mt_rand(0, 59), mt_rand(0, 59));
+    $atTime = fn (CarbonImmutable $d) => $d->setTime(mt_rand(8, 16), mt_rand(0, 59), mt_rand(0, 59));
     $fmt = fn (CarbonImmutable $d) => $d->format('d/m/Y');
 
     // --------------------------------------------------------------- veterinarios
@@ -233,6 +233,84 @@ return function (bool $dryRun = true, bool $allowExisting = false, bool $cleanup
         ['Pelusa', 2, 'Felino', 'Persa', 'Female', '2026-07-12', 'Small', 1.9, 'Largo', 'Normal'],
         ['Tigre', 20, 'Felino', 'SRD', 'Male', '2026-04-25', 'Small', 3.0, 'Corto', 'Normal'],
     ];
+
+    // ---------------------------------------- escala: propietarios y mascotas generados
+    $newOwners = [
+        ['Adriana', 'Female'], ['Camila', 'Female'], ['Diego', 'Male'], ['Estela', 'Female'], ['Fernando', 'Male'],
+        ['Graciela', 'Female'], ['Héctor', 'Male'], ['Irma', 'Female'], ['Jorge', 'Male'], ['Lidia', 'Female'],
+        ['Mario', 'Male'], ['Nilda', 'Female'], ['Óscar', 'Male'], ['Patricia', 'Female'], ['Ramón', 'Male'],
+        ['Silvia', 'Female'], ['Tomás', 'Male'], ['Verónica', 'Female'], ['Walter', 'Male'], ['Ximena', 'Female'],
+        ['Yolanda', 'Female'], ['Zulma', 'Female'], ['Alberto', 'Male'], ['Blanca', 'Female'], ['César', 'Male'],
+        ['Dora', 'Female'], ['Emilio', 'Male'], ['Flora', 'Female'], ['Guillermo', 'Male'], ['Hilda', 'Female'],
+        ['Ignacio', 'Male'], ['Julia', 'Female'], ['Kevin', 'Male'], ['Laura', 'Female'], ['Miguel', 'Male'],
+        ['Natalia', 'Female'], ['Olga', 'Female'], ['Pablo', 'Male'], ['Rosa', 'Female'], ['Santiago', 'Male'],
+        ['Telma', 'Female'], ['Ulises', 'Male'], ['Valeria', 'Female'], ['Wilfrido', 'Male'], ['Yessica', 'Female'],
+    ];
+    $lasts = [
+        'Ramírez', 'Acuña', 'Barrios', 'Colmán', 'Escurra', 'Fleitas', 'Galeano', 'Domínguez', 'Ibarra', 'Jara',
+        'Lezcano', 'Machuca', 'Núñez', 'Ovelar', 'Paredes', 'Quiñónez', 'Riveros', 'Samaniego', 'Torres', 'Urbieta',
+        'Valdez', 'Zacarías', 'Peralta', 'Medina', 'Brítez', 'Cabañas', 'Delvalle', 'Lugo', 'Orué', 'Sosa',
+    ];
+    $streets = [
+        'Calle Mcal. Estigarribia', 'Calle Cerro Corá', 'Calle San Roque', 'Calle Yegros', 'Av. Mcal. López', 'Calle 14 de Mayo',
+        'Calle Tte. Fariña', 'Calle Independencia Nacional', 'Calle Presidente Franco', 'Calle Gral. Díaz', 'Calle Cerro Ñu',
+        'Barrio Valle Pucú, calle', 'Compañía Estanzuela, lote', 'Calle Itapúa', 'Calle Paraguarí', 'Calle Cerro Memby',
+    ];
+    $cityPool = array_merge(array_fill(0, 10, 'Aregu'), array_fill(0, 3, 'Itaugu'), array_fill(0, 2, 'Ypacara'), array_fill(0, 2, 'Capiat'), array_fill(0, 2, 'Luque'), ['San Lorenzo']);
+    foreach ($newOwners as $k => [$first, $gender]) {
+        $ownerRows[] = [$first, $lasts[($k * 7 + 3) % count($lasts)], $gender, $pick($cityPool), $pick($streets).' '.mt_rand(10, 980)];
+    }
+
+    // [raza, tamaño, peso mín., peso máx., pelaje, frecuencia relativa]
+    $dogBreeds = [
+        ['SRD', 'Medium', 8, 25, 'Corto', 30], ['Labrador Retriever', 'Big', 25, 34, 'Corto', 6], ['Pastor Alemán', 'Big', 28, 38, 'Mediano', 5],
+        ['Poodle', 'Small', 4, 9, 'Rizado', 6], ['Chihuahua', 'Tiny', 1.5, 3.5, 'Corto', 4], ['Salchicha', 'Small', 6, 10, 'Corto', 4],
+        ['Bulldog Francés', 'Small', 8, 13, 'Corto', 4], ['Beagle', 'Small', 9, 13, 'Corto', 3], ['Rottweiler', 'Giant', 35, 50, 'Corto', 3],
+        ['Cocker Spaniel', 'Medium', 11, 15, 'Largo', 4], ['Schnauzer', 'Small', 6, 11, 'Mediano', 4], ['Pitbull', 'Medium', 18, 28, 'Corto', 5],
+        ['Boxer', 'Big', 25, 32, 'Corto', 3], ['Yorkshire Terrier', 'Tiny', 2, 3.5, 'Largo', 4], ['Shih Tzu', 'Small', 5, 9, 'Largo', 4],
+        ['Golden Retriever', 'Big', 25, 32, 'Largo', 3], ['Pastor Belga', 'Big', 25, 32, 'Mediano', 2], ['Doberman', 'Big', 30, 40, 'Corto', 2],
+    ];
+    $catBreeds = [
+        ['SRD', 'Small', 3, 5.5, 'Corto', 20], ['SRD', 'Small', 3, 5.5, 'Mediano', 6], ['Siamés', 'Small', 3, 4.5, 'Corto', 3],
+        ['Persa', 'Small', 3.5, 5.5, 'Largo', 3], ['Angora', 'Small', 3, 4.5, 'Largo', 2], ['Maine Coon', 'Small', 5, 8, 'Largo', 1],
+        ['Bengalí', 'Small', 4, 6, 'Corto', 1],
+    ];
+    $dogNames = [
+        'Bobby', 'Nico', 'Lucky', 'Rambo', 'Fido', 'Maya', 'Sasha', 'Roco', 'Taco', 'Atila', 'Ñandé', 'Jaguar', 'Pytã', 'Morocha',
+        'Kuarahy', 'Tyson', 'Kaiser', 'Goliat', 'Apolo', 'Hera', 'Lobo', 'Dante', 'Nena', 'Piojo', 'Chocolate', 'Canelo', 'Panchita',
+        'Manchas', 'Pinky', 'Rina', 'Milka', 'Kenia', 'Blanquita', 'Tuti', 'Churro', 'Capitán', 'Samba', 'Trueno', 'Fiona', 'Gala',
+        'Ringo', 'Tita', 'Wilson', 'Yeyo', 'Zoe', 'Hachi', 'Bandido', 'Mateo', 'Pocho', 'Rulo', 'Sultán', 'Tomi', 'Uno', 'Vito', 'Chico', 'Dolly',
+    ];
+    $catNames = [
+        'Michi', 'Garra', 'Tito', 'Coqui', 'Bigotes', 'Misty', 'Oreo', 'Pantera', 'Mochi', 'Ágata', 'Bruja', 'Pelu', 'Gatuno', 'Kitty',
+        'Lupe', 'Neko', 'Ópalo', 'Pepa', 'Rayo', 'Sombra', 'Tuna', 'Vainilla', 'Whisky', 'Yuyo', 'Zafiro', 'Ámbar', 'Bolita', 'Cuqui',
+        'Dorado', 'Estrella', 'Tigresa',
+    ];
+    for ($p = 0; $p < 73; $p++) {
+        $isDog = $p < 47;
+        $breeds = $isDog ? $dogBreeds : $catBreeds;
+        [$breed, $size, $wMin, $wMax, $fur] = $breeds[$wpick($breeds, fn ($b) => $b[5])];
+        $r = mt_rand(1, 100);
+        if ($r <= 18) { // cachorros y gatitos
+            $birth = CarbonImmutable::create(2025, 12, 1)->addDays(mt_rand(0, 278));
+        } elseif ($r <= 80) { // adultos
+            $birth = CarbonImmutable::create(2018, 11, 1)->addDays(mt_rand(0, 2433));
+        } else { // senior
+            $birth = CarbonImmutable::create(2011, 1, 1)->addDays(mt_rand(0, 2844));
+        }
+        $ageToday = $days($birth, $today);
+        $adultWeight = $wMin + ($wMax - $wMin) * mt_rand(0, 100) / 100;
+        $weight = round($ageToday < 330 ? max(0.4, $adultWeight * (0.12 + 0.88 * $ageToday / 330)) : $adultWeight, 1);
+        $gender = $chance(50) ? 'Male' : 'Female';
+        $repro = 'Normal';
+        if ($r > 18 && $chance($r > 80 ? 40 : 35)) {
+            $repro = $gender === 'Male' ? 'Castrated' : 'Sterilized';
+        }
+        $petRows[] = [
+            $isDog ? $dogNames[$p] : $catNames[$p - 47], $p < 45 ? 25 + $p : mt_rand(0, 69),
+            $isDog ? 'Canino' : 'Felino', $breed, $gender, $birth->toDateString(), $size, $weight, $fur, $repro,
+        ];
+    }
 
     $pets = [];
     foreach ($petRows as $i => [$name, $ownerIdx, $species, $breed, $gender, $birth, $size, $weight, $fur, $repro]) {
@@ -525,6 +603,22 @@ return function (bool $dryRun = true, bool $allowExisting = false, bool $cleanup
         'Milo' => ['Castración', '2026-10-26', 'Cirugía programada. Ayuno de 12 hs. Se aprovecha para limpieza dental si el estado lo permite.'],
         'Chester' => ['Cirugía Dental', '2026-10-28', 'Cirugía programada. Limpieza dental con ultrasonido y posibles extracciones. Ayuno de 12 hs.'],
     ];
+    foreach ($pets as $i => $pet) {
+        if ($i < 40 || $pet['repro0'] !== 'Normal' || ! $chance(14)) {
+            continue;
+        }
+        $earliest = CarbonImmutable::parse($pet['birth'])->addDays(210)->max($start);
+        $latest = $today->subDays(7);
+        if ($earliest->gt($latest)) {
+            continue;
+        }
+        $type = $pet['gender'] === 'Male' ? 'Castración' : ($pet['species'] === 'Canino' ? 'Ovariohisterectomía' : 'Esterilización');
+        $elective[$pet['name']] = [$type, $randDate($earliest, $latest)->toDateString(), $pick([
+            'Cirugía electiva sin complicaciones. Alta el mismo día.',
+            'Procedimiento de rutina bajo anestesia inhalatoria. Recuperación sin incidentes.',
+            'Cirugía electiva. Se indica collar isabelino y control de la herida a los 10 días.',
+        ])];
+    }
 
     $consultPlan = [];  // cada una: pet, date(CarbonImmutable), vet, case-key, ...
     $surgeryPlan = [];  // pet, date, type, obs
@@ -557,8 +651,8 @@ return function (bool $dryRun = true, bool $allowExisting = false, bool $cleanup
     }
 
     // ----------------------------------------------- consultas (cronológico)
-    $monthTargets = [2 => 6, 3 => 7, 4 => 8, 5 => 9, 6 => 10, 7 => 11, 8 => 12, 9 => 12, 10 => 10];
-    $aiAdoption = [2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 25, 7 => 30, 8 => 40, 9 => 65, 10 => 75];
+    $monthTargets = [2 => 38, 3 => 44, 4 => 50, 5 => 55, 6 => 60, 7 => 64, 8 => 68, 9 => 72, 10 => 53];
+    $aiAdoption = [2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0, 7 => 0, 8 => 25, 9 => 50, 10 => 70];
 
     $slots = [];
     foreach ($monthTargets as $m => $n) {
@@ -667,13 +761,13 @@ return function (bool $dryRun = true, bool $allowExisting = false, bool $cleanup
             // estudios y cirugías vinculados al caso
             foreach ($case['tests'] ?? [] as $lab => $pct) {
                 if ($chance((int) round($pct * 0.6))) {
-                    $testPlan[] = ['pet' => $i, 'date' => $date->addDays($chance(30) ? 1 : 0), 'lab' => $lab, 'vet' => $vet];
+                    $testPlan[] = ['pet' => $i, 'date' => $date->addDays($chance(30) && $date->lt($today) ? 1 : 0), 'lab' => $lab, 'vet' => $vet];
                 }
             }
             if (isset($case['surg'])) {
-                $surgeryPlan[] = ['pet' => $i, 'date' => $date->addDay(), 'type' => $case['surg'][0], 'obs' => $case['surg'][1], 'vet' => $vet];
+                $surgeryPlan[] = ['pet' => $i, 'date' => $date->lt($today) ? $date->addDay() : $date, 'type' => $case['surg'][0], 'obs' => $case['surg'][1], 'vet' => $vet];
                 if ($case['surg'][0] === 'Ovariohisterectomía') {
-                    $pets[$i]['changes'][$date->addDay()->toDateString()] = 'Sterilized';
+                    $pets[$i]['changes'][($date->lt($today) ? $date->addDay() : $date)->toDateString()] = 'Sterilized';
                 }
             }
             // control posterior
@@ -774,7 +868,7 @@ return function (bool $dryRun = true, bool $allowExisting = false, bool $cleanup
     $isPending = fn (array $t) => $t['date']->gte($today->subDays(9)) && $t['date']->lte($today);
     $pending = count(array_filter($testPlan, $isPending));
     foreach ($recentCons as $c) {
-        if ($pending >= 6) {
+        if ($pending >= 10) {
             break;
         }
         $testPlan[] = ['pet' => $c['pet'], 'date' => $c['date'], 'lab' => $pick(['hemo_normal', 'bioq_normal', 'coprol']), 'vet' => $c['vet']];

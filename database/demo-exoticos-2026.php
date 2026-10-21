@@ -4,7 +4,7 @@
  * Complemento de database/demo-2026.php (no hace falta rehacer la carga):
  *  1. Mueve a 8-17 hs las horas de creación de los registros demo (la clínica atiende lun-sáb 8 a 17).
  *  2. Agrega 7 mascotas exóticas (4 roedores/conejos y 3 aves) a propietarios demo, con consultas
- *     (6 con IA), vacunas de conejos, 2 cirugías y 1 examen pendiente.
+ *     (4 con IA, todas posteriores al 03/08, fecha de lanzamiento de la función), vacunas de conejos, 2 cirugías y 1 examen pendiente.
  *
  *   $x = require base_path('database/demo-exoticos-2026.php');
  *   $x();                // dry-run (default)
@@ -24,7 +24,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
 return function (bool $dryRun = true): array {
-    $owners = Owner::where('email', 'like', '%@example.com')->get()->keyBy('first_name');
+    $owners = Owner::where('email', 'like', '%@example.com')->get()->keyBy('email');
     if ($owners->isEmpty()) {
         return ['abortado' => 'No hay propietarios demo (@example.com). Corré primero demo-2026.php.'];
     }
@@ -35,7 +35,7 @@ return function (bool $dryRun = true): array {
     if ($vets->count() !== 2 || $vets->contains(fn (User $v) => ! $v->hasPermissionTo('use_ai_diagnostics'))) {
         return ['abortado' => 'Faltan María González / Carlos Giménez o no tienen permiso de IA.'];
     }
-    $missing = collect(['Cynthia', 'Elvira', 'Fabiola', 'Rubén', 'Víctor', 'Karina', 'Noemí'])->reject(fn ($n) => $owners->has($n));
+    $missing = collect(['cynthia.franco', 'elvira.insfran', 'fabiola.cardozo', 'ruben.escobar', 'victor.maidana', 'karina.ledesma', 'noemi.gauto'])->map(fn ($n) => $n.'@example.com')->reject(fn ($e) => $owners->has($e));
     if ($missing->isNotEmpty()) {
         return ['abortado' => 'Faltan propietarios demo: '.$missing->implode(', ')];
     }
@@ -66,13 +66,13 @@ return function (bool $dryRun = true): array {
         // ------------------------------------------------ 2) mascotas exóticas
         // [nombre, propietario, especie, raza, género, nacimiento, tamaño, peso, pelaje, reproducción final]
         $petRows = [
-            ['Copito', 'Cynthia', 'Roedor', 'Conejo Mini Lop', 'Male', '2023-05-10', 'Small', 1.8, 'Corto', 'Castrated'],
-            ['Nieve', 'Elvira', 'Roedor', 'Conejo Cabeza de León', 'Female', '2024-02-20', 'Small', 1.5, 'Largo', 'Sterilized'],
-            ['Pipo', 'Fabiola', 'Roedor', 'Cobayo', 'Male', '2024-08-05', 'Tiny', 0.9, 'Corto', 'Normal'],
-            ['Canelita', 'Rubén', 'Roedor', 'Hámster Sirio', 'Female', '2025-09-01', 'Tiny', 0.12, 'Corto', 'Normal'],
-            ['Lorenzo', 'Víctor', 'Ave', 'Loro Hablador (Amazona)', 'Male', '2016-04-12', 'Small', 0.45, 'Plumaje', 'Normal'],
-            ['Kiwi', 'Karina', 'Ave', 'Cotorra', 'Female', '2022-11-03', 'Tiny', 0.09, 'Plumaje', 'Normal'],
-            ['Sol', 'Noemí', 'Ave', 'Canario', 'Male', '2025-03-14', 'Tiny', 0.02, 'Plumaje', 'Normal'],
+            ['Copito', 'cynthia.franco@example.com', 'Roedor', 'Conejo Mini Lop', 'Male', '2023-05-10', 'Small', 1.8, 'Corto', 'Castrated'],
+            ['Nieve', 'elvira.insfran@example.com', 'Roedor', 'Conejo Cabeza de León', 'Female', '2024-02-20', 'Small', 1.5, 'Largo', 'Sterilized'],
+            ['Pipo', 'fabiola.cardozo@example.com', 'Roedor', 'Cobayo', 'Male', '2024-08-05', 'Tiny', 0.9, 'Corto', 'Normal'],
+            ['Canelita', 'ruben.escobar@example.com', 'Roedor', 'Hámster Sirio', 'Female', '2025-09-01', 'Tiny', 0.12, 'Corto', 'Normal'],
+            ['Lorenzo', 'victor.maidana@example.com', 'Ave', 'Loro Hablador (Amazona)', 'Male', '2016-04-12', 'Small', 0.45, 'Plumaje', 'Normal'],
+            ['Kiwi', 'karina.ledesma@example.com', 'Ave', 'Cotorra', 'Female', '2022-11-03', 'Tiny', 0.09, 'Plumaje', 'Normal'],
+            ['Sol', 'noemi.gauto@example.com', 'Ave', 'Canario', 'Male', '2025-03-14', 'Tiny', 0.02, 'Plumaje', 'Normal'],
         ];
 
         // [mascota, fecha, veterinario (0 = Carlos, 1 = María), anamnesis, diagnóstico, tratamiento, observación, IA: [urgencia, 'asis'|'edit'] | null]
@@ -80,8 +80,8 @@ return function (bool $dryRun = true): array {
             ['Copito', '2026-03-10', 1, 'Control general y consulta por vacunas. Come heno y verduras, heces normales.', 'Paciente clínicamente sano.', 'Vacunación contra mixomatosis y enfermedad hemorrágica vírica. Heno ad libitum.', 'Peso 1,8 kg.', null],
             ['Nieve', '2026-04-07', 0, 'Babea, deja caer el alimento y los incisivos se ven largos. Come menos desde hace 2 semanas.', 'Maloclusión dental con sobrecrecimiento de incisivos.', 'Recorte de incisivos bajo sedación. Dieta con heno ad libitum y verdes. Control cada 4 a 6 semanas.', 'Se revisaron también molares sin hallazgos.', null],
             ['Copito', '2026-05-12', 0, 'Control prequirúrgico para castración. El propietario consulta por el procedimiento.', 'Paciente apto para cirugía electiva.', 'Ayuno de 2 a 3 hs sin restringir el agua. Se agenda la fecha.', null, null],
-            ['Canelita', '2026-06-23', 0, 'Prurito y caspa en el dorso, se rasca con frecuencia. Convive con otro animal en la casa.', 'Ácaros de la piel (Cheyletiella).', 'Selamectina spot-on en dosis única, repetir a los 14 días. Cambiar el sustrato y limpiar la jaula.', 'Se tomó muestra por cinta adhesiva.', ['baja', 'edit']],
-            ['Pipo', '2026-07-14', 0, 'Cojea, no quiere moverse y las encías sangran al comer. Se alimenta solo con alimento seco.', 'Hipovitaminosis C (escorbuto).', 'Vitamina C 50 mg/kg/día por vía oral. Verduras ricas en vitamina C a diario y alimento formulado para cobayos.', 'Dolor articular a la manipulación.', ['media', 'asis']],
+            ['Canelita', '2026-06-23', 0, 'Prurito y caspa en el dorso, se rasca con frecuencia. Convive con otro animal en la casa.', 'Ácaros de la piel (Cheyletiella).', 'Selamectina spot-on en dosis única, repetir a los 14 días. Cambiar el sustrato y limpiar la jaula.', 'Se tomó muestra por cinta adhesiva.', null],
+            ['Pipo', '2026-07-14', 0, 'Cojea, no quiere moverse y las encías sangran al comer. Se alimenta solo con alimento seco.', 'Hipovitaminosis C (escorbuto).', 'Vitamina C 50 mg/kg/día por vía oral. Verduras ricas en vitamina C a diario y alimento formulado para cobayos.', 'Dolor articular a la manipulación.', null],
             ['Kiwi', '2026-08-12', 1, 'Pico sobrecrecido y uñas largas que le dificultan posarse y comer.', 'Sobrecrecimiento de pico y uñas.', 'Recorte de pico y uñas. Agregar perchas de distintos diámetros y cuerdas para desgaste.', 'Sin sangrado durante el procedimiento.', ['baja', 'edit']],
             ['Pipo', '2026-07-28', 0, 'Control posterior a la consulta del 14/07. El propietario refiere mejoría; Pipo come y se mueve con normalidad.', 'Evolución favorable. Alta médica / continuar con el plan indicado.', 'Completar el tratamiento prescrito. Control ante cualquier recidiva.', null, null],
             ['Nieve', '2026-08-19', 1, 'Control prequirúrgico para ovariohisterectomía preventiva.', 'Paciente apta para cirugía electiva.', 'Ayuno de 2 a 3 hs sin restringir el agua. Se agenda la fecha.', null, null],
