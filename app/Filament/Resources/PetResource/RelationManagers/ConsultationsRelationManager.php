@@ -78,7 +78,7 @@ class ConsultationsRelationManager extends RelationManager
         $message = $e->getMessage();
 
         if (str_contains($message, 'ANTHROPIC_API_KEY')) {
-            return 'La integración con IA no está configurada. Contactá al administrador del sistema.';
+            return 'La integración con IA no está configurada. Contacta al administrador del sistema.';
         }
 
         if (str_contains($message, 'formato esperado')) {
@@ -86,7 +86,7 @@ class ConsultationsRelationManager extends RelationManager
         }
 
         if (str_contains($message, 'conectar con la API')) {
-            return 'No se pudo conectar con el servicio de IA. Verificá tu conexión e intentá nuevamente.';
+            return 'No se pudo conectar con el servicio de IA. Verifica tu conexión e intenta nuevamente.';
         }
 
         return 'No se pudo generar la sugerencia. Intenta nuevamente en unos minutos.';
@@ -118,7 +118,7 @@ class ConsultationsRelationManager extends RelationManager
                                 ->color('info')
                                 ->hidden(fn () => ! auth()->user()?->can('use_ai_diagnostics'))
                                 ->modalHeading(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Sobrescribir sugerencia existente' : null)
-                                ->modalDescription(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Ya hay contenido en Diagnóstico o Tratamiento. ¿Querés reemplazarlo con la sugerencia de la IA?' : null)
+                                ->modalDescription(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Ya hay contenido en Diagnóstico o Tratamiento. ¿Quieres reemplazarlo con la sugerencia de la IA?' : null)
                                 ->modalSubmitActionLabel(fn (Get $get) => $this->aiSuggestOverwritesExisting($get) ? 'Sí, sobrescribir' : null)
                                 ->requiresConfirmation(fn (Get $get) => $this->aiSuggestOverwritesExisting($get))
                                 ->action(function (Get $get, Set $set, $livewire) {
@@ -177,7 +177,7 @@ class ConsultationsRelationManager extends RelationManager
                             ->content(new HtmlString(
                                 '<p class="text-sm text-gray-500 dark:text-gray-400">'
                                 .'La IA sugiere un diagnóstico y tratamiento en base a la anamnesis. '
-                                .'Revisá siempre la sugerencia antes de guardar — no reemplaza tu criterio profesional.'
+                                .'Revisa siempre la sugerencia antes de guardar — no reemplaza tu criterio profesional.'
                                 .'</p>'
                                 .'<p wire:loading wire:target="mountFormComponentAction" '
                                 .'class="text-sm font-medium text-primary-600 dark:text-primary-400 mt-1">'

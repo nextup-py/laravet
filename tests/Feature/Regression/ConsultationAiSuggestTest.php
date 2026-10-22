@@ -99,7 +99,7 @@ it('el form top-level muestra el texto de ayuda y el indicador de "generando" pa
     actingAsRole('veterinarian');
 
     Livewire::test(CreateConsultation::class)
-        ->assertSee('Revisá siempre la sugerencia antes de guardar')
+        ->assertSee('Revisa siempre la sugerencia antes de guardar')
         ->assertSeeHtml('Generando sugerencia con IA');
 });
 
@@ -112,7 +112,7 @@ it('el form dentro de la ficha de la mascota muestra el texto de ayuda y el indi
         'pageClass' => EditPet::class,
     ])
         ->mountTableAction('create')
-        ->assertSee('Revisá siempre la sugerencia antes de guardar')
+        ->assertSee('Revisa siempre la sugerencia antes de guardar')
         ->assertSeeHtml('Generando sugerencia con IA');
 });
 
@@ -215,7 +215,7 @@ it('muestra un mensaje específico si la API key de IA no está configurada', fu
         ->assertNotified(
             Notification::make()
                 ->title('Error al generar sugerencia')
-                ->body('La integración con IA no está configurada. Contactá al administrador del sistema.')
+                ->body('La integración con IA no está configurada. Contacta al administrador del sistema.')
                 ->danger()
         );
 
@@ -265,7 +265,7 @@ it('muestra un mensaje específico si falla la conexión con la API de IA', func
         ->assertNotified(
             Notification::make()
                 ->title('Error al generar sugerencia')
-                ->body('No se pudo conectar con el servicio de IA. Verificá tu conexión e intentá nuevamente.')
+                ->body('No se pudo conectar con el servicio de IA. Verifica tu conexión e intenta nuevamente.')
                 ->danger()
         );
 });
