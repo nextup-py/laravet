@@ -68,6 +68,14 @@ class Pet extends Model
     }
 
     /**
+     * Resumen clínico en una línea: especie, raza, edad, peso y género.
+     */
+    public function summaryLine(): string
+    {
+        return "{$this->species->getLabel()} · {$this->breed} · {$this->age} · {$this->weight} kg · {$this->gender->getLabel()}";
+    }
+
+    /**
      * Avatar SVG (data URI) con las iniciales de la mascota, para cuando no tiene foto.
      */
     protected function initialsAvatarUrl(): Attribute
