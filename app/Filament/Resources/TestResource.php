@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\PetSpecies;
 use App\Enums\TestStatus;
 use App\Filament\Resources\TestResource\Pages;
+use App\Http\Controllers\TestResultController;
 use App\Models\Pet;
 use App\Models\Test;
 use Carbon\Carbon;
@@ -88,7 +89,7 @@ class TestResource extends Resource
     {
         return Forms\Components\FileUpload::make('result')
             ->label('Resultados')
-            ->helperText('Opcional: puede registrar la prueba ahora y cargar el resultado después.')
+            ->helperText('Opcional: puede registrar la prueba ahora y cargar el resultado después. Formatos: PDF, PNG o JPG.')
             ->disk('test-results')
             ->directory('resultados')
             ->visibility('private')
@@ -99,6 +100,7 @@ class TestResource extends Resource
             ->downloadable()
             ->uploadingMessage('Subiendo archivo adjunto...')
             ->maxFiles(5)
+            ->acceptedFileTypes(TestResultController::INLINE_MIME_TYPES)
             ->columnSpanFull();
     }
 

@@ -215,3 +215,28 @@ it('la búsqueda global de pruebas incluye mascota, fecha y estado', function ()
         ->and(TestResource::getGlobalSearchResultTitle($prueba))->toContain($prueba->pet->name)
         ->and(TestResource::getGlobalSearchResultDetails($prueba)['Estado'])->toBe('Pendiente');
 });
+
+it('solo acepta PDF, PNG o JPG como archivos de resultado', function () {
+    expect(TestResource::resultUpload()->getAcceptedFileTypes())->toBe(['application/pdf', 'image/png', 'image/jpeg']);
+});
+
+it('muestra inline solo PDF e imágenes seguras y fuerza la descarga de otros tipos', function () {
+    Storage::fake('test-results');
+    Storage::disk('test-results')->put('resultados/informe.pdf', '%PDF-1.4 contenido');
+    Storage::disk('test-results')->put('resultados/malicioso.html', '<script>alert(1)</script>');
+    Storage::disk('test-results')->put('resultados/imagen.svg', '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"/>');
+    $test = Test::factory()->create(['result' => ['resultados/informe.pdf', 'resultados/malicioso.html', 'resultados/imagen.svg']]);
+    actingAsRole('admin');
+
+    $pdf = test()->get(route('filament.admin.tests.result', ['test' => $test, 'index' => 0]));
+    $pdf->assertOk()->assertHeader('X-Content-Type-Options', 'nosniff');
+    expect($pdf->headers->get('Content-Disposition'))->not->toContain('attachment');
+
+    foreach ([1, 2] as $index) {
+        $respuesta = test()->get(route('filament.admin.tests.result', ['test' => $test, 'index' => $index]));
+        $respuesta->assertOk()
+            ->assertHeader('X-Content-Type-Options', 'nosniff')
+            ->assertHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+        expect($respuesta->headers->get('Content-Disposition'))->toContain('attachment');
+    }
+});
