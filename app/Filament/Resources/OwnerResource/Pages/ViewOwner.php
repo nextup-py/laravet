@@ -3,19 +3,34 @@
 namespace App\Filament\Resources\OwnerResource\Pages;
 
 use App\Filament\Resources\OwnerResource;
+use App\Filament\Resources\PetResource;
 use Filament\Actions;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ViewOwner extends ViewRecord
 {
     protected static string $resource = OwnerResource::class;
 
+    public function getTitle(): string|Htmlable
+    {
+        return $this->record->full_name;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('registerPet')
+                ->label('Registrar mascota')
+                ->icon('heroicon-o-plus')
+                ->color('success')
+                ->visible(fn (): bool => PetResource::canCreate())
+                ->url(fn (): string => PetResource::getUrl('create', ['owner_id' => $this->record->getKey()])),
             Actions\EditAction::make(),
         ];
     }
@@ -30,10 +45,11 @@ class ViewOwner extends ViewRecord
                         TextEntry::make('ci')->label('CI'),
                         TextEntry::make('first_name')->label('Nombre(s)'),
                         TextEntry::make('last_name')->label('Apellido(s)'),
-                        TextEntry::make('gender')->label('Género')->badge()
-                            ->formatStateUsing(fn (string $state): string => $state === 'Male' ? 'Masculino' : 'Femenino'),
-                        TextEntry::make('email')->label('Correo electrónico'),
-                        TextEntry::make('phone')->label('Teléfono'),
+                        TextEntry::make('gender')->label('Género')->badge(),
+                        TextEntry::make('email')->label('Correo electrónico')->icon('heroicon-m-envelope')->copyable(),
+                        TextEntry::make('phone')->label('Teléfono')
+                            ->icon('heroicon-m-chat-bubble-left-ellipsis')
+                            ->url(fn ($record): string => $record->whatsapp_url, shouldOpenInNewTab: true),
                     ]),
 
                 Section::make('Datos del domicilio')
@@ -43,6 +59,25 @@ class ViewOwner extends ViewRecord
                         TextEntry::make('city.name')->label('Ciudad'),
                         TextEntry::make('neighborhood.name')->label('Barrio'),
                         TextEntry::make('address')->label('Dirección'),
+                    ]),
+
+                Section::make('Mascotas')
+                    ->visible(fn (): bool => PetResource::canViewAny())
+                    ->schema([
+                        RepeatableEntry::make('pets')
+                            ->hiddenLabel()
+                            ->contained(false)
+                            ->grid(3)
+                            ->placeholder('Este propietario aún no tiene mascotas registradas.')
+                            ->schema([
+                                ImageEntry::make('image')->hiddenLabel()->circular()->height(64),
+                                TextEntry::make('name')->hiddenLabel()->weight('bold')
+                                    ->url(fn ($record): ?string => PetResource::canView($record)
+                                        ? PetResource::getUrl('view', ['record' => $record])
+                                        : null),
+                                TextEntry::make('species')->hiddenLabel()->badge(),
+                                TextEntry::make('breed')->hiddenLabel()->color('gray'),
+                            ]),
                     ]),
             ]);
     }

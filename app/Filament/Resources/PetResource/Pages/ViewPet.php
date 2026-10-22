@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PetResource\Pages;
 
+use App\Filament\Resources\OwnerResource;
 use App\Filament\Resources\PetResource;
 use App\Services\PdfGeneratorService;
 use Filament\Actions;
@@ -10,10 +11,23 @@ use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ViewPet extends ViewRecord
 {
     protected static string $resource = PetResource::class;
+
+    public function getTitle(): string|Htmlable
+    {
+        return $this->record->name;
+    }
+
+    public function getSubheading(): ?string
+    {
+        $pet = $this->record;
+
+        return "{$pet->species->getLabel()} · {$pet->breed} · {$pet->age} · {$pet->weight} kg";
+    }
 
     protected function getHeaderActions(): array
     {
@@ -62,8 +76,17 @@ class ViewPet extends ViewRecord
                         TextEntry::make('active')->label('Activo')->badge()
                             ->formatStateUsing(fn (bool $state): string => $state ? 'Activo' : 'Inactivo')
                             ->color(fn (bool $state): string => $state ? 'success' : 'danger'),
-                        TextEntry::make('owner.first_name')->label('Propietario'),
-                    ]),
+                        TextEntry::make('owner.first_name')->label('Propietario')
+                            ->formatStateUsing(fn ($record): string => OwnerResource::canView($record->owner)
+                                ? $record->owner->full_name
+                                : $record->owner->first_name)
+                            ->url(fn ($record): ?string => OwnerResource::canView($record->owner)
+                                ? OwnerResource::getUrl('view', ['record' => $record->owner_id])
+                                : null),
+                        TextEntry::make('owner.phone')->label('Teléfono del propietario')
+                            ->visible(fn ($record): bool => OwnerResource::canView($record->owner))
+                            ->icon('heroicon-m-chat-bubble-left-ellipsis')
+                            ->url(fn ($record): string => $record->owner->whatsapp_url, shouldOpenInNewTab: true),                    ]),
 
                 Section::make('Más información')
                     ->columns(3)

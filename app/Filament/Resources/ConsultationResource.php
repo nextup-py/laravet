@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\AiUrgencyLevel;
 use App\Enums\AiUsageStatus;
+use App\Enums\PetSpecies;
 use App\Filament\Resources\ConsultationResource\Pages;
 use App\Models\Consultation;
 use App\Models\Pet;
@@ -17,6 +19,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 
@@ -34,6 +37,54 @@ class ConsultationResource extends Resource
     protected static ?int $navigationSort = 1;
 
     protected static ?string $modelLabel = 'consulta';
+
+    protected static ?string $recordTitleAttribute = 'diagnosis';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['diagnosis', 'anamnesis', 'pet.name'];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with('pet');
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return "Consulta de {$record->pet->name} · {$record->consultation_date->format('d/m/Y')}";
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return ['Diagnóstico' => str($record->diagnosis)->limit(60)->toString()];
+    }
+
+    /**
+     * Resumen clínico de la mascota seleccionada y sus últimas consultas, para tener contexto al redactar.
+     */
+    protected static function petContext(?Pet $pet, ?Consultation $current): HtmlString
+    {
+        if (! $pet) {
+            return new HtmlString('');
+        }
+
+        $header = e("{$pet->species->getLabel()} · {$pet->breed} · {$pet->age} · {$pet->weight} kg · {$pet->gender->getLabel()}");
+
+        $previous = $pet->consultations()
+            ->when($current?->exists, fn (Builder $q) => $q->whereKeyNot($current->getKey()))
+            ->latest('consultation_date')
+            ->limit(3)
+            ->get()
+            ->map(fn (Consultation $c): string => '<li>'.e($c->consultation_date->format('d/m/Y').': '.str($c->diagnosis)->limit(80)).'</li>')
+            ->implode('');
+
+        $list = $previous !== ''
+            ? '<p class="mt-2 font-medium">Últimas consultas</p><ul class="list-disc pl-5">'.$previous.'</ul>'
+            : '<p class="mt-2">Sin consultas previas registradas.</p>';
+
+        return new HtmlString('<div class="text-sm text-gray-600 dark:text-gray-300"><p class="font-medium">'.$header.'</p>'.$list.'</div>');
+    }
 
     protected static function aiSuggestOverwritesExisting(Get $get): bool
     {
@@ -86,18 +137,18 @@ class ConsultationResource extends Resource
         $message = $e->getMessage();
 
         if (str_contains($message, 'ANTHROPIC_API_KEY')) {
-            return 'La integración con IA no está configurada. Contactá al administrador del sistema.';
+            return 'La integración con IA no está configurada. Contacta al administrador del sistema.';
         }
 
         if (str_contains($message, 'formato esperado')) {
-            return 'La IA devolvió una respuesta inesperada. Intentá nuevamente.';
+            return 'La IA devolvió una respuesta inesperada. Intenta nuevamente.';
         }
 
         if (str_contains($message, 'conectar con la API')) {
-            return 'No se pudo conectar con el servicio de IA. Verificá tu conexión e intentá nuevamente.';
+            return 'No se pudo conectar con el servicio de IA. Verifica tu conexión e intenta nuevamente.';
         }
 
-        return 'No se pudo generar la sugerencia. Intentá nuevamente en unos minutos.';
+        return 'No se pudo generar la sugerencia. Intenta nuevamente en unos minutos.';
     }
 
     public static function form(Form $form): Form
@@ -117,6 +168,11 @@ class ConsultationResource extends Resource
                             ->preload()
                             ->live()
                             ->required(),
+                        Forms\Components\Placeholder::make('petContext')
+                            ->hiddenLabel()
+                            ->columnSpanFull()
+                            ->visible(fn (Get $get) => filled($get('pet_id')))
+                            ->content(fn (Get $get, ?Consultation $record) => static::petContext(Pet::find($get('pet_id')), $record)),
                         Forms\Components\DatePicker::make('consultation_date')
                             ->label('Fecha de consulta')
                             ->required()
@@ -137,7 +193,7 @@ class ConsultationResource extends Resource
                             Forms\Components\Actions\Action::make('aiSuggest')
                                 ->label('Asistir con IA')
                                 ->modalHeading(fn (Get $get) => static::aiSuggestOverwritesExisting($get) ? 'Sobrescribir sugerencia existente' : null)
-                                ->modalDescription(fn (Get $get) => static::aiSuggestOverwritesExisting($get) ? 'Ya hay contenido en Diagnóstico o Tratamiento. ¿Querés reemplazarlo con la sugerencia de la IA?' : null)
+                                ->modalDescription(fn (Get $get) => static::aiSuggestOverwritesExisting($get) ? 'Ya hay contenido en Diagnóstico o Tratamiento. ¿Quieres reemplazarlo con la sugerencia de la IA?' : null)
                                 ->modalSubmitActionLabel(fn (Get $get) => static::aiSuggestOverwritesExisting($get) ? 'Sí, sobrescribir' : null)
                                 ->requiresConfirmation(fn (Get $get) => static::aiSuggestOverwritesExisting($get))
                                 ->icon('heroicon-o-sparkles')
@@ -148,7 +204,7 @@ class ConsultationResource extends Resource
 
                                         if (! $pet) {
                                             Notification::make()
-                                                ->title('Seleccioná una mascota primero')
+                                                ->title('Selecciona una mascota primero')
                                                 ->warning()
                                                 ->send();
 
@@ -157,7 +213,7 @@ class ConsultationResource extends Resource
 
                                         if (blank($get('anamnesis'))) {
                                             Notification::make()
-                                                ->title('Completá la anamnesis primero')
+                                                ->title('Completa la anamnesis primero')
                                                 ->body('La IA necesita la anamnesis para poder sugerir un diagnóstico.')
                                                 ->warning()
                                                 ->send();
@@ -178,7 +234,7 @@ class ConsultationResource extends Resource
                                         if (in_array($result['urgency'], ['alta', 'emergencia'], true)) {
                                             Notification::make()
                                                 ->title('Posible urgencia detectada')
-                                                ->body('La IA marcó esta consulta con urgencia "'.$result['urgency'].'". Priorizá la revisión del paciente.')
+                                                ->body('La IA marcó esta consulta con urgencia "'.$result['urgency'].'". Prioriza la revisión del paciente.')
                                                 ->danger()
                                                 ->send();
                                         }
@@ -195,7 +251,7 @@ class ConsultationResource extends Resource
 
                                         Notification::make()
                                             ->title('Error al generar sugerencia')
-                                            ->body('Ocurrió un error inesperado. Intentá nuevamente en unos minutos.')
+                                            ->body('Ocurrió un error inesperado. Intenta nuevamente en unos minutos.')
                                             ->danger()
                                             ->send();
                                     }
@@ -209,7 +265,7 @@ class ConsultationResource extends Resource
                             ->content(new HtmlString(
                                 '<p class="text-sm text-gray-500 dark:text-gray-400">'
                                 .'La IA sugiere un diagnóstico y tratamiento en base a la anamnesis. '
-                                .'Revisá siempre la sugerencia antes de guardar — no reemplaza tu criterio profesional.'
+                                .'Revisa siempre la sugerencia antes de guardar — no reemplaza tu criterio profesional.'
                                 .'</p>'
                                 .'<p wire:loading wire:target="mountFormComponentAction" '
                                 .'class="text-sm font-medium text-primary-600 dark:text-primary-400 mt-1">'
@@ -261,20 +317,23 @@ class ConsultationResource extends Resource
                     ->label('ID')
                     ->searchable()
                     ->sortable()
-                    ->numeric(),
+                    ->numeric()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('pet.name')
                     ->label('Mascota')
+                    ->description(fn (Consultation $record): ?string => OwnerResource::canViewAny() ? $record->pet->owner?->full_name : null)
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('consultation_date')
                     ->label('Fecha de consulta')
-                    ->date()
+                    ->date('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('diagnosis')
                     ->label('Diagnóstico')
                     ->searchable()
                     ->sortable()
-                    ->limit(60),
+                    ->limit(60)
+                    ->tooltip(fn (Tables\Columns\TextColumn $column): ?string => strlen((string) $column->getState()) > 60 ? $column->getState() : null),
                 Tables\Columns\IconColumn::make('ai_suggested_at')
                     ->label('IA')
                     ->boolean()
@@ -289,16 +348,48 @@ class ConsultationResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Registrada el')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label('Actualizada el')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('consultation_date', 'desc')
             ->filters([
+                Tables\Filters\SelectFilter::make('species')
+                    ->label('Especie')
+                    ->options(PetSpecies::class)
+                    ->multiple()
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
+                        $data['values'] ?? null,
+                        fn (Builder $q, array $values) => $q->whereHas('pet', fn (Builder $p) => $p->whereIn('species', $values))
+                    )),
+                Tables\Filters\SelectFilter::make('ai_urgency')
+                    ->label('Urgencia IA')
+                    ->options(AiUrgencyLevel::class)
+                    ->multiple(),
+                Tables\Filters\SelectFilter::make('ai_usage')
+                    ->label('Uso de IA')
+                    ->options(AiUsageStatus::class)
+                    ->query(fn (Builder $query, array $data): Builder => match ($data['value'] ?? null) {
+                        AiUsageStatus::Manual->value => $query->whereNull('ai_suggested_at'),
+                        AiUsageStatus::UsedAsIs->value => $query->whereNotNull('ai_suggested_at')
+                            ->whereColumn('diagnosis', 'ai_diagnosis_suggestion')
+                            ->whereColumn('treatment', 'ai_treatment_suggestion'),
+                        AiUsageStatus::Edited->value => $query->whereNotNull('ai_suggested_at')
+                            ->where(fn (Builder $q) => $q->whereColumn('diagnosis', '!=', 'ai_diagnosis_suggestion')
+                                ->orWhereColumn('treatment', '!=', 'ai_treatment_suggestion')),
+                        default => $query,
+                    }),
+                Tables\Filters\SelectFilter::make('user_id')
+                    ->label('Veterinario')
+                    ->relationship('user', 'name')
+                    ->searchable()
+                    ->preload(),
                 Tables\Filters\Filter::make('consultation_date')
                     ->label('Fecha de consulta')
                     ->form([

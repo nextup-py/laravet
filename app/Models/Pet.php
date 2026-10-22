@@ -68,6 +68,20 @@ class Pet extends Model
     }
 
     /**
+     * Avatar SVG (data URI) con las iniciales de la mascota, para cuando no tiene foto.
+     */
+    protected function initialsAvatarUrl(): Attribute
+    {
+        return Attribute::make(get: function () {
+            $initial = e(mb_strtoupper(mb_substr($this->name, 0, 1)));
+            $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" fill="#f59e0b"/>'
+                .'<text x="50%" y="50%" dy=".35em" text-anchor="middle" font-family="sans-serif" font-size="30" fill="#fff">'.$initial.'</text></svg>';
+
+            return 'data:image/svg+xml;base64,'.base64_encode($svg);
+        });
+    }
+
+    /**
      * Una mascota pertenece a un dueño.
      * Esta relación define que cada mascota está asociada con un dueño específico.
      */

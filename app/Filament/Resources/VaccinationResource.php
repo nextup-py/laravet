@@ -121,7 +121,7 @@ class VaccinationResource extends Resource
                     ])
                     ->required(),
                 Forms\Components\Select::make('pet_id')
-                    ->label('Pet id')
+                    ->label('Mascota')
                     ->relationship('pet', 'name', modifyQueryUsing: fn (Builder $query, ?Vaccination $record) => $query->where(
                         fn (Builder $q) => $q->where('active', true)
                             ->when($record?->pet_id, fn (Builder $q, $petId) => $q->orWhere('id', $petId))

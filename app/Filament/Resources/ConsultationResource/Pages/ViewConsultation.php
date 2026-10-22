@@ -11,11 +11,17 @@ use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HtmlString;
 
 class ViewConsultation extends ViewRecord
 {
     protected static string $resource = ConsultationResource::class;
+
+    public function getTitle(): string|Htmlable
+    {
+        return "Consulta de {$this->record->pet->name} · {$this->record->consultation_date->format('d/m/Y')}";
+    }
 
     protected function getHeaderActions(): array
     {
@@ -33,7 +39,9 @@ class ViewConsultation extends ViewRecord
                     ->schema([
                         TextEntry::make('pet.name')
                             ->label('Mascota')
-                            ->url(fn (Consultation $record) => PetResource::getUrl('view', ['record' => $record->pet_id])),
+                            ->url(fn (Consultation $record) => PetResource::canView($record->pet)
+                                ? PetResource::getUrl('view', ['record' => $record->pet_id])
+                                : null),
                         TextEntry::make('user.name')
                             ->label('Veterinario')
                             ->url(fn (Consultation $record) => auth()->user()?->can('view_user')
