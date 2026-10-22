@@ -62,6 +62,7 @@ class ViewOwner extends ViewRecord
                     ]),
 
                 Section::make('Mascotas')
+                    ->visible(fn (): bool => PetResource::canViewAny())
                     ->schema([
                         RepeatableEntry::make('pets')
                             ->hiddenLabel()
@@ -71,7 +72,9 @@ class ViewOwner extends ViewRecord
                             ->schema([
                                 ImageEntry::make('image')->hiddenLabel()->circular()->height(64),
                                 TextEntry::make('name')->hiddenLabel()->weight('bold')
-                                    ->url(fn ($record): string => PetResource::getUrl('view', ['record' => $record])),
+                                    ->url(fn ($record): ?string => PetResource::canView($record)
+                                        ? PetResource::getUrl('view', ['record' => $record])
+                                        : null),
                                 TextEntry::make('species')->hiddenLabel()->badge(),
                                 TextEntry::make('breed')->hiddenLabel()->color('gray'),
                             ]),

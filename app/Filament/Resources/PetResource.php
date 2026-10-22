@@ -8,6 +8,7 @@ use App\Enums\PetSize;
 use App\Enums\PetSpecies;
 use App\Filament\Resources\PetResource\Pages;
 use App\Filament\Resources\PetResource\RelationManagers;
+use App\Models\Owner;
 use App\Models\Pet;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
@@ -15,6 +16,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Gestión de mascotas y su historial clínico asociado.
@@ -30,6 +33,28 @@ class PetResource extends Resource
     protected static ?int $navigationSort = 1;
 
     protected static ?string $modelLabel = 'mascota';
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return OwnerResource::canViewAny()
+            ? ['name', 'breed', 'owner.first_name', 'owner.last_name', 'owner.ci']
+            : ['name', 'breed'];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with('owner');
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return array_filter([
+            'Especie' => $record->species?->getLabel(),
+            'Propietario' => OwnerResource::canViewAny() ? $record->owner?->full_name : null,
+        ]);
+    }
 
     /**
      * Schema del formulario, compartido con la PetsRelationManager de Owner
@@ -148,12 +173,14 @@ class PetResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
                     ->label('Imagen')
-                    ->circular(),
+                    ->circular()
+                    ->defaultImageUrl(fn (Pet $record): string => $record->initials_avatar_url),
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->sortable()
-                    ->numeric(),
+                    ->numeric()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nombre')
                     ->searchable()
@@ -169,14 +196,22 @@ class PetResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('age')
                     ->label('Edad')
-                    ->getStateUsing(fn (Pet $record) => $record->age),
+                    ->getStateUsing(fn (Pet $record) => $record->age)
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query
+                        ->orderBy('birthdate', $direction === 'asc' ? 'desc' : 'asc')),
                 Tables\Columns\IconColumn::make('active')
                     ->label('Activo')
                     ->boolean()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('owner.first_name')
                     ->label('Propietario')
-                    ->searchable()
+                    ->formatStateUsing(fn (Pet $record): string => OwnerResource::canView($record->owner)
+                        ? $record->owner->full_name
+                        : $record->owner->first_name)
+                    ->url(fn (Pet $record): ?string => OwnerResource::canView($record->owner)
+                        ? OwnerResource::getUrl('view', ['record' => $record->owner_id])
+                        : null)
+                    ->searchable(OwnerResource::canViewAny() ? ['first_name', 'last_name', 'ci'] : ['first_name'])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('gender')
                     ->label('Género')
@@ -216,8 +251,32 @@ class PetResource extends Resource
                 Tables\Filters\SelectFilter::make('gender')
                     ->label('Género')
                     ->options(PetGender::class),
+                Tables\Filters\SelectFilter::make('reproduction')
+                    ->label('Reproducción')
+                    ->options(PetReproductionStatus::class),
+                Tables\Filters\SelectFilter::make('owner_id')
+                    ->label('Propietario')
+                    ->visible(fn (): bool => OwnerResource::canViewAny())
+                    ->relationship('owner', 'first_name')
+                    ->getOptionLabelFromRecordUsing(fn (Owner $record): string => "{$record->full_name} (CI {$record->ci})")
+                    ->searchable(['first_name', 'last_name', 'ci'])
+                    ->preload(),
+                Tables\Filters\TernaryFilter::make('vaccination_due')
+                    ->label('Vacunas')
+                    ->placeholder('Todas')
+                    ->trueLabel('Vencidas o por vencer (7 días)')
+                    ->falseLabel('Al día')
+                    ->queries(
+                        true: fn (Builder $query) => $query->whereHas('vaccinations', fn (Builder $q) => $q->upcomingOrOverdue()),
+                        false: fn (Builder $query) => $query->whereDoesntHave('vaccinations', fn (Builder $q) => $q->upcomingOrOverdue()),
+                        blank: fn (Builder $query) => $query,
+                    ),
                 Tables\Filters\TernaryFilter::make('active')
-                    ->label('Estado'),
+                    ->label('Estado')
+                    ->placeholder('Todas')
+                    ->trueLabel('Activas')
+                    ->falseLabel('Inactivas')
+                    ->default(true),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([

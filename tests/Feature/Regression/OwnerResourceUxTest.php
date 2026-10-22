@@ -7,7 +7,9 @@ use App\Filament\Resources\OwnerResource\Pages\ViewOwner;
 use App\Filament\Resources\PetResource\Pages\CreatePet;
 use App\Models\Owner;
 use App\Models\Pet;
+use App\Models\User;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 
 it('normaliza el teléfono a un enlace de WhatsApp con prefijo 595', function () {
     expect((new Owner(['phone' => '0981123456']))->whatsapp_url)->toBe('https://wa.me/595981123456')
@@ -89,4 +91,19 @@ it('registrar mascota desde la ficha precarga el propietario', function () {
     Livewire::withQueryParams(['owner_id' => $owner->id])
         ->test(CreatePet::class)
         ->assertFormSet(['owner_id' => (string) $owner->id]);
+});
+
+it('la ficha del propietario oculta las mascotas a quien no tiene permiso para verlas', function () {
+    $role = Role::create(['name' => 'solo-propietarios', 'guard_name' => 'web']);
+    $role->givePermissionTo(['view_any_owner', 'view_owner']);
+    $user = User::factory()->create();
+    $user->assignRole($role);
+    test()->actingAs($user);
+
+    $owner = Owner::factory()->create();
+    $pet = Pet::factory()->create(['owner_id' => $owner->id]);
+
+    Livewire::test(ViewOwner::class, ['record' => $owner->getRouteKey()])
+        ->assertSee($owner->full_name)
+        ->assertDontSee($pet->name);
 });
