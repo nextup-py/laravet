@@ -132,6 +132,7 @@ class PetResource extends Resource
             Forms\Components\Select::make('owner_id')
                 ->label('Propietario')
                 ->relationship('owner', 'first_name')
+                ->default(fn () => request()->query('owner_id'))
                 ->searchable(['first_name', 'ci'])
                 ->preload()
                 ->live()

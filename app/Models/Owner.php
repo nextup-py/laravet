@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OwnerGender;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,9 +32,27 @@ class Owner extends Model
         'address', // Dirección de residencia
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'gender' => OwnerGender::class,
+        ];
+    }
+
     public function getFullNameAttribute(): string
     {
         return $this->first_name . ' ' . $this->last_name;
+    }
+
+    /**
+     * Enlace de WhatsApp (wa.me) a partir del teléfono, normalizado al prefijo 595 de Paraguay.
+     */
+    public function getWhatsappUrlAttribute(): string
+    {
+        $digits = preg_replace('/\D+/', '', $this->phone);
+        $digits = str_starts_with($digits, '595') ? $digits : '595'.ltrim($digits, '0');
+
+        return 'https://wa.me/'.$digits;
     }
 
 
