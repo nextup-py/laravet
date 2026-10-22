@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PetResource\Pages;
 
 use App\Filament\Resources\OwnerResource;
 use App\Filament\Resources\PetResource;
+use App\Filament\Resources\TestResource;
 use App\Services\PdfGeneratorService;
 use Filament\Actions;
 use Filament\Infolists\Components\ImageEntry;
@@ -56,6 +57,11 @@ class ViewPet extends ViewRecord
                 ->requiresConfirmation()
                 ->modalHeading('Generar ficha de identificación')
                 ->modalDescription('¿Desea descargar el PDF con la ficha de identificación de la mascota?'),
+            Actions\Action::make('registerTest')
+                ->label('Registrar prueba')
+                ->icon('heroicon-o-beaker')
+                ->visible(fn (): bool => TestResource::canCreate())
+                ->url(fn (): string => TestResource::getUrl('create', ['pet_id' => $this->record->getKey()])),
             Actions\EditAction::make(),
         ];
     }

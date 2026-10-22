@@ -21,38 +21,7 @@ class TestsRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\DatePicker::make('date')
-                    ->label('Fecha')
-                    ->required()
-                    ->native(false)
-                    ->displayFormat('d/m/Y')
-                    ->closeOnDateSelection()
-                    ->maxDate(now()),
-                Forms\Components\Select::make('type')
-                    ->label('Tipo')
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->options(TestResource::typeOptions())
-                    ->required(),
-                Forms\Components\FileUpload::make('result')
-                    ->label('Resultados')
-                    ->multiple()
-                    ->maxParallelUploads(1)
-                    ->panelLayout('grid')
-                    ->openable()
-                    ->downloadable()
-                    ->uploadingMessage('Subiendo archivo adjunto...')
-                    ->maxFiles(5)
-                    ->columnSpanFull()
-                    ->required(),
-                Forms\Components\Textarea::make('observation')
-                    ->label('Observación')
-                    ->autosize()
-                    ->columnSpanFull(),
-            ]);
+        return $form->schema(TestResource::formFields());
     }
 
     public function table(Table $table): Table
@@ -63,7 +32,8 @@ class TestsRelationManager extends RelationManager
                     ->label('ID')
                     ->searchable()
                     ->sortable()
-                    ->numeric(),
+                    ->numeric()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('date')
                     ->label('Fecha')
                     ->date('d/m/Y')
@@ -73,6 +43,9 @@ class TestsRelationManager extends RelationManager
                     ->label('Tipo')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Estado')
+                    ->badge(),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Usuario')
                     ->searchable()
@@ -89,7 +62,9 @@ class TestsRelationManager extends RelationManager
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('date', 'desc')
             ->filters([
+                TestResource::statusFilter(),
                 Tables\Filters\Filter::make('date')
                     ->label('Fecha')
                     ->form([
@@ -111,6 +86,7 @@ class TestsRelationManager extends RelationManager
                     }),
             ])
             ->actions([
+                TestResource::uploadResultAction(),
                 Tables\Actions\EditAction::make()
                     ->extraModalFooterActions([
                         Tables\Actions\DeleteAction::make()
