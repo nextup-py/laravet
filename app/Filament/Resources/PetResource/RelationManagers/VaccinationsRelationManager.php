@@ -4,12 +4,10 @@ namespace App\Filament\Resources\PetResource\RelationManagers;
 
 use App\Filament\Resources\VaccinationResource;
 use App\Services\PdfGeneratorService;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class VaccinationsRelationManager extends RelationManager
@@ -22,64 +20,7 @@ class VaccinationsRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('vaccine')
-                    ->label('Vacuna')
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->options(VaccinationResource::vaccineOptions())
-                    ->required(),
-                Forms\Components\DatePicker::make('application_date')
-                    ->label('Fecha de aplicación')
-                    ->required()
-                    ->native(false)
-                    ->displayFormat('d/m/Y')
-                    ->closeOnDateSelection()
-                    ->maxDate(now()),
-                Forms\Components\DatePicker::make('next_application')
-                    ->label('Próxima aplicación')
-                    ->required()
-                    ->native(false)
-                    ->displayFormat('d/m/Y')
-                    ->closeOnDateSelection()
-                    ->minDate(now()),
-                Forms\Components\TextInput::make('batch')
-                    ->label('Lote')
-                    ->string()
-                    ->required(),
-                Forms\Components\Select::make('manufacturer')
-                    ->label('Fabricante')
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->options([
-                        'Zoetis' => 'Zoetis',
-                        'MSD' => 'MSD',
-                        'Elanco' => 'Elanco',
-                        'Boehringer Ingelheim' => 'Boehringer Ingelheim',
-                        'Merial' => 'Merial',
-                        'Virbac' => 'Virbac',
-                        'Ceva' => 'Ceva',
-                        'Heska' => 'Heska',
-                        'Bayer' => 'Bayer',
-                        'Vetoquinol' => 'Vetoquinol',
-                        'Phibro' => 'Phibro',
-                        'Hipra' => 'Hipra',
-                        'Biogénesis Bagó' => 'Biogénesis Bagó',
-                        'Bioiberica' => 'Bioiberica',
-                        'Syva' => 'Syva',
-                        'IDT Biologika' => 'IDT Biologika',
-                        'VECOL' => 'VECOL',
-                        'Karnov' => 'Karnov',
-                        'Labiana' => 'Labiana',
-                    ])
-                    ->required(),
-                Forms\Components\Textarea::make('observation')
-                    ->label('Observación')
-                    ->autosize(),
-            ]);
+        return $form->schema(VaccinationResource::formFields());
     }
 
     public function table(Table $table): Table
@@ -90,7 +31,8 @@ class VaccinationsRelationManager extends RelationManager
                     ->label('ID')
                     ->searchable()
                     ->sortable()
-                    ->numeric(),
+                    ->numeric()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('vaccine')
                     ->label('Vacuna')
                     ->searchable()
@@ -103,8 +45,10 @@ class VaccinationsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('next_application')
                     ->label('Próxima aplicación')
                     ->date('d/m/Y')
-                    ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Estado')
+                    ->badge(),
                 Tables\Columns\TextColumn::make('batch')
                     ->label('Lote')
                     ->searchable()
@@ -130,13 +74,14 @@ class VaccinationsRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\Filter::make('overdue')
-                    ->label('Vencidas')
-                    ->query(fn (Builder $query) => $query->where('next_application', '<', now())),
-                Tables\Filters\Filter::make('upcoming')
-                    ->label('Próximas (7 días)')
-                    ->query(fn (Builder $query) => $query->whereBetween('next_application', [now(), now()->addDays(7)])),
+                VaccinationResource::statusFilter(),
+                Tables\Filters\SelectFilter::make('vaccine')
+                    ->label('Vacuna')
+                    ->options(VaccinationResource::vaccineOptions())
+                    ->multiple()
+                    ->searchable(),
             ])
+            ->defaultSort('next_application')
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {

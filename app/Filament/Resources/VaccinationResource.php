@@ -2,14 +2,20 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\PetSpecies;
+use App\Enums\VaccinationStatus;
 use App\Filament\Resources\VaccinationResource\Pages;
 use App\Models\Vaccination;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Gestión de vacunaciones aplicadas a las mascotas.
@@ -28,6 +34,8 @@ class VaccinationResource extends Resource
 
     protected static ?string $pluralModelLabel = 'vacunaciones';
 
+    protected static ?string $recordTitleAttribute = 'vaccine';
+
     public static function getNavigationBadge(): ?string
     {
         return (string) static::getModel()::upcomingOrOverdue()->count();
@@ -35,7 +43,30 @@ class VaccinationResource extends Resource
 
     public static function getNavigationBadgeColor(): ?string
     {
-        return static::getModel()::where('next_application', '<', now())->exists() ? 'danger' : 'warning';
+        return static::getModel()::overdue()->exists() ? 'danger' : 'warning';
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['vaccine', 'batch', 'pet.name'];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with('pet');
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return "{$record->vaccine} · {$record->pet->name}";
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Próxima aplicación' => Carbon::parse($record->next_application)->format('d/m/Y'),
+            'Estado' => $record->status->getLabel(),
+        ];
     }
 
     public static function vaccineOptions(): array
@@ -68,71 +99,92 @@ class VaccinationResource extends Resource
         ];
     }
 
+    public static function manufacturerOptions(): array
+    {
+        $manufacturers = [
+            'Zoetis', 'MSD', 'Elanco', 'Boehringer Ingelheim', 'Merial', 'Virbac', 'Ceva', 'Heska',
+            'Bayer', 'Vetoquinol', 'Phibro', 'Hipra', 'Biogénesis Bagó', 'Bioiberica', 'Syva',
+            'IDT Biologika', 'VECOL', 'Karnov', 'Labiana',
+        ];
+
+        return array_combine($manufacturers, $manufacturers);
+    }
+
+    /**
+     * Campos del formulario, compartidos con la VaccinationsRelationManager de Pet
+     * (que no incluye el selector de mascota porque ya está fijada por contexto).
+     */
+    public static function formFields(): array
+    {
+        return [
+            Forms\Components\Select::make('vaccine')
+                ->label('Vacuna')
+                ->searchable()
+                ->preload()
+                ->options(self::vaccineOptions())
+                ->default(fn () => request()->query('vaccine'))
+                ->required(),
+            Forms\Components\DatePicker::make('application_date')
+                ->label('Fecha de aplicación')
+                ->required()
+                ->native(false)
+                ->displayFormat('d/m/Y')
+                ->closeOnDateSelection()
+                ->maxDate(now())
+                ->live()
+                ->afterStateUpdated(function (Get $get, Set $set, ?string $state, ?string $old, string $operation) {
+                    if ($operation !== 'create' || blank($state)) {
+                        return;
+                    }
+
+                    $previousSuggestion = filled($old) ? Carbon::parse($old)->addYear()->toDateString() : null;
+                    $current = $get('next_application');
+
+                    if (blank($current) || Carbon::parse($current)->toDateString() === $previousSuggestion) {
+                        $set('next_application', Carbon::parse($state)->addYear()->toDateString());
+                    }
+                }),
+            Forms\Components\DatePicker::make('next_application')
+                ->label('Próxima aplicación')
+                ->helperText('Se sugiere un año después de la aplicación; puede modificarla.')
+                ->required()
+                ->native(false)
+                ->displayFormat('d/m/Y')
+                ->closeOnDateSelection()
+                ->minDate(fn (string $operation) => $operation === 'create' ? today() : null)
+                ->afterOrEqual('application_date'),
+            Forms\Components\TextInput::make('batch')
+                ->label('Lote')
+                ->string()
+                ->required(),
+            Forms\Components\Select::make('manufacturer')
+                ->label('Fabricante')
+                ->searchable()
+                ->preload()
+                ->options(self::manufacturerOptions())
+                ->required(),
+            Forms\Components\Textarea::make('observation')
+                ->label('Observación')
+                ->autosize()
+                ->columnSpanFull(),
+        ];
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('vaccine')
-                    ->label('Vacuna')
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->options(self::vaccineOptions())
-                    ->required(),
-                Forms\Components\DatePicker::make('application_date')
-                    ->label('Fecha de aplicación')
-                    ->required()
-                    ->native(false)
-                    ->maxDate(now()),
-                Forms\Components\DatePicker::make('next_application')
-                    ->label('Próxima aplicación')
-                    ->required()
-                    ->native(false)
-                    ->minDate(now()),
-                Forms\Components\TextInput::make('batch')
-                    ->label('Lote')
-                    ->string()
-                    ->required(),
-                Forms\Components\Select::make('manufacturer')
-                    ->label('Fabricante')
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->options([
-                        'Zoetis' => 'Zoetis',
-                        'MSD' => 'MSD',
-                        'Elanco' => 'Elanco',
-                        'Boehringer Ingelheim' => 'Boehringer Ingelheim',
-                        'Merial' => 'Merial',
-                        'Virbac' => 'Virbac',
-                        'Ceva' => 'Ceva',
-                        'Heska' => 'Heska',
-                        'Bayer' => 'Bayer',
-                        'Vetoquinol' => 'Vetoquinol',
-                        'Phibro' => 'Phibro',
-                        'Hipra' => 'Hipra',
-                        'Biogénesis Bagó' => 'Biogénesis Bagó',
-                        'Bioiberica' => 'Bioiberica',
-                        'Syva' => 'Syva',
-                        'IDT Biologika' => 'IDT Biologika',
-                        'VECOL' => 'VECOL',
-                        'Karnov' => 'Karnov',
-                        'Labiana' => 'Labiana',
-                    ])
-                    ->required(),
                 Forms\Components\Select::make('pet_id')
                     ->label('Mascota')
                     ->relationship('pet', 'name', modifyQueryUsing: fn (Builder $query, ?Vaccination $record) => $query->where(
                         fn (Builder $q) => $q->where('active', true)
                             ->when($record?->pet_id, fn (Builder $q, $petId) => $q->orWhere('id', $petId))
                     ))
+                    ->default(fn () => request()->query('pet_id'))
                     ->searchable(['name', 'id'])
                     ->preload()
-                    ->live()
                     ->required(),
-                Forms\Components\Textarea::make('observation')
-                    ->label('Observación')
-                    ->columnSpanFull(),
+                ...self::formFields(),
             ]);
     }
 
@@ -144,9 +196,11 @@ class VaccinationResource extends Resource
                     ->label('ID')
                     ->searchable()
                     ->sortable()
-                    ->numeric(),
+                    ->numeric()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('pet.name')
                     ->label('Mascota')
+                    ->description(fn (Vaccination $record): ?string => OwnerResource::canViewAny() ? $record->pet->owner?->full_name : null)
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('vaccine')
@@ -155,52 +209,103 @@ class VaccinationResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('application_date')
                     ->label('Fecha de aplicación')
-                    ->date()
-                    ->searchable()
+                    ->date('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('next_application')
                     ->label('Próxima aplicación')
-                    ->date()
-                    ->searchable()
+                    ->date('d/m/Y')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Estado')
+                    ->badge(),
+                Tables\Columns\IconColumn::make('reminder_sent_at')
+                    ->label('Recordatorio')
+                    ->boolean()
+                    ->getStateUsing(fn (Vaccination $record): bool => filled($record->reminder_sent_at))
+                    ->tooltip(fn (Vaccination $record): string => filled($record->reminder_sent_at)
+                        ? 'Enviado el '.Carbon::parse($record->reminder_sent_at)->format('d/m/Y H:i')
+                        : 'Aún no enviado'),
                 Tables\Columns\TextColumn::make('batch')
                     ->label('Lote')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('manufacturer')
                     ->label('Fabricante')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Usuario')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Creado a las')
-                    ->dateTime()
+                    ->label('Registrada el')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Actualizado a las')
-                    ->dateTime()
+                    ->label('Actualizada el')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('next_application')
             ->filters([
-                Tables\Filters\Filter::make('overdue')
-                    ->label('Vencidas')
-                    ->query(fn (Builder $query) => $query->where('next_application', '<', now())),
-                Tables\Filters\Filter::make('upcoming')
-                    ->label('Próximas (7 días)')
-                    ->query(fn (Builder $query) => $query->whereBetween('next_application', [now(), now()->addDays(7)])),
+                self::statusFilter(),
+                Tables\Filters\SelectFilter::make('vaccine')
+                    ->label('Vacuna')
+                    ->options(self::vaccineOptions())
+                    ->multiple()
+                    ->searchable(),
+                Tables\Filters\SelectFilter::make('manufacturer')
+                    ->label('Fabricante')
+                    ->options(self::manufacturerOptions())
+                    ->multiple()
+                    ->searchable(),
+                Tables\Filters\SelectFilter::make('pet_id')
+                    ->label('Mascota')
+                    ->relationship('pet', 'name')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('species')
+                    ->label('Especie')
+                    ->options(PetSpecies::class)
+                    ->multiple()
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
+                        $data['values'] ?? null,
+                        fn (Builder $q, array $values) => $q->whereHas('pet', fn (Builder $p) => $p->whereIn('species', $values))
+                    )),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
+                    Tables\Actions\Action::make('revaccinate')
+                        ->label('Revacunar')
+                        ->icon('heroicon-o-arrow-path')
+                        ->visible(fn (): bool => static::canCreate())
+                        ->url(fn (Vaccination $record): string => static::getUrl('create', [
+                            'pet_id' => $record->pet_id,
+                            'vaccine' => $record->vaccine,
+                        ])),
                 ]),
             ])->selectCurrentPageOnly();
+    }
+
+    /**
+     * Filtro único por estado de vencimiento, compartido con la VaccinationsRelationManager de Pet.
+     */
+    public static function statusFilter(): Tables\Filters\SelectFilter
+    {
+        return Tables\Filters\SelectFilter::make('status')
+            ->label('Estado')
+            ->options(VaccinationStatus::class)
+            ->query(fn (Builder $query, array $data): Builder => $query->when(
+                $data['value'] ?? null,
+                fn (Builder $q, string $value) => $q->withStatus(VaccinationStatus::from($value))
+            ));
     }
 
     public static function getRelations(): array
