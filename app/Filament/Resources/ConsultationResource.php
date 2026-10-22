@@ -90,14 +90,14 @@ class ConsultationResource extends Resource
         }
 
         if (str_contains($message, 'formato esperado')) {
-            return 'La IA devolvió una respuesta inesperada. Intentá nuevamente.';
+            return 'La IA devolvió una respuesta inesperada. Intenta nuevamente.';
         }
 
         if (str_contains($message, 'conectar con la API')) {
             return 'No se pudo conectar con el servicio de IA. Verificá tu conexión e intentá nuevamente.';
         }
 
-        return 'No se pudo generar la sugerencia. Intentá nuevamente en unos minutos.';
+        return 'No se pudo generar la sugerencia. Intenta nuevamente en unos minutos.';
     }
 
     public static function form(Form $form): Form
@@ -148,7 +148,7 @@ class ConsultationResource extends Resource
 
                                         if (! $pet) {
                                             Notification::make()
-                                                ->title('Seleccioná una mascota primero')
+                                                ->title('Selecciona una mascota primero')
                                                 ->warning()
                                                 ->send();
 
@@ -157,7 +157,7 @@ class ConsultationResource extends Resource
 
                                         if (blank($get('anamnesis'))) {
                                             Notification::make()
-                                                ->title('Completá la anamnesis primero')
+                                                ->title('Completa la anamnesis primero')
                                                 ->body('La IA necesita la anamnesis para poder sugerir un diagnóstico.')
                                                 ->warning()
                                                 ->send();
@@ -178,7 +178,7 @@ class ConsultationResource extends Resource
                                         if (in_array($result['urgency'], ['alta', 'emergencia'], true)) {
                                             Notification::make()
                                                 ->title('Posible urgencia detectada')
-                                                ->body('La IA marcó esta consulta con urgencia "'.$result['urgency'].'". Priorizá la revisión del paciente.')
+                                                ->body('La IA marcó esta consulta con urgencia "'.$result['urgency'].'". Prioriza la revisión del paciente.')
                                                 ->danger()
                                                 ->send();
                                         }
@@ -195,7 +195,7 @@ class ConsultationResource extends Resource
 
                                         Notification::make()
                                             ->title('Error al generar sugerencia')
-                                            ->body('Ocurrió un error inesperado. Intentá nuevamente en unos minutos.')
+                                            ->body('Ocurrió un error inesperado. Intenta nuevamente en unos minutos.')
                                             ->danger()
                                             ->send();
                                     }

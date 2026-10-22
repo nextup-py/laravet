@@ -72,7 +72,7 @@ it('el botón IA pide completar la anamnesis primero si está vacía en el form 
             'anamnesis' => '',
         ])
         ->callFormComponentAction('aiSuggestAction', 'aiSuggest')
-        ->assertNotified('Completá la anamnesis primero');
+        ->assertNotified('Completa la anamnesis primero');
 
     Http::assertNothingSent();
 });
@@ -90,7 +90,7 @@ it('el botón IA pide completar la anamnesis primero si está vacía dentro de l
         ->mountTableAction('create')
         ->setTableActionData(['anamnesis' => ''])
         ->callFormComponentAction('aiSuggestAction', 'aiSuggest', formName: 'mountedTableActionForm')
-        ->assertNotified('Completá la anamnesis primero');
+        ->assertNotified('Completa la anamnesis primero');
 
     Http::assertNothingSent();
 });
@@ -243,7 +243,7 @@ it('muestra un mensaje específico si la respuesta de la IA no tiene el formato 
         ->assertNotified(
             Notification::make()
                 ->title('Error al generar sugerencia')
-                ->body('La IA devolvió una respuesta inesperada. Intentá nuevamente.')
+                ->body('La IA devolvió una respuesta inesperada. Intenta nuevamente.')
                 ->danger()
         );
 });

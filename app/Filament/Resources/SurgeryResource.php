@@ -68,7 +68,7 @@ class SurgeryResource extends Resource
                     ->columns(2)
                     ->schema([
                         Forms\Components\Select::make('pet_id')
-                            ->label('Pet id')
+                            ->label('Mascota')
                             ->relationship('pet', 'name', modifyQueryUsing: fn (Builder $query, ?Surgery $record) => $query->where(
                                 fn (Builder $q) => $q->where('active', true)
                                     ->when($record?->pet_id, fn (Builder $q, $petId) => $q->orWhere('id', $petId))

@@ -46,7 +46,7 @@ class CityResource extends Resource
                     ->searchable()
                     ->preload()
                     ->live()
-                    ->label('Department id')
+                    ->label('Departamento')
                     ->required(),
             ]);
     }

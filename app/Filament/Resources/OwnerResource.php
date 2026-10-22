@@ -86,7 +86,7 @@ class OwnerResource extends Resource
                                 $set('city_id', null);
                                 $set('neighborhood_id', null);
                             })
-                            ->label('Department id')
+                            ->label('Departamento')
                             ->required(),
                         Forms\Components\Select::make('city_id')
                             ->options(fn (Get $get): Collection => City::query()->where('department_id', $get('department_id'))->pluck('name', 'id'))

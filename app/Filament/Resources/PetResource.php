@@ -130,7 +130,7 @@ class PetResource extends Resource
         $schema[0] = $schema[0]->schema([
             ...$schema[0]->getChildComponents(),
             Forms\Components\Select::make('owner_id')
-                ->label('Owner id')
+                ->label('Propietario')
                 ->relationship('owner', 'first_name')
                 ->searchable(['first_name', 'ci'])
                 ->preload()
