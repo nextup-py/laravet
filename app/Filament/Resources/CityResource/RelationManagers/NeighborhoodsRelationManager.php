@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\CityResource\RelationManagers;
 
+use App\Filament\Concerns\GuardsDeletion;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Validation\Rules\Unique;
 
 class NeighborhoodsRelationManager extends RelationManager
 {
@@ -23,6 +25,11 @@ class NeighborhoodsRelationManager extends RelationManager
                 Forms\Components\TextInput::make('name')
                     ->label('Nombre')
                     ->autofocus()
+                    ->unique(
+                        ignoreRecord: true,
+                        modifyRuleUsing: fn (Unique $rule): Unique => $rule->where('city_id', $this->getOwnerRecord()->getKey()),
+                    )
+                    ->validationMessages(['unique' => 'Ya existe un barrio con ese nombre en la ciudad.'])
                     ->required(),
             ]);
     }
@@ -35,12 +42,14 @@ class NeighborhoodsRelationManager extends RelationManager
                     ->label('ID')
                     ->numeric()
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nombre')
                     ->searchable()
                     ->sortable(),
             ])
+            ->defaultSort('name')
             ->filters([])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),
@@ -48,8 +57,7 @@ class NeighborhoodsRelationManager extends RelationManager
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->extraModalFooterActions([
-                        Tables\Actions\DeleteAction::make()
-                            ->cancelParentActions(),
+                        GuardsDeletion::apply(Tables\Actions\DeleteAction::make()->cancelParentActions()),
                     ]),
             ]);
     }

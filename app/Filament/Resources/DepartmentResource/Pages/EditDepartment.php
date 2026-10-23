@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\DepartmentResource\Pages;
 
+use App\Filament\Concerns\GuardsDeletion;
 use App\Filament\Resources\DepartmentResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
@@ -13,7 +14,7 @@ class EditDepartment extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            GuardsDeletion::apply(Actions\DeleteAction::make()),
         ];
     }
 }

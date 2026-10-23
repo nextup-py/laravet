@@ -24,8 +24,6 @@ class Department extends Model
     /**
      * Un departamento tiene muchas ciudades.
      * Esta relación define que un departamento puede tener múltiples ciudades asociadas.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function cities(): HasMany
     {
@@ -35,8 +33,6 @@ class Department extends Model
     /**
      * Un departamento puede tener muchos usuarios.
      * Esta relación podría utilizarse para asociar usuarios a un departamento específico.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function users(): HasMany
     {
@@ -46,11 +42,25 @@ class Department extends Model
     /**
      * Un departamento puede tener muchos dueños de mascotas.
      * Esta relación podría utilizarse para asociar los dueños de mascotas registrados en la aplicación con el departamento en el que residen.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function owners(): HasMany
     {
         return $this->hasMany(Owner::class);
+    }
+
+    /**
+     * Motivo por el que no puede eliminarse (está en uso), o null si puede.
+     */
+    public function deletionBlockedReason(): ?string
+    {
+        if ($this->cities()->exists()) {
+            return 'Tiene ciudades asociadas. Elimínelas o reubíquelas primero.';
+        }
+
+        if ($this->owners()->exists() || $this->users()->exists()) {
+            return 'Hay propietarios o usuarios con domicilio en este departamento; eliminarlo los borraría junto con su historial.';
+        }
+
+        return null;
     }
 }
