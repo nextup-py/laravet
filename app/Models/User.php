@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Filament\Concerns\ClinicRoles;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -103,6 +104,39 @@ class User extends Authenticatable implements FilamentUser
     public function tests(): HasMany
     {
         return $this->hasMany(Test::class);
+    }
+
+    /**
+     * Indica si el usuario registró algún dato clínico (mascotas, consultas, vacunaciones, cirugías o pruebas).
+     * Al eliminar un usuario esas filas se borran en cascada, por eso se usa para bloquear la eliminación.
+     */
+    public function hasClinicalRecords(): bool
+    {
+        return $this->pets()->exists()
+            || $this->consultations()->exists()
+            || $this->vaccinations()->exists()
+            || $this->surgeries()->exists()
+            || $this->tests()->exists();
+    }
+
+    /**
+     * Motivo por el que este usuario no puede eliminarse, o null si puede.
+     */
+    public function deletionBlockedReason(?self $actor = null): ?string
+    {
+        if ($actor && $actor->is($this)) {
+            return 'No puede eliminar su propio usuario.';
+        }
+
+        if ($this->hasRole(ClinicRoles::ADMIN) && static::role(ClinicRoles::ADMIN)->count() <= 1) {
+            return 'No se puede eliminar al único administrador.';
+        }
+
+        if ($this->hasClinicalRecords()) {
+            return 'Tiene registros clínicos asociados que se perderían. Reasigne o conserve el usuario.';
+        }
+
+        return null;
     }
 
     public function canAccessPanel(Panel $panel): bool
