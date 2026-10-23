@@ -36,6 +36,17 @@ return [
             'throw' => false,
         ],
 
+        // Resultados de pruebas laboratoriales: privado, se sirve solo a usuarios autorizados
+        // (ver TestResultController); no es accesible por URL pública.
+        'test-results' => [
+            'driver' => 'local',
+            'root' => storage_path('app/test-results'),
+            'url' => env('APP_URL').'/archivos-privados/pruebas',
+            'visibility' => 'private',
+            'serve' => true,
+            'throw' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

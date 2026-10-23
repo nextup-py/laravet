@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\TestStatus;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,6 +58,21 @@ class Test extends Model
      */
     public function scopeWithoutResult(Builder $query): Builder
     {
-        return $query->whereNull('result');
+        return $query->where(fn (Builder $q) => $q->whereNull('result')->orWhereJsonLength('result', 0));
+    }
+
+    public function scopeWithResult(Builder $query): Builder
+    {
+        return $query->whereNotNull('result')->whereJsonLength('result', '>', 0);
+    }
+
+    /**
+     * Estado de la prueba: pendiente si todavía no tiene archivos de resultado.
+     */
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): TestStatus => filled($this->result) ? TestStatus::WithResult : TestStatus::Pending,
+        );
     }
 }
