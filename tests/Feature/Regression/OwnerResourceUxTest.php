@@ -107,3 +107,19 @@ it('la ficha del propietario oculta las mascotas a quien no tiene permiso para v
         ->assertSee($owner->full_name)
         ->assertDontSee($pet->name);
 });
+
+it('ordenar por cualquier columna ordenable de la tabla de propietarios no falla', function () {
+    actingAsRole('admin');
+    Owner::factory()->create();
+
+    $columns = Livewire::test(ListOwners::class)->instance()->getTable()->getColumns();
+
+    foreach ($columns as $column) {
+        if ($column->isSortable()) {
+            Livewire::test(ListOwners::class)->sortTable($column->getName())->assertSuccessful();
+        }
+    }
+
+    // La tabla `owners` no tiene user_id: una columna "Usuario" ordenable rompe la consulta.
+    expect(array_keys($columns))->not->toContain('user.name');
+});
