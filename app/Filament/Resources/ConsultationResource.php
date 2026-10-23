@@ -69,7 +69,7 @@ class ConsultationResource extends Resource
             return new HtmlString('');
         }
 
-        $header = e("{$pet->species->getLabel()} · {$pet->breed} · {$pet->age} · {$pet->weight} kg · {$pet->gender->getLabel()}");
+        $header = e($pet->summaryLine());
 
         $previous = $pet->consultations()
             ->when($current?->exists, fn (Builder $q) => $q->whereKeyNot($current->getKey()))

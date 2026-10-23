@@ -21,27 +21,7 @@ class SurgeriesRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\DatePicker::make('date')
-                    ->label('Fecha')
-                    ->required()
-                    ->native(false)
-                    ->displayFormat('d/m/Y')
-                    ->closeOnDateSelection()
-                    ->maxDate(now()),
-                Forms\Components\Select::make('type')
-                    ->label('Tipo')
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->options(SurgeryResource::typeOptions())
-                    ->required(),
-                Forms\Components\Textarea::make('observation')
-                    ->label('Observación')
-                    ->autosize()
-                    ->columnSpanFull(),
-            ]);
+        return $form->schema(SurgeryResource::formFields());
     }
 
     public function table(Table $table): Table
@@ -52,12 +32,15 @@ class SurgeriesRelationManager extends RelationManager
                     ->label('ID')
                     ->searchable()
                     ->sortable()
-                    ->numeric(),
+                    ->numeric()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('date')
                     ->label('Fecha')
                     ->date('d/m/Y')
-                    ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Estado')
+                    ->badge(),
                 Tables\Columns\TextColumn::make('type')
                     ->label('Tipo')
                     ->searchable()
@@ -78,7 +61,13 @@ class SurgeriesRelationManager extends RelationManager
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('date', 'desc')
             ->filters([
+                Tables\Filters\SelectFilter::make('type')
+                    ->label('Tipo')
+                    ->options(SurgeryResource::typeOptions())
+                    ->multiple()
+                    ->searchable(),
                 Tables\Filters\Filter::make('date')
                     ->label('Fecha')
                     ->form([

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PetResource\Pages;
 
 use App\Filament\Resources\OwnerResource;
 use App\Filament\Resources\PetResource;
+use App\Filament\Resources\SurgeryResource;
 use App\Filament\Resources\TestResource;
 use App\Services\PdfGeneratorService;
 use Filament\Actions;
@@ -57,6 +58,11 @@ class ViewPet extends ViewRecord
                 ->requiresConfirmation()
                 ->modalHeading('Generar ficha de identificación')
                 ->modalDescription('¿Desea descargar el PDF con la ficha de identificación de la mascota?'),
+            Actions\Action::make('registerSurgery')
+                ->label('Registrar cirugía')
+                ->icon('heroicon-o-scissors')
+                ->visible(fn (): bool => SurgeryResource::canCreate())
+                ->url(fn (): string => SurgeryResource::getUrl('create', ['pet_id' => $this->record->getKey()])),
             Actions\Action::make('registerTest')
                 ->label('Registrar prueba')
                 ->icon('heroicon-o-beaker')

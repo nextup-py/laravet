@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\VaccinationStatus;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -50,5 +53,48 @@ class Vaccination extends Model
     public function scopeUpcomingOrOverdue(Builder $query, int $days = 7): Builder
     {
         return $query->where('next_application', '<', now()->addDays($days));
+    }
+
+    /**
+     * Estado de la vacunación según la fecha de próxima aplicación.
+     */
+    protected function status(): Attribute
+    {
+        return Attribute::make(get: function (): VaccinationStatus {
+            $next = Carbon::parse($this->next_application)->startOfDay();
+
+            return match (true) {
+                $next->lt(today()) => VaccinationStatus::Overdue,
+                $next->lte(today()->addDays(VaccinationStatus::DUE_SOON_DAYS)) => VaccinationStatus::DueSoon,
+                default => VaccinationStatus::UpToDate,
+            };
+        });
+    }
+
+    public function scopeOverdue(Builder $query): Builder
+    {
+        return $query->where('next_application', '<', today()->toDateString());
+    }
+
+    public function scopeDueSoon(Builder $query): Builder
+    {
+        return $query->whereBetween('next_application', [
+            today()->toDateString(),
+            today()->addDays(VaccinationStatus::DUE_SOON_DAYS)->endOfDay()->toDateTimeString(),
+        ]);
+    }
+
+    public function scopeUpToDate(Builder $query): Builder
+    {
+        return $query->where('next_application', '>', today()->addDays(VaccinationStatus::DUE_SOON_DAYS)->endOfDay()->toDateTimeString());
+    }
+
+    public function scopeWithStatus(Builder $query, VaccinationStatus $status): Builder
+    {
+        return match ($status) {
+            VaccinationStatus::Overdue => $query->overdue(),
+            VaccinationStatus::DueSoon => $query->dueSoon(),
+            VaccinationStatus::UpToDate => $query->upToDate(),
+        };
     }
 }
