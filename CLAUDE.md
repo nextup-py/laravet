@@ -55,7 +55,7 @@ La localización sigue la jerarquía paraguaya: `Department → City → Neighbo
 
 Toda la funcionalidad CRUD vive en `/app/Filament/Resources/`. No hay controladores personalizados — Filament maneja todo. El panel se configura en `app/Providers/Filament/AdminPanelProvider.php` (color amber, modo SPA, sidebar colapsable).
 
-Los recursos principales son `PetResource` y `OwnerResource`. `PetResource` agrupa los cuatro tipos de registros médicos como **RelationManagers** (en `/app/Filament/Resources/PetResource/RelationManagers/`), permitiendo gestión contextual desde la ficha de la mascota.
+Los recursos principales son `PetResource` y `OwnerResource`. La ficha de `OwnerResource` lista las mascotas solo con su RelationManager (solo lectura: enlaza a la ficha de la mascota; el alta es el botón "Registrar mascota" con `?owner_id=`), sin sección duplicada en el infolist. `PetResource` agrupa los cuatro tipos de registros médicos como **RelationManagers** (en `/app/Filament/Resources/PetResource/RelationManagers/`), permitiendo gestión contextual desde la ficha de la mascota.
 
 `ConsultationResource`, `SurgeryResource` y `TestResource` usan página tipo `ManageRecords` (sin List/Create/Edit separados). `VaccinationResource` tiene páginas Create y Edit propias.
 

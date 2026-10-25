@@ -57,8 +57,7 @@ class PetResource extends Resource
     }
 
     /**
-     * Schema del formulario, compartido con la PetsRelationManager de Owner
-     * (que lo usa tal cual, sin el campo owner_id porque ya está fijado por contexto).
+     * Schema base del formulario; `form()` le agrega el campo del propietario.
      */
     public static function formSchema(): array
     {
