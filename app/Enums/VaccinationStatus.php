@@ -13,6 +13,7 @@ enum VaccinationStatus: string implements HasColor, HasLabel
     case Overdue = 'overdue';
     case DueSoon = 'due_soon';
     case UpToDate = 'up_to_date';
+    case Renewed = 'renewed';
 
     /** Días hacia adelante en los que una vacunación se considera "por vencer". */
     public const DUE_SOON_DAYS = 7;
@@ -23,6 +24,7 @@ enum VaccinationStatus: string implements HasColor, HasLabel
             self::Overdue => 'Vencida',
             self::DueSoon => 'Por vencer',
             self::UpToDate => 'Al día',
+            self::Renewed => 'Renovada',
         };
     }
 
@@ -32,6 +34,7 @@ enum VaccinationStatus: string implements HasColor, HasLabel
             self::Overdue => 'danger',
             self::DueSoon => 'warning',
             self::UpToDate => 'success',
+            self::Renewed => 'gray',
         };
     }
 }

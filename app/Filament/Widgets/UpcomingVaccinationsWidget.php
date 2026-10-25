@@ -29,7 +29,7 @@ class UpcomingVaccinationsWidget extends BaseWidget
             ->query(
                 Vaccination::query()
                     ->with(['pet', 'pet.owner'])
-                    ->upcomingOrOverdue()
+                    ->actionable()
                     ->orderBy('next_application')
             )
             ->recordUrl(fn (Vaccination $record) => VaccinationResource::getUrl('view', ['record' => $record]))

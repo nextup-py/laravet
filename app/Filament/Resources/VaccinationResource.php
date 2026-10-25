@@ -39,12 +39,12 @@ class VaccinationResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return (string) static::getModel()::upcomingOrOverdue()->count();
+        return (string) static::getModel()::actionable()->count();
     }
 
     public static function getNavigationBadgeColor(): ?string
     {
-        return static::getModel()::overdue()->exists() ? 'danger' : 'warning';
+        return static::getModel()::current()->overdue()->exists() ? 'danger' : 'warning';
     }
 
     public static function getRecordTitle(?Model $record): string|Htmlable|null
@@ -197,6 +197,7 @@ class VaccinationResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->withRenewedFlag())
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')

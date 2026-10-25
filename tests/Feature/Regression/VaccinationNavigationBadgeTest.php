@@ -8,6 +8,6 @@ it('el badge de navegación cuenta vacunas vencidas/próximas con el scope dedic
     Vaccination::factory()->create(['next_application' => now()->addDays(30)]);
 
     expect(VaccinationResource::getNavigationBadge())
-        ->toBe((string) Vaccination::upcomingOrOverdue()->count())
+        ->toBe((string) Vaccination::actionable()->count())
         ->toBe('2');
 });
