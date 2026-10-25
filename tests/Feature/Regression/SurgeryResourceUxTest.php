@@ -119,7 +119,7 @@ it('registrar cirugía desde la ficha de mascota precarga la mascota', function 
     $pet = Pet::factory()->create();
 
     Livewire::test(ViewPet::class, ['record' => $pet->getRouteKey()])
-        ->assertActionVisible('registerSurgery');
+        ->assertActionDoesNotExist('registerSurgery');
 
     Livewire::withQueryParams(['pet_id' => $pet->id])
         ->test(CreateSurgery::class)

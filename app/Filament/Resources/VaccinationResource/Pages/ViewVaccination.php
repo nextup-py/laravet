@@ -24,6 +24,14 @@ class ViewVaccination extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('revaccinate')
+                ->label('Revacunar')
+                ->icon('heroicon-o-arrow-path')
+                ->visible(fn (): bool => VaccinationResource::canCreate())
+                ->url(fn (): string => VaccinationResource::getUrl('create', [
+                    'pet_id' => $this->record->pet_id,
+                    'vaccine' => $this->record->vaccine,
+                ])),
             Actions\EditAction::make(),
         ];
     }

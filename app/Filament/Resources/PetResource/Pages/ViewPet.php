@@ -4,8 +4,6 @@ namespace App\Filament\Resources\PetResource\Pages;
 
 use App\Filament\Resources\OwnerResource;
 use App\Filament\Resources\PetResource;
-use App\Filament\Resources\SurgeryResource;
-use App\Filament\Resources\TestResource;
 use App\Services\PdfGeneratorService;
 use Filament\Actions;
 use Filament\Infolists\Components\ImageEntry;
@@ -34,40 +32,36 @@ class ViewPet extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('downloadClinicalHistory')
-                ->label('Descargar historia clínica')
-                ->icon('heroicon-o-document-arrow-down')
+            Actions\ActionGroup::make([
+                Actions\Action::make('downloadClinicalHistory')
+                    ->label('Descargar historia clínica')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('success')
+                    ->action(fn (PdfGeneratorService $pdfGenerator) => $pdfGenerator->download(
+                        'pdf.clinical-history',
+                        ['pet' => $this->record],
+                        "Historia-Clinica-{$this->record->name}.pdf",
+                    ))
+                    ->requiresConfirmation()
+                    ->modalHeading('Generar historia clínica')
+                    ->modalDescription('¿Desea descargar el PDF con el historial completo de consultas?'),
+                Actions\Action::make('downloadPetIdCard')
+                    ->label('Descargar ficha de mascota')
+                    ->icon('heroicon-o-identification')
+                    ->color('success')
+                    ->action(fn (PdfGeneratorService $pdfGenerator) => $pdfGenerator->download(
+                        'pdf.pet-id-card',
+                        ['pet' => $this->record],
+                        "Ficha-Mascota-{$this->record->name}.pdf",
+                    ))
+                    ->requiresConfirmation()
+                    ->modalHeading('Generar ficha de identificación')
+                    ->modalDescription('¿Desea descargar el PDF con la ficha de identificación de la mascota?'),
+            ])
+                ->label('Descargar')
+                ->icon('heroicon-o-arrow-down-tray')
                 ->color('success')
-                ->action(fn (PdfGeneratorService $pdfGenerator) => $pdfGenerator->download(
-                    'pdf.clinical-history',
-                    ['pet' => $this->record],
-                    "Historia-Clinica-{$this->record->name}.pdf",
-                ))
-                ->requiresConfirmation()
-                ->modalHeading('Generar historia clínica')
-                ->modalDescription('¿Desea descargar el PDF con el historial completo de consultas?'),
-            Actions\Action::make('downloadPetIdCard')
-                ->label('Descargar ficha de mascota')
-                ->icon('heroicon-o-identification')
-                ->color('success')
-                ->action(fn (PdfGeneratorService $pdfGenerator) => $pdfGenerator->download(
-                    'pdf.pet-id-card',
-                    ['pet' => $this->record],
-                    "Ficha-Mascota-{$this->record->name}.pdf",
-                ))
-                ->requiresConfirmation()
-                ->modalHeading('Generar ficha de identificación')
-                ->modalDescription('¿Desea descargar el PDF con la ficha de identificación de la mascota?'),
-            Actions\Action::make('registerSurgery')
-                ->label('Registrar cirugía')
-                ->icon('heroicon-o-scissors')
-                ->visible(fn (): bool => SurgeryResource::canCreate())
-                ->url(fn (): string => SurgeryResource::getUrl('create', ['pet_id' => $this->record->getKey()])),
-            Actions\Action::make('registerTest')
-                ->label('Registrar prueba')
-                ->icon('heroicon-o-beaker')
-                ->visible(fn (): bool => TestResource::canCreate())
-                ->url(fn (): string => TestResource::getUrl('create', ['pet_id' => $this->record->getKey()])),
+                ->button(),
             Actions\EditAction::make(),
         ];
     }

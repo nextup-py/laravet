@@ -66,7 +66,7 @@ Los diez Resources siguen la misma estructura; al tocar uno, mantenerla:
 - **Campos y filtros compartidos**: el formulario de un Resource que también aparece como RelationManager en la ficha de mascota expone `formFields()` (o `formSchema()` en `PetResource`) y lo reutiliza el RelationManager; los filtros comunes viven en métodos estáticos (`VaccinationResource::statusFilter()`, `TestResource::statusFilter()`). No duplicar listas de opciones (`vaccineOptions()`, `manufacturerOptions()`, `typeOptions()`).
 - **Título del registro**: sobrescribir `getRecordTitle()` con el mismo título que la ficha y la búsqueda global (ej. "Consulta de Toby · 11/10/2026"); si no, el rastro de navegación muestra el atributo crudo (`recordTitleAttribute`).
 - **Búsqueda global**: `getGloballySearchableAttributes()`, `getGlobalSearchEloquentQuery()` con `with(...)` y `getGlobalSearchResultDetails()`.
-- **Páginas Ver** con `getTitle()` y, donde aplique, subtítulo; los enlaces a otros registros solo se generan si el usuario puede verlos (`PetResource::canView($pet)`).
+- **Páginas Ver** con `getTitle()` y, donde aplique, subtítulo; los enlaces a otros registros solo se generan si el usuario puede verlos (`PetResource::canView($pet)`). El header de cada página Edit lleva «Ver» + «Eliminar»; las fichas ofrecen sus acciones propias: PDF (consulta, cirugía, prueba; mascota agrupa «Descargar») y «Revacunar» en la vacunación.
 - **Atajos**: botones que abren el formulario de creación con `?pet_id=` / `?owner_id=` / `?vaccine=` (el Select toma `->default(fn () => request()->query(...))`), y acciones de fila como "Revacunar" o "Cargar resultado".
 - **Tests**: cada Resource tiene un `tests/Feature/Regression/*UxTest.php` (Pest) con sus filtros, orden, fichas y permisos.
 

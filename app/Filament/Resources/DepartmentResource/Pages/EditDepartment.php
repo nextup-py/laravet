@@ -14,6 +14,7 @@ class EditDepartment extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\ViewAction::make(),
             GuardsDeletion::apply(Actions\DeleteAction::make()),
         ];
     }
