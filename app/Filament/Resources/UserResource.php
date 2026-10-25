@@ -194,6 +194,7 @@ class UserResource extends Resource
                     ->formatStateUsing(fn (?string $state): string => self::roleOptions()[$state] ?? $state ?? '—'),
                 Tables\Columns\TextColumn::make('city.name')
                     ->label('Ciudad')
+                    ->placeholder('—')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('consultations_count')
                     ->label('Consultas')

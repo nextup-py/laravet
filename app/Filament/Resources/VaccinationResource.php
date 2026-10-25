@@ -14,6 +14,7 @@ use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -44,6 +45,11 @@ class VaccinationResource extends Resource
     public static function getNavigationBadgeColor(): ?string
     {
         return static::getModel()::overdue()->exists() ? 'danger' : 'warning';
+    }
+
+    public static function getRecordTitle(?Model $record): string|Htmlable|null
+    {
+        return $record ? static::getGlobalSearchResultTitle($record) : null;
     }
 
     public static function getGloballySearchableAttributes(): array
@@ -251,7 +257,7 @@ class VaccinationResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->defaultSort('next_application')
+            ->defaultSort('application_date', 'desc')
             ->filters([
                 self::statusFilter(),
                 Tables\Filters\SelectFilter::make('vaccine')

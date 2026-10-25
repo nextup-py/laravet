@@ -18,6 +18,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
@@ -39,6 +40,11 @@ class ConsultationResource extends Resource
     protected static ?string $modelLabel = 'consulta';
 
     protected static ?string $recordTitleAttribute = 'diagnosis';
+
+    public static function getRecordTitle(?Model $record): string|Htmlable|null
+    {
+        return $record ? static::getGlobalSearchResultTitle($record) : null;
+    }
 
     public static function getGloballySearchableAttributes(): array
     {
