@@ -19,12 +19,14 @@ Este proyecto es un trabajo de **Tesis Final de Grado** de la carrera **Ingenier
 - **Diagnóstico Asistido por IA**: Botón "Asistir con IA" en el formulario de consulta que sugiere diagnóstico y tratamiento usando Claude (Anthropic), basándose en la anamnesis y los datos clínicos de la mascota
 - **Gestión de Clientes (Propietarios)**: Registro y administración de información de clientes
 - **Gestión de Mascotas**: Información detallada de mascotas incluyendo raza, edad y datos médicos
-- **Consultas Veterinarias**: Registro de consultas, síntomas y tratamientos
-- **Cirugías**: Control de procedimientos quirúrgicos y seguimiento postoperatorio
-- **Vacunaciones**: Registro completo de vacunas y fechas de aplicación con recordatorios automáticos
-- **Pruebas/Exámenes Laboratoriales**: Documentación de tests realizados
-- **Ubicaciones**: Integración con divisiones administrativas de Paraguay (departamentos, ciudades, barrios)
-- **Panel de Administración**: Interfaz intuitiva con Filament
+- **Consultas Veterinarias**: Registro de consultas, síntomas y tratamientos, con el resumen clínico de la mascota y sus últimas consultas al registrar
+- **Cirugías**: Registro y programación de procedimientos quirúrgicos (estados Programada / Hoy / Realizada) con el veterinario que las realizó
+- **Vacunaciones**: Registro de vacunas con estado de vencimiento (Vencida / Por vencer / Al día / Renovada: solo la última aplicación de cada vacuna cuenta), próxima aplicación sugerida a un año, acción "Revacunar" y recordatorios automáticos por email a los propietarios
+- **Pruebas/Exámenes Laboratoriales**: Registro de pruebas con resultado opcional (Pendiente / Con resultado); los archivos de resultado (PDF, PNG o JPG) se guardan en un almacenamiento privado y solo los ven los usuarios con permiso
+- **Ubicaciones**: Integración con divisiones administrativas de Paraguay (departamentos, ciudades, barrios), con protección contra eliminar registros en uso
+- **Búsqueda y filtros**: Búsqueda global de propietarios, mascotas, consultas, vacunaciones, cirugías, pruebas y usuarios, y filtros por estado, tipo, fechas, veterinario y ubicación en cada listado
+- **Roles y permisos**: Roles dinámicos gestionados desde el panel, con permisos fijos por recurso; los datos de contacto del propietario solo los ven quienes pueden ver propietarios
+- **Panel de Administración**: Interfaz intuitiva con Filament, íntegramente en español
 - **Reportes en PDF**: Generación de reportes y documentos
 
 ## 📋 Requisitos Previos
@@ -153,21 +155,24 @@ npm run build
 - **http://localhost:8000**
 
 ### Panel de Administración
-- **http://localhost:8000/admin**
+- **http://localhost:8000** (el panel está en la raíz; si no hay sesión redirige a `/login`)
 
 Credenciales de acceso (datos demo):
 
 | Campo | Valor |
 |-------|-------|
-| Email | `admin@mbopivet.com.py` |
-| Contraseña | `password` |
+| Email | `admin@mbopivet.com.py` (configurable con `ADMIN_EMAIL` en `.env`) |
+| Contraseña | La genera el seeder la primera vez y se muestra **una sola vez** en la consola: guárdala en ese momento (si la pierdes, vuelve a ejecutar `php artisan migrate:fresh --seed`) |
 
 ## 📁 Estructura del Proyecto
 
 ```
 laravet/
 ├── app/                          # Código de aplicación
+│   ├── Enums/                   # Estados y opciones (especie, estado de vacunación, etc.)
 │   ├── Filament/                # Recursos del panel de administración
+│   │   ├── Concerns/            # Roles por defecto y protección de eliminación
+│   │   ├── Widgets/             # Tablero de inicio
 │   │   └── Resources/           # Interfaz para gestionar entidades
 │   │       ├── CityResource
 │   │       ├── ConsultationResource
@@ -180,9 +185,11 @@ laravet/
 │   │       ├── UserResource
 │   │       └── VaccinationResource
 │   ├── Models/                  # Modelos de datos
-│   ├── Http/                    # Controllers y requests
-│   └── Console/                 # Comandos personalizados
+│   ├── Services/                # Integración con IA y generación de PDF
+│   ├── Http/                    # Controllers (entrega autenticada de resultados de pruebas)
+│   └── Console/                 # Comandos personalizados (recordatorios de vacunación)
 ├── config/                      # Archivos de configuración
+├── lang/                        # Traducciones al español (incluye etiquetas de permisos)
 ├── database/
 │   ├── migrations/              # Migraciones de BD
 │   ├── factories/               # Factories para tests
@@ -287,6 +294,15 @@ ls -la database/database.sqlite  # Debe mostrar permisos de lectura/escritura
 2. Eliminar `database/database.sqlite`
 3. Ejecutar `php artisan migrate` nuevamente
 
+### Problema: Error 500 solo en producción (con MySQL)
+Los tests corren en SQLite y producción usa MySQL; algunas consultas que SQLite tolera MySQL las rechaza (por ejemplo, subconsultas que devuelven más de una fila). Revisa el mensaje real en `storage/logs/laravel.log` del servidor:
+```bash
+grep "production.ERROR" storage/logs/laravel.log | tail -n 3 | cut -c1-900
+```
+
+### Problema: No se abre el archivo de resultado de una prueba
+Los resultados se guardan en el disco privado `test-results` (`storage/app/test-results`) y se sirven por una ruta autenticada; hace falta tener el permiso para ver pruebas. Si el archivo es anterior a este cambio, ejecuta las migraciones pendientes (`php artisan migrate`), que lo mueven desde el almacenamiento público.
+
 ## 📚 Documentación Adicional
 
 - [Laravel Documentation](https://laravel.com/docs)
@@ -313,4 +329,4 @@ Para reportar problemas, preguntas o sugerencias, por favor abre un issue en el 
 
 ---
 
-**Última actualización**: Mayo 2026 — v1.1 (IA + seeders demo)
+**Última actualización**: Octubre 2026 — v1.2 (panel en español, mejoras de UX en todos los recursos, vacunas vigentes y resultados privados)
