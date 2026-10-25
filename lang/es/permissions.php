@@ -8,5 +8,6 @@
 return [
     'custom' => [
         'use_ai_diagnostics' => 'Usar diagnóstico asistido por IA',
+        'export_data' => 'Exportar listas a CSV/Excel',
     ],
 ];

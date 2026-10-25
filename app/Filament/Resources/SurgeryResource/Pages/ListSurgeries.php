@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SurgeryResource\Pages;
 
+use App\Filament\Exporters\SurgeryExporter;
 use App\Filament\Resources\SurgeryResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
@@ -13,6 +14,12 @@ class ListSurgeries extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\ExportAction::make()
+                ->exporter(SurgeryExporter::class)
+                ->label('Exportar')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->visible(fn (): bool => auth()->user()?->can('export_data') ?? false),
             Actions\CreateAction::make(),
         ];
     }
