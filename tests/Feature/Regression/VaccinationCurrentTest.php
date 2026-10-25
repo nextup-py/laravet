@@ -136,3 +136,25 @@ it('el correo dice "venció" para una vacuna ya vencida y "está por vencer" par
     expect(implode(' ', $mailVencida->introLines))->toContain('venció el')
         ->and(implode(' ', $mailProxima->introLines))->toContain('está por vencer el');
 });
+
+it('con tres o más aplicaciones de la misma vacuna, solo la última queda vigente y las demás Renovadas', function () {
+    $pet = Pet::factory()->create();
+    $ids = collect([30, 20, 10])->map(fn (int $dias) => Vaccination::factory()->create([
+        'pet_id' => $pet->id,
+        'vaccine' => 'Rabia',
+        'application_date' => today()->subDays($dias),
+        'next_application' => today()->addYear()->subDays($dias),
+    ])->id);
+
+    $porId = Vaccination::query()->withRenewedFlag()->get()->keyBy('id');
+
+    expect($porId[$ids[0]]->status)->toBe(VaccinationStatus::Renewed)
+        ->and($porId[$ids[1]]->status)->toBe(VaccinationStatus::Renewed)
+        ->and($porId[$ids[2]]->status)->toBe(VaccinationStatus::UpToDate);
+});
+
+it('la marca is_renewed es una subconsulta escalar con limit 1 (MySQL falla con 1242 si devuelve varias filas)', function () {
+    // SQLite tolera subconsultas escalares con varias filas y MySQL no: se verifica el SQL generado.
+    expect(Vaccination::query()->withRenewedFlag()->toSql())
+        ->toMatch('/limit 1\) as [`"]is_renewed[`"]/');
+});
