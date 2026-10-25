@@ -125,6 +125,7 @@ class VaccinationsRelationManager extends RelationManager
                                 ->cancelParentActions(),
                         ]),
                     VaccinationResource::revaccinateAction(),
+                    VaccinationResource::whatsappReminderAction(),
                 ]),
             ]);
     }
