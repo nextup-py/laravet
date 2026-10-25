@@ -6,7 +6,9 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  # Rápido y coincide con `php artisan test` en local (phpunit.xml usa SQLite en memoria).
+  test-sqlite:
+    name: Tests (SQLite)
     runs-on: ubuntu-latest
 
     steps:
@@ -35,4 +37,58 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ":memory:"
+        run: vendor/bin/pest --colors=always
+
+  # Producción usa MySQL: detecta consultas que SQLite tolera y MySQL rechaza
+  # (por ejemplo, una subconsulta escalar con varias filas da el error 1242).
+  # Si la versión de producción es otra, cambiar la imagen del servicio.
+  test-mysql:
+    name: Tests (MySQL)
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          # Credenciales descartables: el servicio existe solo durante este job.
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: laravet_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -psecret"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, bcmath, gd, zip, pdo_mysql
+          coverage: none
+
+      - name: Copy .env
+        run: cp .env.example .env
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v3
+        with:
+          composer-options: "--prefer-dist --no-progress"
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Run tests
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: laravet_test
+          DB_USERNAME: root
+          DB_PASSWORD: secret
         run: vendor/bin/pest --colors=always
