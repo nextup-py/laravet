@@ -262,6 +262,11 @@ class OwnerResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
+                    Tables\Actions\Action::make('registerPet')
+                        ->label('Registrar mascota')
+                        ->icon('heroicon-o-plus')
+                        ->visible(fn (): bool => PetResource::canCreate())
+                        ->url(fn (Owner $record): string => PetResource::getUrl('create', ['owner_id' => $record->getKey()])),
                 ]),
             ]);
     }

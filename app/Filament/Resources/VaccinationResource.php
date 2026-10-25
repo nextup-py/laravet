@@ -6,6 +6,7 @@ use App\Enums\PetSpecies;
 use App\Enums\VaccinationStatus;
 use App\Filament\Resources\VaccinationResource\Pages;
 use App\Models\Vaccination;
+use App\Settings\ClinicSettings;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -290,8 +291,28 @@ class VaccinationResource extends Resource
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     self::revaccinateAction(),
+                    self::whatsappReminderAction(),
                 ]),
             ])->selectCurrentPageOnly();
+    }
+
+    /**
+     * Recordatorio por WhatsApp al propietario de una vacunación vigente vencida o por vencer.
+     * Solo para quien puede ver propietarios (el teléfono es un dato del propietario).
+     */
+    public static function whatsappReminderAction(): Tables\Actions\Action
+    {
+        return Tables\Actions\Action::make('whatsappReminder')
+            ->label('Avisar por WhatsApp')
+            ->icon('heroicon-o-chat-bubble-left-ellipsis')
+            ->visible(fn (Vaccination $record): bool => OwnerResource::canViewAny()
+                && in_array($record->status, [VaccinationStatus::Overdue, VaccinationStatus::DueSoon], true))
+            ->url(fn (Vaccination $record): string => $record->pet->owner->whatsapp_url.'?text='.rawurlencode(
+                "Hola {$record->pet->owner->first_name}, te escribimos de ".app(ClinicSettings::class)->name.'. '
+                ."La vacuna {$record->vaccine} de {$record->pet->name} "
+                .($record->status === VaccinationStatus::Overdue ? 'venció' : 'vence')
+                .' el '.Carbon::parse($record->next_application)->format('d/m/Y').'. ¿Te agendamos un turno?'
+            ), shouldOpenInNewTab: true);
     }
 
     /**

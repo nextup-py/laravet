@@ -281,8 +281,34 @@ class PetResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
+                    ...self::registerActions(),
                 ]),
             ])->selectCurrentPageOnly();
+    }
+
+    /**
+     * Atajos de fila que abren el alta de un registro clínico con la mascota precargada (`?pet_id=`).
+     * Solo para mascotas activas, igual que los selects de mascota de los formularios.
+     *
+     * @return array<int, Tables\Actions\Action>
+     */
+    public static function registerActions(): array
+    {
+        $shortcuts = [
+            'consultation' => ['Nueva consulta', 'heroicon-o-chat-bubble-left-right', ConsultationResource::class],
+            'vaccination' => ['Nueva vacunación', 'heroicon-o-shield-check', VaccinationResource::class],
+            'surgery' => ['Nueva cirugía', 'heroicon-o-scissors', SurgeryResource::class],
+            'test' => ['Nueva prueba', 'heroicon-o-beaker', TestResource::class],
+        ];
+
+        return collect($shortcuts)
+            ->map(fn (array $shortcut, string $key): Tables\Actions\Action => Tables\Actions\Action::make("register_{$key}")
+                ->label($shortcut[0])
+                ->icon($shortcut[1])
+                ->visible(fn (Pet $record): bool => $record->active && $shortcut[2]::canCreate())
+                ->url(fn (Pet $record): string => $shortcut[2]::getUrl('create', ['pet_id' => $record->getKey()])))
+            ->values()
+            ->all();
     }
 
     public static function getRelations(): array

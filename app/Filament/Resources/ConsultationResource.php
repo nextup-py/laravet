@@ -170,6 +170,7 @@ class ConsultationResource extends Resource
                                 fn (Builder $q) => $q->where('active', true)
                                     ->when($record?->pet_id, fn (Builder $q, $petId) => $q->orWhere('id', $petId))
                             ))
+                            ->default(fn () => request()->query('pet_id'))
                             ->searchable(['name', 'id'])
                             ->preload()
                             ->live()
