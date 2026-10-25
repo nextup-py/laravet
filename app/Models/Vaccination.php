@@ -97,7 +97,9 @@ class Vaccination extends Model
     {
         return $query->addSelect([
             'vaccinations.*',
-            'is_renewed' => fn ($sub) => $this->newerApplicationExists($sub),
+            // limit(1): como subconsulta escalar debe devolver a lo sumo una fila (MySQL falla con 1242
+            // si una aplicación tiene varias más recientes); SQLite lo tolera, por eso solo falla en MySQL.
+            'is_renewed' => fn ($sub) => $this->newerApplicationExists($sub)->limit(1),
         ]);
     }
 
