@@ -142,4 +142,21 @@ class Pet extends Model
     {
         return $this->hasMany(Test::class);
     }
+
+    /**
+     * Motivo por el que no puede eliminarse (tiene historial clínico), o null si puede.
+     */
+    public function deletionBlockedReason(): ?string
+    {
+        $hasHistory = $this->consultations()->exists()
+            || $this->vaccinations()->exists()
+            || $this->surgeries()->exists()
+            || $this->tests()->exists();
+
+        if ($hasHistory) {
+            return 'Tiene historial clínico; eliminarla lo borraría. Márcala como inactiva en su lugar.';
+        }
+
+        return null;
+    }
 }
