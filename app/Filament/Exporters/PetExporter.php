@@ -24,21 +24,21 @@ class PetExporter extends Exporter
     {
         return [
             ExportColumn::make('id')->label('ID'),
-            ExportColumn::make('name')->label('Nombre'),
+            static::text('name', 'Nombre'),
             ExportColumn::make('species')->label('Especie')->formatStateUsing(fn ($state) => $state?->getLabel()),
-            ExportColumn::make('breed')->label('Raza'),
+            static::text('breed', 'Raza'),
             ExportColumn::make('gender')->label('Género')->formatStateUsing(fn ($state) => $state?->getLabel()),
             ExportColumn::make('birthdate')->label('Fecha de nacimiento')->formatStateUsing(fn ($state) => static::formatDate($state)),
             ExportColumn::make('size')->label('Tamaño')->formatStateUsing(fn ($state) => $state?->getLabel()),
             ExportColumn::make('weight')->label('Peso (kg)'),
-            ExportColumn::make('fur')->label('Pelaje'),
+            static::text('fur', 'Pelaje'),
             ExportColumn::make('reproduction')->label('Reproducción')->formatStateUsing(fn ($state) => $state?->getLabel()),
             ExportColumn::make('active')->label('Activo')->formatStateUsing(fn ($state) => $state ? 'Sí' : 'No'),
             ...(static::canExportOwnerData() ? [
-                ExportColumn::make('owner.full_name')->label('Propietario'),
+                static::text('owner.full_name', 'Propietario'),
                 ExportColumn::make('owner.phone')->label('Teléfono del propietario'),
             ] : []),
-            ExportColumn::make('user.name')->label('Registrada por'),
+            static::text('user.name', 'Registrada por'),
         ];
     }
 

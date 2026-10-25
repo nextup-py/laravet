@@ -24,18 +24,18 @@ class VaccinationExporter extends Exporter
     {
         return [
             ExportColumn::make('id')->label('ID'),
-            ExportColumn::make('pet.name')->label('Mascota'),
+            static::text('pet.name', 'Mascota'),
             ...(static::canExportOwnerData() ? [
-                ExportColumn::make('pet.owner.full_name')->label('Propietario'),
+                static::text('pet.owner.full_name', 'Propietario'),
                 ExportColumn::make('pet.owner.phone')->label('Teléfono del propietario'),
             ] : []),
-            ExportColumn::make('vaccine')->label('Vacuna'),
+            static::text('vaccine', 'Vacuna'),
             ExportColumn::make('application_date')->label('Fecha de aplicación')->formatStateUsing(fn ($state) => static::formatDate($state)),
             ExportColumn::make('next_application')->label('Próxima aplicación')->formatStateUsing(fn ($state) => static::formatDate($state)),
             ExportColumn::make('status')->label('Estado')->formatStateUsing(fn ($state) => $state?->getLabel()),
-            ExportColumn::make('batch')->label('Lote'),
-            ExportColumn::make('manufacturer')->label('Fabricante'),
-            ExportColumn::make('user.name')->label('Veterinario'),
+            static::text('batch', 'Lote'),
+            static::text('manufacturer', 'Fabricante'),
+            static::text('user.name', 'Veterinario'),
         ];
     }
 

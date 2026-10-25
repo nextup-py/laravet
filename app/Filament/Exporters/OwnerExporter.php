@@ -25,15 +25,15 @@ class OwnerExporter extends Exporter
         return [
             ExportColumn::make('id')->label('ID'),
             ExportColumn::make('ci')->label('CI'),
-            ExportColumn::make('first_name')->label('Nombre(s)'),
-            ExportColumn::make('last_name')->label('Apellido(s)'),
+            static::text('first_name', 'Nombre(s)'),
+            static::text('last_name', 'Apellido(s)'),
             ExportColumn::make('gender')->label('Género')->formatStateUsing(fn ($state) => $state?->getLabel()),
-            ExportColumn::make('email')->label('Correo electrónico'),
+            static::text('email', 'Correo electrónico'),
             ExportColumn::make('phone')->label('Teléfono'),
-            ExportColumn::make('department.name')->label('Departamento'),
-            ExportColumn::make('city.name')->label('Ciudad'),
-            ExportColumn::make('neighborhood.name')->label('Barrio'),
-            ExportColumn::make('address')->label('Dirección'),
+            static::text('department.name', 'Departamento'),
+            static::text('city.name', 'Ciudad'),
+            static::text('neighborhood.name', 'Barrio'),
+            static::text('address', 'Dirección'),
             ExportColumn::make('pets_count')->label('Mascotas'),
         ];
     }

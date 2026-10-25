@@ -25,14 +25,14 @@ class SurgeryExporter extends Exporter
         return [
             ExportColumn::make('id')->label('ID'),
             ExportColumn::make('date')->label('Fecha')->formatStateUsing(fn ($state) => static::formatDate($state)),
-            ExportColumn::make('pet.name')->label('Mascota'),
+            static::text('pet.name', 'Mascota'),
             ...(static::canExportOwnerData() ? [
-                ExportColumn::make('pet.owner.full_name')->label('Propietario'),
+                static::text('pet.owner.full_name', 'Propietario'),
             ] : []),
-            ExportColumn::make('type')->label('Tipo'),
+            static::text('type', 'Tipo'),
             ExportColumn::make('status')->label('Estado')->formatStateUsing(fn ($state) => $state?->getLabel()),
-            ExportColumn::make('observation')->label('Observación'),
-            ExportColumn::make('user.name')->label('Veterinario'),
+            static::text('observation', 'Observación'),
+            static::text('user.name', 'Veterinario'),
         ];
     }
 

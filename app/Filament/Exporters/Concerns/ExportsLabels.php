@@ -3,6 +3,7 @@
 namespace App\Filament\Exporters\Concerns;
 
 use Carbon\Carbon;
+use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Models\Export;
 use Illuminate\Support\Number;
 
@@ -16,6 +17,17 @@ trait ExportsLabels
         $rows = Number::format($export->successful_rows);
 
         return "La exportación terminó: se exportaron {$rows} ".($export->successful_rows === 1 ? 'fila' : 'filas').'.';
+    }
+
+    /**
+     * Columna de texto libre. Los valores que empiezan por =, +, -, @, tab o retorno de carro se
+     * prefijan con una comilla simple para que Excel/Sheets no los evalúe como fórmula (CSV injection).
+     */
+    protected static function text(string $name, string $label): ExportColumn
+    {
+        return ExportColumn::make($name)->label($label)->formatStateUsing(
+            fn ($state) => is_string($state) && preg_match('/^[=+\-@\t\r]/', $state) ? "'".$state : $state
+        );
     }
 
     protected static function formatDate(mixed $state): ?string
