@@ -99,6 +99,10 @@ Requiere `ANTHROPIC_API_KEY` en `.env`. La key se obtiene en [console.anthropic.
 - `User::canAccessPanel()` no depende de una lista de roles — cualquier usuario con al menos un rol asignado entra al panel (`$this->roles()->exists()`).
 - `ClinicSettingsPage` es la única pantalla que sigue siendo un chequeo de rol directo (`hasRole(ClinicRoles::ADMIN)`, no un permiso de Shield) — decisión consciente para no meter Pages/Widgets en el sistema de permisos (`entities.pages`/`entities.widgets = false` en el config). Los 2 widgets del dashboard no tienen restricción propia — ya alcanza con el acceso al panel.
 
+### Exportar listas
+
+Las seis listas clínicas (mascotas, propietarios, vacunaciones, consultas, cirugías, pruebas) tienen un `ExportAction` en el header (exporters en `app/Filament/Exporters/`, exporta lo filtrado en la tabla a CSV/Excel). Solo lo ve quien tiene el permiso custom `export_data` (por defecto solo `admin`); sin `view_any_owner` no se exportan los datos del propietario. La cola es `sync`, así que el export corre en la misma petición. La tabla `exports` y el permiso se crean por migración (el deploy no corre seeders; la migración del permiso es idempotente). Al agregar una lista nueva, crear su exporter con el mismo criterio de datos del propietario.
+
 ### Tareas programadas
 
 `routes/console.php` programa `send:vaccination-notifications` una vez al día (`->daily()`, zona `America/Asuncion`, `withoutOverlapping`). Avisa por email al propietario solo de vacunaciones **vigentes** (`current()`) sin `reminder_sent_at`, con próxima aplicación desde 30 días atrás hasta 3 días adelante; marca `reminder_sent_at` para no reenviar, y el texto dice "venció el…" o "está por vencer el…" según la fecha.
