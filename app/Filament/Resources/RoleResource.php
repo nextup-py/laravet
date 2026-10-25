@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\ClinicRoles;
 use App\Filament\Resources\RoleResource\Pages;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
@@ -16,6 +17,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -135,13 +137,30 @@ class RoleResource extends Resource implements HasShieldPermissions
             ->filters([
                 //
             ])
+            ->defaultSort('name')
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                ]),
             ]);
+    }
+
+    /**
+     * Motivo por el que un rol no puede eliminarse, o null si puede. Los roles base los usa el
+     * sistema (el seeder y `ClinicRoles`) y eliminar uno con usuarios los dejaría sin acceso.
+     */
+    public static function deletionBlockedReason(Model $role): ?string
+    {
+        if (in_array($role->name, ClinicRoles::all(), true)) {
+            return 'Es un rol base del sistema.';
+        }
+
+        if ($role->users()->exists()) {
+            return 'Hay usuarios con este rol asignado. Cámbiales el rol primero.';
+        }
+
+        return null;
     }
 
     public static function getRelations(): array

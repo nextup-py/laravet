@@ -14,4 +14,12 @@ final class ClinicRoles
     public const VETERINARIAN = 'veterinarian';
 
     public const ASSISTANT = 'assistant';
+
+    /**
+     * @return array<int, string>
+     */
+    public static function all(): array
+    {
+        return [self::ADMIN, self::VETERINARIAN, self::ASSISTANT];
+    }
 }
