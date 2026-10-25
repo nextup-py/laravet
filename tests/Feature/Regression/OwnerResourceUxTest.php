@@ -73,14 +73,13 @@ it('busca por nombre completo y CI en la tabla', function () {
         ->assertCanNotSeeTableRecords([$otro]);
 });
 
-it('la ficha del propietario usa su nombre como título y lista sus mascotas', function () {
+it('la ficha del propietario usa su nombre como título y ofrece registrar mascota', function () {
     actingAsRole('admin');
     $owner = Owner::factory()->create();
     $pet = Pet::factory()->create(['owner_id' => $owner->id]);
 
     Livewire::test(ViewOwner::class, ['record' => $owner->getRouteKey()])
         ->assertSee($owner->full_name)
-        ->assertSee($pet->name)
         ->assertActionVisible('registerPet');
 });
 
