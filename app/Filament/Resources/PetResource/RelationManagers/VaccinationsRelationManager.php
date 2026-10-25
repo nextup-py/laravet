@@ -81,7 +81,7 @@ class VaccinationsRelationManager extends RelationManager
                     ->multiple()
                     ->searchable(),
             ])
-            ->defaultSort('next_application')
+            ->defaultSort('application_date', 'desc')
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {

@@ -42,7 +42,8 @@ class ViewOwner extends ViewRecord
                 Section::make('Datos personales')
                     ->columns(2)
                     ->schema([
-                        TextEntry::make('ci')->label('CI'),
+                        TextEntry::make('ci')->label('CI')
+                            ->formatStateUsing(fn ($state): string => number_format((int) $state, 0, ',', '.')),
                         TextEntry::make('first_name')->label('Nombre(s)'),
                         TextEntry::make('last_name')->label('Apellido(s)'),
                         TextEntry::make('gender')->label('Género')->badge(),
@@ -65,18 +66,19 @@ class ViewOwner extends ViewRecord
                     ->visible(fn (): bool => PetResource::canViewAny())
                     ->schema([
                         RepeatableEntry::make('pets')
+                            ->label('Mascotas')
                             ->hiddenLabel()
                             ->contained(false)
                             ->grid(3)
                             ->placeholder('Este propietario aún no tiene mascotas registradas.')
                             ->schema([
-                                ImageEntry::make('image')->hiddenLabel()->circular()->height(64),
-                                TextEntry::make('name')->hiddenLabel()->weight('bold')
+                                ImageEntry::make('image')->label('Imagen')->hiddenLabel()->circular()->height(64),
+                                TextEntry::make('name')->label('Nombre')->hiddenLabel()->weight('bold')
                                     ->url(fn ($record): ?string => PetResource::canView($record)
                                         ? PetResource::getUrl('view', ['record' => $record])
                                         : null),
-                                TextEntry::make('species')->hiddenLabel()->badge(),
-                                TextEntry::make('breed')->hiddenLabel()->color('gray'),
+                                TextEntry::make('species')->label('Especie')->hiddenLabel()->badge(),
+                                TextEntry::make('breed')->label('Raza')->hiddenLabel()->color('gray'),
                             ]),
                     ]),
             ]);

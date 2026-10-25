@@ -17,6 +17,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
@@ -39,6 +40,11 @@ class TestResource extends Resource
     protected static ?string $pluralModelLabel = 'pruebas laboratoriales';
 
     protected static ?string $recordTitleAttribute = 'type';
+
+    public static function getRecordTitle(?Model $record): string|Htmlable|null
+    {
+        return $record ? static::getGlobalSearchResultTitle($record) : null;
+    }
 
     public static function getGloballySearchableAttributes(): array
     {
