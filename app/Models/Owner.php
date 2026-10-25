@@ -99,4 +99,16 @@ class Owner extends Model
     {
         return $this->hasMany(Pet::class);
     }
+
+    /**
+     * Motivo por el que no puede eliminarse (tiene mascotas), o null si puede.
+     */
+    public function deletionBlockedReason(): ?string
+    {
+        if ($this->pets()->exists()) {
+            return 'Tiene mascotas registradas; eliminarlo borraría también todo su historial clínico.';
+        }
+
+        return null;
+    }
 }
