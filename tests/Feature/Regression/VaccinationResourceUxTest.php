@@ -187,8 +187,8 @@ it('la búsqueda global de vacunaciones incluye mascota, estado y fecha', functi
 it('la ficha de mascota usa el formulario y filtros compartidos de vacunaciones', function () {
     actingAsRole('admin');
     $pet = Pet::factory()->create();
-    $vencida = Vaccination::factory()->create(['pet_id' => $pet->id, 'next_application' => today()->subDays(2)]);
-    $alDia = Vaccination::factory()->create(['pet_id' => $pet->id, 'next_application' => today()->addMonths(6)]);
+    $vencida = Vaccination::factory()->create(['pet_id' => $pet->id, 'vaccine' => 'Rabia', 'next_application' => today()->subDays(2)]);
+    $alDia = Vaccination::factory()->create(['pet_id' => $pet->id, 'vaccine' => 'Triple Felina', 'next_application' => today()->addMonths(6)]);
 
     Livewire::test(VaccinationsRelationManager::class, ['ownerRecord' => $pet, 'pageClass' => ViewPet::class])
         ->filterTable('status', 'overdue')
