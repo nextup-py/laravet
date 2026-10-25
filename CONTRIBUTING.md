@@ -68,9 +68,11 @@ La aplicación estará en: http://localhost:8000
 - Usar nombres descriptivos para variables y funciones
 
 ### Verificar Formato
+> Formatea solo los archivos que tocaste (`./vendor/bin/pint ruta/al/archivo.php`): Pint sobre carpetas enteras reformatea archivos ajenos y ensucia el PR.
+
 ```bash
-./vendor/bin/pint  # Formatea el código automáticamente
-./vendor/bin/pint --check  # Solo verifica sin cambiar
+./vendor/bin/pint ruta/al/archivo.php  # Formatea solo ese archivo
+./vendor/bin/pint --check ruta/al/archivo.php  # Solo verifica sin cambiar
 ```
 
 ### JavaScript/Frontend
@@ -95,39 +97,30 @@ php artisan test --debug           # Modo verbose
 
 ### Escribir Tests
 
-#### Test Unitario Ejemplo
+El proyecto usa [Pest](https://pestphp.com). Los tests de los recursos del panel viven en `tests/Feature/Regression/` y siguen este patrón (el archivo `tests/Pest.php` ya siembra roles y regiones antes de cada test y define `actingAsRole()`):
+
 ```php
-// tests/Unit/ExampleTest.php
-namespace Tests\Unit;
+// tests/Feature/Regression/EjemploUxTest.php
+use App\Filament\Resources\PetResource\Pages\ListPets;
+use App\Models\Pet;
+use Livewire\Livewire;
 
-use PHPUnit\Framework\TestCase;
+it('filtra mascotas por propietario', function () {
+    actingAsRole('admin');
+    $suya = Pet::factory()->create();
+    $ajena = Pet::factory()->create();
 
-class ExampleTest extends TestCase
-{
-    public function test_basic_math()
-    {
-        $this->assertEquals(2, 1 + 1);
-    }
-}
+    Livewire::test(ListPets::class)
+        ->filterTable('owner_id', $suya->owner_id)
+        ->assertCanSeeTableRecords([$suya])
+        ->assertCanNotSeeTableRecords([$ajena]);
+});
 ```
 
-#### Test Funcional Ejemplo
-```php
-// tests/Feature/ExampleTest.php
-namespace Tests\Feature;
+Qué conviene cubrir en cada recurso: filtros, orden por defecto, la ficha (título y enlaces), la búsqueda global y los permisos (un rol con solo `view_*` no debe ver datos que requieren otro permiso).
 
-use Tests\TestCase;
-
-class ExampleTest extends TestCase
-{
-    public function test_application_returns_a_successful_response()
-    {
-        $response = $this->get('/');
-        $response->assertStatus(200);
-    }
-}
-```
-
+#### Los tests corren en SQLite, producción usa MySQL
+Una consulta puede pasar todos los tests y fallar en MySQL: por ejemplo, una subconsulta escalar que devuelve más de una fila funciona en SQLite pero MySQL responde `1242 Subquery returns more than 1 row`. Si agregas subconsultas, `groupBy`, funciones de fecha o `addSelect` con subconsultas, pruébalas también contra MySQL, o verifica el SQL generado con `->toSql()` en un test.
 ### Requisitos de Tests
 - Todos los tests deben pasar antes de enviar un Pull Request
 - Agregar tests para nuevas funcionalidades
@@ -144,6 +137,8 @@ php artisan test --coverage  # Ver cobertura de tests
 - Ser conciso pero descriptivo
 - Primera línea máximo 50 caracteres
 - Detalles adicionales en líneas posteriores si es necesario
+- Los mensajes van en español y con prefijo del tipo de cambio: `feat:`, `fix:`, `docs:`, `refactor:` (por ejemplo `fix: evitar el error 1242 de MySQL en la marca de vacunación renovada`)
+- La primera línea puede superar los 50 caracteres si el prefijo y el resumen lo requieren; el detalle va en el cuerpo
 
 Ejemplos:
 ```bash
@@ -332,5 +327,7 @@ Antes de enviar un Pull Request, verifica:
 - [ ] No hay código comentado innecesario
 - [ ] No hay archivos secretos (.env, credentials)
 - [ ] He testeado manualmente en el navegador
+- [ ] Si agregué consultas con subconsultas o funciones de base de datos, las probé también en MySQL
+- [ ] Si el cambio muestra datos de propietarios o elimina registros, respeté los permisos y la protección contra eliminación en cascada (ver CLAUDE.md)
 
 ¡Gracias por contribuir! 🎉
