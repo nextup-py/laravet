@@ -16,6 +16,7 @@ class EditUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\ViewAction::make(),
             Actions\DeleteAction::make()
                 ->disabled(fn (): bool => filled($this->record->deletionBlockedReason(auth()->user())))
                 ->tooltip(fn (): ?string => $this->record->deletionBlockedReason(auth()->user()))

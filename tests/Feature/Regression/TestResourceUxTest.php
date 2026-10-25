@@ -175,7 +175,7 @@ it('registrar prueba desde la ficha de mascota precarga la mascota', function ()
     actingAsRole('admin');
     $pet = Pet::factory()->create();
 
-    Livewire::test(ViewPet::class, ['record' => $pet->getRouteKey()])->assertActionVisible('registerTest');
+    Livewire::test(ViewPet::class, ['record' => $pet->getRouteKey()])->assertActionDoesNotExist('registerTest');
 
     Livewire::withQueryParams(['pet_id' => $pet->id])
         ->test(CreateTest::class)
