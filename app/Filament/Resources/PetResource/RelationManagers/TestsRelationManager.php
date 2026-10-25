@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PetResource\RelationManagers;
 
 use App\Filament\Resources\TestResource;
+use App\Models\Test;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -52,12 +53,12 @@ class TestsRelationManager extends RelationManager
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Creado a las')
+                    ->label('Registrada el')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Actualizado a las')
+                    ->label('Actualizada el')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -87,11 +88,18 @@ class TestsRelationManager extends RelationManager
             ])
             ->actions([
                 TestResource::uploadResultAction(),
-                Tables\Actions\EditAction::make()
-                    ->extraModalFooterActions([
-                        Tables\Actions\DeleteAction::make()
-                            ->cancelParentActions(),
-                    ]),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('view')
+                        ->label('Ver')
+                        ->icon('heroicon-m-eye')
+                        ->visible(fn (Test $record): bool => TestResource::canView($record))
+                        ->url(fn (Test $record): string => TestResource::getUrl('view', ['record' => $record])),
+                    Tables\Actions\EditAction::make()
+                        ->extraModalFooterActions([
+                            Tables\Actions\DeleteAction::make()
+                                ->cancelParentActions(),
+                        ]),
+                ]),
             ]);
     }
 }
