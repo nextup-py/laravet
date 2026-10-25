@@ -8,6 +8,7 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class VaccinationsRelationManager extends RelationManager
@@ -26,6 +27,7 @@ class VaccinationsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->withRenewedFlag())
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')

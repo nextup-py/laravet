@@ -15,6 +15,12 @@ class SendVaccinationNotifications extends Command
      */
     protected $signature = 'send:vaccination-notifications';
 
+    /** Días antes del vencimiento desde los que se avisa. */
+    private const DAYS_BEFORE = 3;
+
+    /** Antigüedad máxima de una vacunación vencida para que todavía se avise. */
+    private const MAX_DAYS_OVERDUE = 30;
+
     /**
      * Descripción del comando de consola.
      *
@@ -27,11 +33,16 @@ class SendVaccinationNotifications extends Command
      */
     public function handle(): void
     {
-        // Vacunaciones cuya próxima aplicación es en los próximos 3 días y que aún
-        // no recibieron un recordatorio (evita reenviar en cada corrida del schedule).
+        // Solo vacunaciones vigentes (la última aplicación de cada vacuna por mascota) cuya
+        // próxima aplicación es en los próximos 3 días, o venció hace como máximo 30 días,
+        // y que aún no recibieron un recordatorio (evita reenviar en cada corrida del schedule).
         $vaccinations = Vaccination::query()
+            ->current()
             ->whereNull('reminder_sent_at')
-            ->where('next_application', '<=', now()->addDays(3))
+            ->whereBetween('next_application', [
+                today()->subDays(self::MAX_DAYS_OVERDUE)->toDateString(),
+                today()->addDays(self::DAYS_BEFORE)->endOfDay()->toDateTimeString(),
+            ])
             ->with(['pet.owner'])
             ->get();
 

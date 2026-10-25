@@ -267,8 +267,8 @@ class PetResource extends Resource
                     ->trueLabel('Vencidas o por vencer (7 días)')
                     ->falseLabel('Al día')
                     ->queries(
-                        true: fn (Builder $query) => $query->whereHas('vaccinations', fn (Builder $q) => $q->upcomingOrOverdue()),
-                        false: fn (Builder $query) => $query->whereDoesntHave('vaccinations', fn (Builder $q) => $q->upcomingOrOverdue()),
+                        true: fn (Builder $query) => $query->whereHas('vaccinations', fn (Builder $q) => $q->actionable()),
+                        false: fn (Builder $query) => $query->whereDoesntHave('vaccinations', fn (Builder $q) => $q->actionable()),
                         blank: fn (Builder $query) => $query,
                     ),
                 Tables\Filters\TernaryFilter::make('active')

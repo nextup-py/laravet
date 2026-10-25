@@ -46,7 +46,7 @@ class VaccinationNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->greeting('¡Hola, '.$this->vaccination->pet->owner->first_name.'!')
             ->subject(__('Recordatorio de vacunación para tu mascota.'))
-            ->line('La vacuna de tu mascota '.$this->vaccination->pet->name.' está por vencer el '.Carbon::parse($this->vaccination->next_application)->format('d/m/Y'))
+            ->line('La vacuna de tu mascota '.$this->vaccination->pet->name.(Carbon::parse($this->vaccination->next_application)->startOfDay()->lt(today()) ? ' venció el ' : ' está por vencer el ').Carbon::parse($this->vaccination->next_application)->format('d/m/Y'))
             ->action('Ver detalles', PetResource::getUrl('edit', ['record' => $this->vaccination->pet_id]))
             ->salutation('Saludos, '.$clinic->name);
     }
