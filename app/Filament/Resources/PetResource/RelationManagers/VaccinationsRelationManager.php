@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PetResource\RelationManagers;
 
 use App\Filament\Resources\VaccinationResource;
+use App\Models\Vaccination;
 use App\Services\PdfGeneratorService;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -65,12 +66,12 @@ class VaccinationsRelationManager extends RelationManager
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Creado a las')
+                    ->label('Registrada el')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Actualizado a las')
+                    ->label('Actualizada el')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -112,11 +113,19 @@ class VaccinationsRelationManager extends RelationManager
                     ->modalDescription('¿Desea descargar el PDF con el historial completo?'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->extraModalFooterActions([
-                        Tables\Actions\DeleteAction::make()
-                            ->cancelParentActions(),
-                    ]),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('view')
+                        ->label('Ver')
+                        ->icon('heroicon-m-eye')
+                        ->visible(fn (Vaccination $record): bool => VaccinationResource::canView($record))
+                        ->url(fn (Vaccination $record): string => VaccinationResource::getUrl('view', ['record' => $record])),
+                    Tables\Actions\EditAction::make()
+                        ->extraModalFooterActions([
+                            Tables\Actions\DeleteAction::make()
+                                ->cancelParentActions(),
+                        ]),
+                    VaccinationResource::revaccinateAction(),
+                ]),
             ]);
     }
 }

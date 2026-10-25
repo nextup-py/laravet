@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PetResource\RelationManagers;
 
 use App\Enums\AiUsageStatus;
+use App\Filament\Resources\ConsultationResource;
 use App\Models\Consultation;
 use App\Services\AIDiagnosticService;
 use Filament\Forms;
@@ -229,10 +230,11 @@ class ConsultationsRelationManager extends RelationManager
                     ->label('ID')
                     ->searchable()
                     ->sortable()
-                    ->numeric(),
+                    ->numeric()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('consultation_date')
                     ->label('Fecha de consulta')
-                    ->date()
+                    ->date('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('diagnosis')
                     ->label('Diagnóstico')
@@ -253,28 +255,28 @@ class ConsultationsRelationManager extends RelationManager
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Creado a las')
+                    ->label('Registrada el')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Actualizado a las')
+                    ->label('Actualizada el')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('consultation_date', 'desc')
             ->filters([
-                Tables\Filters\Filter::make('created_at')
-                    ->label('Creado a las')
+                Tables\Filters\Filter::make('consultation_date')
+                    ->label('Fecha de consulta')
                     ->form([
                         Forms\Components\DatePicker::make('from')->label('Desde')->native(false),
                         Forms\Components\DatePicker::make('until')->label('Hasta')->native(false),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
-                            ->when($data['from'], fn (Builder $query, $date) => $query->whereDate('created_at', '>=', $date))
-                            ->when($data['until'], fn (Builder $query, $date) => $query->whereDate('created_at', '<=', $date));
+                            ->when($data['from'], fn (Builder $query, $date) => $query->whereDate('consultation_date', '>=', $date))
+                            ->when($data['until'], fn (Builder $query, $date) => $query->whereDate('consultation_date', '<=', $date));
                     }),
             ])
             ->headerActions([
@@ -286,11 +288,18 @@ class ConsultationsRelationManager extends RelationManager
                     }),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->extraModalFooterActions([
-                        Tables\Actions\DeleteAction::make()
-                            ->cancelParentActions(),
-                    ]),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('view')
+                        ->label('Ver')
+                        ->icon('heroicon-m-eye')
+                        ->visible(fn (Consultation $record): bool => ConsultationResource::canView($record))
+                        ->url(fn (Consultation $record): string => ConsultationResource::getUrl('view', ['record' => $record])),
+                    Tables\Actions\EditAction::make()
+                        ->extraModalFooterActions([
+                            Tables\Actions\DeleteAction::make()
+                                ->cancelParentActions(),
+                        ]),
+                ]),
             ]);
     }
 }

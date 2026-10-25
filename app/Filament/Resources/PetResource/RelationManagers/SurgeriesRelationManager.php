@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PetResource\RelationManagers;
 
 use App\Filament\Resources\SurgeryResource;
+use App\Models\Surgery;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -51,12 +52,12 @@ class SurgeriesRelationManager extends RelationManager
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Creado a las')
+                    ->label('Registrada el')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Actualizado a las')
+                    ->label('Actualizada el')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -89,11 +90,18 @@ class SurgeriesRelationManager extends RelationManager
                     }),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->extraModalFooterActions([
-                        Tables\Actions\DeleteAction::make()
-                            ->cancelParentActions(),
-                    ]),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('view')
+                        ->label('Ver')
+                        ->icon('heroicon-m-eye')
+                        ->visible(fn (Surgery $record): bool => SurgeryResource::canView($record))
+                        ->url(fn (Surgery $record): string => SurgeryResource::getUrl('view', ['record' => $record])),
+                    Tables\Actions\EditAction::make()
+                        ->extraModalFooterActions([
+                            Tables\Actions\DeleteAction::make()
+                                ->cancelParentActions(),
+                        ]),
+                ]),
             ]);
     }
 }

@@ -289,16 +289,25 @@ class VaccinationResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
-                    Tables\Actions\Action::make('revaccinate')
-                        ->label('Revacunar')
-                        ->icon('heroicon-o-arrow-path')
-                        ->visible(fn (): bool => static::canCreate())
-                        ->url(fn (Vaccination $record): string => static::getUrl('create', [
-                            'pet_id' => $record->pet_id,
-                            'vaccine' => $record->vaccine,
-                        ])),
+                    self::revaccinateAction(),
                 ]),
             ])->selectCurrentPageOnly();
+    }
+
+    /**
+     * Acción de fila que abre el alta de la misma vacuna para la misma mascota; compartida
+     * con la VaccinationsRelationManager de Pet.
+     */
+    public static function revaccinateAction(): Tables\Actions\Action
+    {
+        return Tables\Actions\Action::make('revaccinate')
+            ->label('Revacunar')
+            ->icon('heroicon-o-arrow-path')
+            ->visible(fn (): bool => static::canCreate())
+            ->url(fn (Vaccination $record): string => static::getUrl('create', [
+                'pet_id' => $record->pet_id,
+                'vaccine' => $record->vaccine,
+            ]));
     }
 
     /**
