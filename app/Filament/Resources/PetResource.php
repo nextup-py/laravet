@@ -279,7 +279,6 @@ class PetResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     ...self::registerActions(),
                 ]),
@@ -309,6 +308,19 @@ class PetResource extends Resource
                 ->url(fn (Pet $record): string => $shortcut[2]::getUrl('create', ['pet_id' => $record->getKey()])))
             ->values()
             ->all();
+    }
+
+    /**
+     * Atajo de fila a la ficha de la mascota del registro (consulta, cirugía, prueba…); solo si el
+     * usuario puede verla. Para tablas de modelos con relación `pet`.
+     */
+    public static function viewPetAction(): Tables\Actions\Action
+    {
+        return Tables\Actions\Action::make('viewPet')
+            ->label('Ver mascota')
+            ->icon('heroicon-o-identification')
+            ->visible(fn (Model $record): bool => $record->pet && static::canView($record->pet))
+            ->url(fn (Model $record): string => static::getUrl('view', ['record' => $record->pet_id]));
     }
 
     public static function getRelations(): array

@@ -84,18 +84,11 @@ class PetsRelationManager extends RelationManager
                 ? PetResource::getUrl('view', ['record' => $record])
                 : null)
             ->actions([
-                Tables\Actions\ActionGroup::make([
-                    Tables\Actions\Action::make('view')
-                        ->label('Ver')
-                        ->icon('heroicon-m-eye')
-                        ->visible(fn (Pet $record): bool => PetResource::canView($record))
-                        ->url(fn (Pet $record): string => PetResource::getUrl('view', ['record' => $record])),
-                    Tables\Actions\Action::make('edit')
-                        ->label('Editar')
-                        ->icon('heroicon-m-pencil-square')
-                        ->visible(fn (Pet $record): bool => PetResource::canEdit($record))
-                        ->url(fn (Pet $record): string => PetResource::getUrl('edit', ['record' => $record])),
-                ]),
+                Tables\Actions\Action::make('edit')
+                    ->label('Editar')
+                    ->icon('heroicon-m-pencil-square')
+                    ->visible(fn (Pet $record): bool => PetResource::canEdit($record))
+                    ->url(fn (Pet $record): string => PetResource::getUrl('edit', ['record' => $record])),
             ]);
     }
 }
