@@ -260,7 +260,6 @@ class OwnerResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\Action::make('registerPet')
                         ->label('Registrar mascota')

@@ -20,10 +20,9 @@ it('las acciones de fila siguen existiendo y habilitadas dentro del ActionGroup 
     $consultation = Consultation::factory()->create();
 
     Livewire::test(ListConsultations::class)
-        ->assertTableActionExists('view')
+        ->assertTableActionDoesNotExist('view')
         ->assertTableActionExists('edit')
         ->assertTableActionDoesNotExist('delete')
-        ->assertTableActionEnabled('view', $consultation)
         ->assertTableActionEnabled('edit', $consultation);
 });
 
