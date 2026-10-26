@@ -12,6 +12,7 @@ use BezhanSalleh\FilamentShield\Traits\HasShieldFormComponents;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -22,6 +23,7 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
+use Spatie\Permission\Models\Role;
 
 class RoleResource extends Resource implements HasShieldPermissions
 {
@@ -140,8 +142,28 @@ class RoleResource extends Resource implements HasShieldPermissions
             ->defaultSort('name')
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
+                    Tables\Actions\Action::make('duplicate')
+                        ->label('Duplicar')
+                        ->icon('heroicon-o-document-duplicate')
+                        ->visible(fn (): bool => static::canCreate())
+                        ->form([
+                            Forms\Components\TextInput::make('name')
+                                ->label('Nombre del rol nuevo')
+                                ->required()
+                                ->maxLength(255)
+                                ->unique('roles', 'name', modifyRuleUsing: fn (Unique $rule): Unique => $rule->where('guard_name', 'web')),
+                        ])
+                        ->modalHeading(fn (Model $record): string => "Duplicar el rol «{$record->name}»")
+                        ->modalDescription('Se crea un rol nuevo con los mismos permisos; luego puedes ajustarlos.')
+                        ->action(function (Model $record, array $data) {
+                            $copy = Role::create(['name' => $data['name'], 'guard_name' => $record->guard_name]);
+                            $copy->syncPermissions($record->permissions);
+
+                            Notification::make()->title('Rol duplicado')->success()->send();
+
+                            return redirect(static::getUrl('edit', ['record' => $copy]));
+                        }),
                 ]),
             ]);
     }

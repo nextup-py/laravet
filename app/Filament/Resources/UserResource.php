@@ -9,17 +9,21 @@ use App\Models\City;
 use App\Models\Department;
 use App\Models\Neighborhood;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Notifications\Auth\ResetPassword as ResetPasswordNotification;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
@@ -290,8 +294,39 @@ class UserResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
+                    Tables\Actions\Action::make('sendPasswordReset')
+                        ->label('Enviar enlace de contraseña')
+                        ->icon('heroicon-o-key')
+                        ->visible(fn (User $record): bool => static::canEdit($record))
+                        ->requiresConfirmation()
+                        ->modalHeading('Enviar enlace para restablecer la contraseña')
+                        ->modalDescription(fn (User $record): string => "Se enviará un correo a {$record->email} con un enlace para elegir una contraseña nueva.")
+                        ->action(function (User $record): void {
+                            $status = Password::broker(Filament::getAuthPasswordBroker())->sendResetLink(
+                                ['email' => $record->email],
+                                function (User $user, string $token): void {
+                                    $notification = app(ResetPasswordNotification::class, ['token' => $token]);
+                                    $notification->url = Filament::getResetPasswordUrl($token, $user);
+
+                                    $user->notify($notification);
+                                },
+                            );
+
+                            $status === Password::RESET_LINK_SENT
+                                ? Notification::make()->title('Enlace enviado')->body("Se envió el correo a {$record->email}.")->success()->send()
+                                : Notification::make()->title('No se pudo enviar el enlace')->body('Espera unos minutos e intenta nuevamente.')->danger()->send();
+                        }),
+                    Tables\Actions\Action::make('viewConsultations')
+                        ->label('Ver sus consultas')
+                        ->icon('heroicon-o-chat-bubble-left-right')
+                        ->visible(fn (): bool => ConsultationResource::canViewAny())
+                        ->url(fn (User $record): string => ConsultationResource::getUrl('index', ['tableFilters' => ['user_id' => ['value' => $record->getKey()]]])),
+                    Tables\Actions\Action::make('viewVaccinations')
+                        ->label('Ver sus vacunaciones')
+                        ->icon('heroicon-o-shield-check')
+                        ->visible(fn (): bool => VaccinationResource::canViewAny())
+                        ->url(fn (User $record): string => VaccinationResource::getUrl('index', ['tableFilters' => ['user_id' => ['value' => $record->getKey()]]])),
                 ]),
             ]);
     }
