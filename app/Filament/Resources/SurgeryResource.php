@@ -6,7 +6,6 @@ use App\Enums\PetSpecies;
 use App\Filament\Resources\SurgeryResource\Pages;
 use App\Models\Pet;
 use App\Models\Surgery;
-use App\Services\PdfGeneratorService;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
@@ -269,15 +268,12 @@ class SurgeryResource extends Resource
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make(),
-                    Tables\Actions\Action::make('downloadCertificate')
-                        ->label('Descargar certificado')
-                        ->icon('heroicon-o-document-arrow-down')
+                    Tables\Actions\Action::make('openCertificate')
+                        ->label('Certificado PDF')
+                        ->icon('heroicon-o-document-text')
                         ->authorize(fn (Surgery $record): bool => static::canView($record))
-                        ->action(fn (Surgery $record, PdfGeneratorService $pdfGenerator) => $pdfGenerator->download(
-                            'pdf.surgery-certificate',
-                            ['surgery' => $record],
-                            "Certificado-Cirugia-{$record->pet->name}-{$record->id}.pdf",
-                        )),
+                        ->url(fn (Surgery $record): string => route('filament.admin.pdf.surgery', $record))
+                        ->openUrlInNewTab(),
                     PetResource::viewPetAction(),
                 ]),
             ]);

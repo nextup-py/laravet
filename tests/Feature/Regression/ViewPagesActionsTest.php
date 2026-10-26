@@ -14,8 +14,9 @@ it('la ficha de mascota agrupa las descargas y ya no tiene botones de registrar'
     $pet = Pet::factory()->create();
 
     Livewire::test(ViewPet::class, ['record' => $pet->getRouteKey()])
-        ->assertActionExists('downloadClinicalHistory')
-        ->assertActionExists('downloadPetIdCard')
+        ->assertActionExists('openClinicalHistory')
+        ->assertActionExists('openPetIdCard')
+        ->assertActionExists('openVaccineCard')
         ->assertActionDoesNotExist('registerSurgery')
         ->assertActionDoesNotExist('registerTest')
         ->assertActionExists('edit');
@@ -33,12 +34,11 @@ it('la ficha de vacunación ofrece Revacunar con mascota y vacuna precargadas', 
         ]));
 });
 
-it('la ficha de consulta permite descargar el informe en PDF', function () {
+it('la ficha de consulta abre el informe PDF en una pestaña nueva', function () {
     actingAsRole('veterinarian');
     $consultation = Consultation::factory()->create();
 
     Livewire::test(ViewConsultation::class, ['record' => $consultation->getRouteKey()])
-        ->assertActionExists('downloadConsultation')
-        ->callAction('downloadConsultation')
-        ->assertFileDownloaded();
+        ->assertActionHasUrl('openReport', route('filament.admin.pdf.consultation', $consultation))
+        ->assertActionShouldOpenUrlInNewTab('openReport');
 });

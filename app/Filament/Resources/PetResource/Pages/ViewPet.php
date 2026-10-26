@@ -4,7 +4,6 @@ namespace App\Filament\Resources\PetResource\Pages;
 
 use App\Filament\Resources\OwnerResource;
 use App\Filament\Resources\PetResource;
-use App\Services\PdfGeneratorService;
 use Filament\Actions;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section;
@@ -33,33 +32,26 @@ class ViewPet extends ViewRecord
     {
         return [
             Actions\ActionGroup::make([
-                Actions\Action::make('downloadClinicalHistory')
-                    ->label('Descargar historia clínica')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->color('success')
-                    ->action(fn (PdfGeneratorService $pdfGenerator) => $pdfGenerator->download(
-                        'pdf.clinical-history',
-                        ['pet' => $this->record],
-                        "Historia-Clinica-{$this->record->name}.pdf",
-                    ))
-                    ->requiresConfirmation()
-                    ->modalHeading('Generar historia clínica')
-                    ->modalDescription('¿Desea descargar el PDF con el historial completo de consultas?'),
-                Actions\Action::make('downloadPetIdCard')
-                    ->label('Descargar ficha de mascota')
+                Actions\Action::make('openClinicalHistory')
+                    ->label('Historia clínica')
+                    ->icon('heroicon-o-document-text')
+                    ->visible(fn (): bool => auth()->user()?->can('view_any_consultation') ?? false)
+                    ->url(fn (): string => route('filament.admin.pdf.clinical-history', $this->record))
+                    ->openUrlInNewTab(),
+                Actions\Action::make('openPetIdCard')
+                    ->label('Ficha de la mascota')
                     ->icon('heroicon-o-identification')
-                    ->color('success')
-                    ->action(fn (PdfGeneratorService $pdfGenerator) => $pdfGenerator->download(
-                        'pdf.pet-id-card',
-                        ['pet' => $this->record],
-                        "Ficha-Mascota-{$this->record->name}.pdf",
-                    ))
-                    ->requiresConfirmation()
-                    ->modalHeading('Generar ficha de identificación')
-                    ->modalDescription('¿Desea descargar el PDF con la ficha de identificación de la mascota?'),
+                    ->url(fn (): string => route('filament.admin.pdf.pet-id-card', $this->record))
+                    ->openUrlInNewTab(),
+                Actions\Action::make('openVaccineCard')
+                    ->label('Carnet de vacunación')
+                    ->icon('heroicon-o-shield-check')
+                    ->visible(fn (): bool => auth()->user()?->can('view_any_vaccination') ?? false)
+                    ->url(fn (): string => route('filament.admin.pdf.vaccine-card', $this->record))
+                    ->openUrlInNewTab(),
             ])
-                ->label('Descargar')
-                ->icon('heroicon-o-arrow-down-tray')
+                ->label('Documentos PDF')
+                ->icon('heroicon-o-document-arrow-down')
                 ->color('success')
                 ->button(),
             Actions\EditAction::make(),

@@ -5,7 +5,6 @@ namespace App\Filament\Resources\TestResource\Pages;
 use App\Filament\Resources\PetResource;
 use App\Filament\Resources\TestResource;
 use App\Filament\Resources\UserResource;
-use App\Services\PdfGeneratorService;
 use Filament\Actions;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -25,18 +24,12 @@ class ViewTest extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('downloadReport')
-                ->label('Descargar reporte')
-                ->icon('heroicon-o-document-arrow-down')
+            Actions\Action::make('openReport')
+                ->label('Reporte PDF')
+                ->icon('heroicon-o-document-text')
                 ->color('success')
-                ->action(fn (PdfGeneratorService $pdfGenerator) => $pdfGenerator->download(
-                    'pdf.test-report',
-                    ['test' => $this->record],
-                    "Reporte-Prueba-{$this->record->pet->name}-{$this->record->id}.pdf",
-                ))
-                ->requiresConfirmation()
-                ->modalHeading('Generar reporte de prueba laboratorial')
-                ->modalDescription('¿Desea descargar el reporte en PDF de esta prueba?'),
+                ->url(fn (): string => route('filament.admin.pdf.test', $this->record))
+                ->openUrlInNewTab(),
             Actions\EditAction::make(),
         ];
     }

@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Http\Controllers\PdfDocumentController;
 use App\Http\Controllers\TestResultController;
 use App\Settings\ClinicSettings;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -80,6 +81,14 @@ class AdminPanelProvider extends PanelProvider
                     ->collapsed(),
             ])
             ->authenticatedRoutes(function () {
+                Route::controller(PdfDocumentController::class)->group(function () {
+                    Route::get('/mascotas/{pet}/historia-clinica.pdf', 'clinicalHistory')->name('pdf.clinical-history');
+                    Route::get('/mascotas/{pet}/ficha.pdf', 'petIdCard')->name('pdf.pet-id-card');
+                    Route::get('/mascotas/{pet}/carnet-vacunacion.pdf', 'vaccineCard')->name('pdf.vaccine-card');
+                    Route::get('/consultas/{consultation}/informe.pdf', 'consultation')->name('pdf.consultation');
+                    Route::get('/cirugias/{surgery}/certificado.pdf', 'surgery')->name('pdf.surgery');
+                    Route::get('/pruebas/{test}/reporte.pdf', 'test')->name('pdf.test');
+                });
                 Route::get('/pruebas/{test}/resultados/{index}', TestResultController::class)
                     ->whereNumber('index')
                     ->name('tests.result');

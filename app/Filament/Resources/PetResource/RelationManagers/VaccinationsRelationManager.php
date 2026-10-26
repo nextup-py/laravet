@@ -4,7 +4,6 @@ namespace App\Filament\Resources\PetResource\RelationManagers;
 
 use App\Filament\Resources\VaccinationResource;
 use App\Models\Vaccination;
-use App\Services\PdfGeneratorService;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
@@ -92,25 +91,12 @@ class VaccinationsRelationManager extends RelationManager
 
                         return $data;
                     }),
-                Tables\Actions\Action::make('downloadVaccineCard')
-                    ->label('Descargar PDF')
+                Tables\Actions\Action::make('openVaccineCard')
+                    ->label('Carnet PDF')
+                    ->icon('heroicon-o-document-text')
                     ->color('success')
-                    ->action(function (PdfGeneratorService $pdfGenerator) {
-                        $pet = $this->getOwnerRecord(); // Obtenemos el Pet desde el contexto padre
-
-                        if (! $pet) {
-                            throw new \Exception('Mascota no encontrada');
-                        }
-
-                        return $pdfGenerator->download(
-                            'pdf.vaccine-card',
-                            ['pet' => $pet, 'vaccinations' => $pet->vaccinations],
-                            "Carnet-Vacunacion-{$pet->name}.pdf",
-                        );
-                    })
-                    ->requiresConfirmation()
-                    ->modalHeading('Generar carnet de vacunación')
-                    ->modalDescription('¿Desea descargar el PDF con el historial completo?'),
+                    ->url(fn (): string => route('filament.admin.pdf.vaccine-card', $this->getOwnerRecord()))
+                    ->openUrlInNewTab(),
             ])
             ->recordAction('view')
             ->actions([

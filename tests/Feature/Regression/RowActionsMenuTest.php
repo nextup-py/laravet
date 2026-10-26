@@ -24,25 +24,19 @@ it('las tablas clínicas no repiten «Ver» en el menú de fila: el clic en la f
     ListVaccinations::class, ListSurgeries::class, ListTests::class,
 ]);
 
-it('consultas, cirugías y pruebas ofrecen PDF y atajo a la mascota desde la fila', function () {
+it('consultas, cirugías y pruebas abren su PDF en una pestaña nueva y tienen atajo a la mascota', function () {
     actingAsRole('admin');
     $consultation = Consultation::factory()->create();
     $surgery = Surgery::factory()->create();
     $test = Test::factory()->create();
 
     Livewire::test(ListConsultations::class)
-        ->assertTableActionExists('downloadReport')
-        ->callTableAction('downloadReport', $consultation)
-        ->assertFileDownloaded();
-    Livewire::test(ListSurgeries::class)
-        ->callTableAction('downloadCertificate', $surgery)
-        ->assertFileDownloaded();
-    Livewire::test(ListTests::class)
-        ->callTableAction('downloadReport', $test)
-        ->assertFileDownloaded();
-
-    Livewire::test(ListConsultations::class)
+        ->assertTableActionHasUrl('openReport', route('filament.admin.pdf.consultation', $consultation), $consultation)
         ->assertTableActionHasUrl('viewPet', PetResource::getUrl('view', ['record' => $consultation->pet_id]), $consultation);
+    Livewire::test(ListSurgeries::class)
+        ->assertTableActionHasUrl('openCertificate', route('filament.admin.pdf.surgery', $surgery), $surgery);
+    Livewire::test(ListTests::class)
+        ->assertTableActionHasUrl('openReport', route('filament.admin.pdf.test', $test), $test);
 });
 
 it('quien no puede ver el registro no descarga su PDF desde la fila', function () {
@@ -53,11 +47,11 @@ it('quien no puede ver el registro no descarga su PDF desde la fila', function (
     test()->actingAs($user);
 
     Livewire::test(ListConsultations::class)
-        ->assertTableActionHidden('downloadReport', Consultation::factory()->create());
+        ->assertTableActionHidden('openReport', Consultation::factory()->create());
     Livewire::test(ListSurgeries::class)
-        ->assertTableActionHidden('downloadCertificate', Surgery::factory()->create());
+        ->assertTableActionHidden('openCertificate', Surgery::factory()->create());
     Livewire::test(ListTests::class)
-        ->assertTableActionHidden('downloadReport', Test::factory()->create());
+        ->assertTableActionHidden('openReport', Test::factory()->create());
 });
 
 it('la consulta de control abre el alta con la mascota y solo para mascotas activas', function () {

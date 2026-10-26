@@ -296,6 +296,12 @@ class VaccinationResource extends Resource
                     Tables\Actions\EditAction::make(),
                     self::revaccinateAction(),
                     self::whatsappReminderAction(),
+                    Tables\Actions\Action::make('openVaccineCard')
+                        ->label('Carnet PDF')
+                        ->icon('heroicon-o-document-text')
+                        ->visible(fn (Vaccination $record): bool => PetResource::canView($record->pet))
+                        ->url(fn (Vaccination $record): string => route('filament.admin.pdf.vaccine-card', $record->pet_id))
+                        ->openUrlInNewTab(),
                 ]),
             ])->selectCurrentPageOnly();
     }

@@ -9,7 +9,6 @@ use App\Filament\Resources\ConsultationResource\Pages;
 use App\Models\Consultation;
 use App\Models\Pet;
 use App\Services\AIDiagnosticService;
-use App\Services\PdfGeneratorService;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
@@ -413,15 +412,12 @@ class ConsultationResource extends Resource
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make(),
-                    Tables\Actions\Action::make('downloadReport')
-                        ->label('Descargar informe')
-                        ->icon('heroicon-o-document-arrow-down')
+                    Tables\Actions\Action::make('openReport')
+                        ->label('Informe PDF')
+                        ->icon('heroicon-o-document-text')
                         ->authorize(fn (Consultation $record): bool => static::canView($record))
-                        ->action(fn (Consultation $record, PdfGeneratorService $pdfGenerator) => $pdfGenerator->download(
-                            'pdf.consultation',
-                            ['consultation' => $record],
-                            "Consulta-{$record->pet->name}-{$record->id}.pdf",
-                        )),
+                        ->url(fn (Consultation $record): string => route('filament.admin.pdf.consultation', $record))
+                        ->openUrlInNewTab(),
                     Tables\Actions\Action::make('followUp')
                         ->label('Nueva consulta de control')
                         ->icon('heroicon-o-arrow-path')
