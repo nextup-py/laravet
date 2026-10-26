@@ -59,6 +59,7 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->passwordReset()
             ->spa()
+            ->databaseNotifications()
             ->profile(isSimple: false)
             ->sidebarCollapsibleOnDesktop()
             ->readOnlyRelationManagersOnResourceViewPagesByDefault(false)
