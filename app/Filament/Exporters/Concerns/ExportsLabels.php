@@ -30,18 +30,6 @@ trait ExportsLabels
         );
     }
 
-    /**
-     * El export corre en la misma petición, sin depender del driver de cola del entorno. Con la cola
-     * `database` el archivo se generaba, pero el aviso de «completada» se enviaba como notificación a
-     * la base de datos, y el proyecto no tiene la tabla `notifications`: el trabajo fallaba y la
-     * persona solo veía «Exportación iniciada». En sync Filament muestra el aviso con los botones
-     * de descarga directamente en la respuesta.
-     */
-    public function getJobConnection(): ?string
-    {
-        return 'sync';
-    }
-
     protected static function formatDate(mixed $state): ?string
     {
         return filled($state) ? Carbon::parse($state)->format('d/m/Y') : null;
