@@ -143,6 +143,20 @@ correr el seeder por primera vez, ya no es fija).
 - **Un admin no puede cambiar su propio rol** ni dejar el sistema sin administradores (`UserResource`).
 - **Resultados de pruebas laboratoriales**: archivos en el disco privado `test-results` (`storage/app/test-results`, no accesible por `/storage`), solo PDF/PNG/JPG, servidos por `TestResultController` (ruta del panel `filament.admin.tests.result`) que exige sesión y el permiso `view` sobre la prueba. Solo se muestran inline PDF y PNG/JPG; cualquier otro tipo se fuerza como descarga con `nosniff` y CSP `sandbox` (evita XSS almacenado). Una migración movió los archivos antiguos desde el disco público.
 
+### Versión de Filament
+
+Se queda **a propósito en Filament 3.3** (hoy 3.3.57; se actualizan solo parches con `composer update "filament/*" bezhansalleh/filament-shield --with-dependencies`). Decisión (octubre 2026): el sistema está en producción con la clínica y no hay urgencia de seguridad; migrar solo si hay una razón fuerte. Destino futuro: **Filament 5 + Shield 4** (la 5 es la 4 más Livewire 4; ir directo a la 5 evita dos saltos). Una simulación (`composer require "filament/filament:^5.0" "bezhansalleh/filament-shield:*" --dry-run -W`) resuelve sin conflictos: Filament 5.10, Livewire 4.4, Shield 4.3. El costo está en el código, no en la instalación.
+
+Riesgos a revisar antes de migrar:
+- Más de 90 archivos usan la API de Filament 3 (formularios, tablas, acciones, infolists, widgets): la 4 cambió namespaces y componentes centrales.
+- `app/Filament/Resources/RoleResource.php` es una copia publicada y modificada de Shield (etiquetas en español, `deletionBlockedReason()`, «Duplicar»): hay que volver a aplicarla sobre el recurso de Shield 4.
+- Posible cambio del formato de nombres de permiso en Shield 4 (hoy `view_any_pet`): verificarlo, porque afecta filas en la base de datos de producción y todos los `can('...')` y `hasRole`/seeders del código.
+- `ClinicSettingsPage` (spatie/laravel-settings) y las páginas/widgets propios.
+- Livewire 4: URLs de endpoints, `wire:model` diferido por defecto y rutas propias; revisar cualquier componente Livewire propio.
+- Boost incluye hoy la guía genérica de Filament; al migrar, regenerar con `php artisan boost:update`.
+
+Cómo probar la migración sin riesgo: rama de prueba (sin merge) con `filament/upgrade` y su script, `composer why-not filament/filament "^5.0"`, y correr la suite en SQLite y MySQL antes de decidir.
+
 ### Despliegue
 
 - El deploy es el workflow manual `.github/workflows/deploy.yml` (`workflow_dispatch` sobre `main`): corre los tests, despliega por SSH ejecutando las migraciones, hace un health check y crea el tag `prod-AAAA-MM-DD_HHMM`. Si falla manda un correo; el detalle del paso que falló queda en `storage/logs/deploy.log` del servidor, y los errores de la app en `storage/logs/laravel.log`.
