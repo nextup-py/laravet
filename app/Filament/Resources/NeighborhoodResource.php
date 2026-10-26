@@ -61,7 +61,8 @@ class NeighborhoodResource extends Resource
                 Forms\Components\Select::make('department_id')
                     ->label('Departamento')
                     ->options(fn (): Collection => Department::query()->orderBy('name')->pluck('name', 'id'))
-                    ->afterStateHydrated(fn (Set $set, ?Neighborhood $record) => $set('department_id', $record?->city?->department_id))
+                    ->afterStateHydrated(fn (Set $set, ?Neighborhood $record) => $record && $set('department_id', $record->city?->department_id))
+                    ->default(fn () => City::find(request()->query('city_id'))?->department_id)
                     ->searchable()
                     ->live()
                     ->afterStateUpdated(fn (Set $set) => $set('city_id', null))
@@ -69,6 +70,7 @@ class NeighborhoodResource extends Resource
                     ->required(),
                 Forms\Components\Select::make('city_id')
                     ->label('Ciudad')
+                    ->default(fn () => request()->query('city_id'))
                     ->options(fn (Get $get): Collection => City::query()
                         ->where('department_id', $get('department_id'))
                         ->orderBy('name')
@@ -178,10 +180,7 @@ class NeighborhoodResource extends Resource
                     ),
             ])
             ->actions([
-                Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make(),
-                ]),
+                Tables\Actions\EditAction::make(),
             ]);
     }
 

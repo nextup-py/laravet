@@ -55,6 +55,7 @@ class CityResource extends Resource
             ->schema([
                 Forms\Components\Select::make('department_id')
                     ->relationship('department', 'name')
+                    ->default(fn () => request()->query('department_id'))
                     ->searchable()
                     ->preload()
                     ->live()
@@ -146,8 +147,12 @@ class CityResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
+                    Tables\Actions\Action::make('addNeighborhood')
+                        ->label('Agregar barrio')
+                        ->icon('heroicon-o-plus')
+                        ->visible(fn (): bool => NeighborhoodResource::canCreate())
+                        ->url(fn (City $record): string => NeighborhoodResource::getUrl('create', ['city_id' => $record->getKey()])),
                 ]),
             ]);
     }

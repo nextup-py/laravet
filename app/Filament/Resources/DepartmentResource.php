@@ -116,8 +116,12 @@ class DepartmentResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
+                    Tables\Actions\Action::make('addCity')
+                        ->label('Agregar ciudad')
+                        ->icon('heroicon-o-plus')
+                        ->visible(fn (): bool => CityResource::canCreate())
+                        ->url(fn (Department $record): string => CityResource::getUrl('create', ['department_id' => $record->getKey()])),
                 ]),
             ]);
     }
