@@ -6,7 +6,6 @@ use App\Filament\Resources\ConsultationResource;
 use App\Filament\Resources\PetResource;
 use App\Filament\Resources\UserResource;
 use App\Models\Consultation;
-use App\Services\PdfGeneratorService;
 use Filament\Actions;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -27,18 +26,12 @@ class ViewConsultation extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('downloadConsultation')
-                ->label('Descargar informe')
-                ->icon('heroicon-o-document-arrow-down')
+            Actions\Action::make('openReport')
+                ->label('Informe PDF')
+                ->icon('heroicon-o-document-text')
                 ->color('success')
-                ->action(fn (PdfGeneratorService $pdfGenerator) => $pdfGenerator->download(
-                    'pdf.consultation',
-                    ['consultation' => $this->record],
-                    "Consulta-{$this->record->pet->name}-{$this->record->id}.pdf",
-                ))
-                ->requiresConfirmation()
-                ->modalHeading('Generar informe de consulta')
-                ->modalDescription('¿Desea descargar el informe en PDF de esta consulta?'),
+                ->url(fn (): string => route('filament.admin.pdf.consultation', $this->record))
+                ->openUrlInNewTab(),
             Actions\EditAction::make(),
         ];
     }

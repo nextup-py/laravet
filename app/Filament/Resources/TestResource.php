@@ -8,7 +8,6 @@ use App\Filament\Resources\TestResource\Pages;
 use App\Http\Controllers\TestResultController;
 use App\Models\Pet;
 use App\Models\Test;
-use App\Services\PdfGeneratorService;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
@@ -302,15 +301,12 @@ class TestResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make(),
                     self::uploadResultAction(),
-                    Tables\Actions\Action::make('downloadReport')
-                        ->label('Descargar reporte')
-                        ->icon('heroicon-o-document-arrow-down')
+                    Tables\Actions\Action::make('openReport')
+                        ->label('Reporte PDF')
+                        ->icon('heroicon-o-document-text')
                         ->authorize(fn (Test $record): bool => static::canView($record))
-                        ->action(fn (Test $record, PdfGeneratorService $pdfGenerator) => $pdfGenerator->download(
-                            'pdf.test-report',
-                            ['test' => $record],
-                            "Reporte-Prueba-{$record->pet->name}-{$record->id}.pdf",
-                        )),
+                        ->url(fn (Test $record): string => route('filament.admin.pdf.test', $record))
+                        ->openUrlInNewTab(),
                     PetResource::viewPetAction(),
                 ]),
             ]);

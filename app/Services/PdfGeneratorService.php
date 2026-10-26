@@ -5,18 +5,16 @@ namespace App\Services;
 use App\Settings\ClinicSettings;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as PdfDocument;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class PdfGeneratorService
 {
     /**
-     * Livewire solo dispara la descarga en el navegador para acciones que
-     * devuelven un StreamedResponse (ver SupportFileDownloads de Livewire) —
-     * por eso se usa streamDownload() en vez del Response plano de
-     * PDF::download(), volcando los bytes crudos de output() (nunca el
-     * Response de stream(), que al "echo"-earse serializa headers HTTP).
+     * Respuesta con el PDF en línea (`Content-Disposition: inline`): el navegador lo muestra en su
+     * visor y desde ahí se lee, imprime o guarda. Se usa desde un controlador, no desde una acción
+     * de Livewire (que solo dispara descargas con un StreamedResponse).
      */
-    public function download(string $view, array $data, string $filename): StreamedResponse
+    public function inline(string $view, array $data, string $filename): Response
     {
         $pdf = Pdf::loadView($view, [
             ...$data,
@@ -26,7 +24,11 @@ class PdfGeneratorService
         $pdf->render();
         $this->paginate($pdf);
 
-        return response()->streamDownload(fn () => print ($pdf->output()), $filename);
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$filename.'"',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     private function paginate(PdfDocument $pdf): void

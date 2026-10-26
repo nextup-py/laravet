@@ -281,6 +281,12 @@ class PetResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make(),
                     ...self::registerActions(),
+                    Tables\Actions\Action::make('openClinicalHistory')
+                        ->label('Historia clínica PDF')
+                        ->icon('heroicon-o-document-text')
+                        ->visible(fn (): bool => ConsultationResource::canViewAny())
+                        ->url(fn (Pet $record): string => route('filament.admin.pdf.clinical-history', $record))
+                        ->openUrlInNewTab(),
                 ]),
             ])->selectCurrentPageOnly();
     }

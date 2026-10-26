@@ -5,7 +5,6 @@ namespace App\Filament\Resources\SurgeryResource\Pages;
 use App\Filament\Resources\PetResource;
 use App\Filament\Resources\SurgeryResource;
 use App\Filament\Resources\UserResource;
-use App\Services\PdfGeneratorService;
 use Filament\Actions;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -25,18 +24,12 @@ class ViewSurgery extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('downloadCertificate')
-                ->label('Descargar certificado')
-                ->icon('heroicon-o-document-arrow-down')
+            Actions\Action::make('openCertificate')
+                ->label('Certificado PDF')
+                ->icon('heroicon-o-document-text')
                 ->color('success')
-                ->action(fn (PdfGeneratorService $pdfGenerator) => $pdfGenerator->download(
-                    'pdf.surgery-certificate',
-                    ['surgery' => $this->record],
-                    "Certificado-Cirugia-{$this->record->pet->name}-{$this->record->id}.pdf",
-                ))
-                ->requiresConfirmation()
-                ->modalHeading('Generar certificado de cirugía')
-                ->modalDescription('¿Desea descargar el certificado en PDF de esta cirugía?'),
+                ->url(fn (): string => route('filament.admin.pdf.surgery', $this->record))
+                ->openUrlInNewTab(),
             Actions\EditAction::make(),
         ];
     }
