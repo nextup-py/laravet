@@ -277,6 +277,11 @@ class VaccinationResource extends Resource
                     ->relationship('pet', 'name')
                     ->searchable()
                     ->preload(),
+                Tables\Filters\SelectFilter::make('user_id')
+                    ->label('Veterinario')
+                    ->relationship('user', 'name')
+                    ->searchable()
+                    ->preload(),
                 Tables\Filters\SelectFilter::make('species')
                     ->label('Especie')
                     ->options(PetSpecies::class)

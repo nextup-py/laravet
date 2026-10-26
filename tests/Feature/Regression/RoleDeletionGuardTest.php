@@ -6,12 +6,13 @@ use App\Models\User;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
-it('la tabla de roles agrupa Ver/Editar y no tiene eliminar suelto ni masivo', function () {
+it('la tabla de roles agrupa Editar y Duplicar, sin Ver (la fila ya abre la ficha), ni eliminar suelto ni masivo', function () {
     actingAsRole('admin');
     $role = Role::create(['name' => 'recepcion', 'guard_name' => 'web']);
 
     Livewire::test(ListRoles::class)
-        ->assertTableActionExists('view')
+        ->assertTableActionDoesNotExist('view')
+        ->assertTableActionExists('duplicate')
         ->assertTableActionExists('edit')
         ->assertTableActionDoesNotExist('delete')
         ->assertTableBulkActionDoesNotExist('delete')
