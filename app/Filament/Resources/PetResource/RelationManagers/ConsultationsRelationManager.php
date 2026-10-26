@@ -287,11 +287,13 @@ class ConsultationsRelationManager extends RelationManager
                         return $data;
                     }),
             ])
+            ->recordAction('view')
             ->actions([
+                Tables\Actions\ViewAction::make()->extraAttributes(['class' => 'hidden']),
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\Action::make('view')
-                        ->label('Ver')
-                        ->icon('heroicon-m-eye')
+                    Tables\Actions\Action::make('openRecord')
+                        ->label('Abrir ficha')
+                        ->icon('heroicon-m-arrow-top-right-on-square')
                         ->visible(fn (Consultation $record): bool => ConsultationResource::canView($record))
                         ->url(fn (Consultation $record): string => ConsultationResource::getUrl('view', ['record' => $record])),
                     Tables\Actions\EditAction::make()

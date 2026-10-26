@@ -89,11 +89,13 @@ class SurgeriesRelationManager extends RelationManager
                         return $data;
                     }),
             ])
+            ->recordAction('view')
             ->actions([
+                Tables\Actions\ViewAction::make()->extraAttributes(['class' => 'hidden']),
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\Action::make('view')
-                        ->label('Ver')
-                        ->icon('heroicon-m-eye')
+                    Tables\Actions\Action::make('openRecord')
+                        ->label('Abrir ficha')
+                        ->icon('heroicon-m-arrow-top-right-on-square')
                         ->visible(fn (Surgery $record): bool => SurgeryResource::canView($record))
                         ->url(fn (Surgery $record): string => SurgeryResource::getUrl('view', ['record' => $record])),
                     Tables\Actions\EditAction::make()
