@@ -47,7 +47,11 @@ it('cada lista exporta por la cola y avisa con una notificación de base de dato
         ->assertHasNoActionErrors()
         ->assertNotified('Exportación iniciada');
 
-    Artisan::call('queue:work', ['--stop-when-empty' => true, '--tries' => 1]);
+    // Cada trabajo encadena al siguiente (lote, completar, xlsx): un solo `--stop-when-empty` puede
+    // terminar entre uno y otro según el momento, así que se repite hasta vaciar la cola.
+    for ($pass = 0; $pass < 10 && DB::table('jobs')->exists(); $pass++) {
+        Artisan::call('queue:work', ['--stop-when-empty' => true, '--tries' => 1]);
+    }
 
     $export = Export::query()->latest('id')->firstOrFail();
 
