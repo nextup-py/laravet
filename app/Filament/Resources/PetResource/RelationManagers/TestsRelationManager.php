@@ -86,12 +86,14 @@ class TestsRelationManager extends RelationManager
                         return $data;
                     }),
             ])
+            ->recordAction('view')
             ->actions([
+                Tables\Actions\ViewAction::make()->extraAttributes(['class' => 'hidden']),
                 TestResource::uploadResultAction(),
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\Action::make('view')
-                        ->label('Ver')
-                        ->icon('heroicon-m-eye')
+                    Tables\Actions\Action::make('openRecord')
+                        ->label('Abrir ficha')
+                        ->icon('heroicon-m-arrow-top-right-on-square')
                         ->visible(fn (Test $record): bool => TestResource::canView($record))
                         ->url(fn (Test $record): string => TestResource::getUrl('view', ['record' => $record])),
                     Tables\Actions\EditAction::make()

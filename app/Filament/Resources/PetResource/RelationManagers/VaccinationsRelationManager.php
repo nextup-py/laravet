@@ -112,11 +112,13 @@ class VaccinationsRelationManager extends RelationManager
                     ->modalHeading('Generar carnet de vacunación')
                     ->modalDescription('¿Desea descargar el PDF con el historial completo?'),
             ])
+            ->recordAction('view')
             ->actions([
+                Tables\Actions\ViewAction::make()->extraAttributes(['class' => 'hidden']),
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\Action::make('view')
-                        ->label('Ver')
-                        ->icon('heroicon-m-eye')
+                    Tables\Actions\Action::make('openRecord')
+                        ->label('Abrir ficha')
+                        ->icon('heroicon-m-arrow-top-right-on-square')
                         ->visible(fn (Vaccination $record): bool => VaccinationResource::canView($record))
                         ->url(fn (Vaccination $record): string => VaccinationResource::getUrl('view', ['record' => $record])),
                     Tables\Actions\EditAction::make()

@@ -16,7 +16,7 @@ use App\Models\User;
 use App\Models\Vaccination;
 use Livewire\Livewire;
 
-it('los RM de la ficha de mascota ofrecen "Ver" hacia el registro completo', function () {
+it('los RM de la ficha de mascota ofrecen «Abrir ficha» y abren la lectura en modal al hacer clic en la fila', function () {
     actingAsRole('veterinarian');
     $pet = Pet::factory()->create();
     $consultation = Consultation::factory()->create(['pet_id' => $pet->id]);
@@ -30,10 +30,15 @@ it('los RM de la ficha de mascota ofrecen "Ver" hacia el registro completo', fun
         [SurgeriesRelationManager::class, $surgery],
         [TestsRelationManager::class, $test],
     ] as [$manager, $record]) {
-        Livewire::test($manager, ['ownerRecord' => $pet, 'pageClass' => ViewPet::class])
-            ->assertTableActionExists('view')
-            ->assertTableActionVisible('view', $record)
+        $component = Livewire::test($manager, ['ownerRecord' => $pet, 'pageClass' => ViewPet::class])
+            ->assertTableActionExists('openRecord')
+            ->assertTableActionVisible('openRecord', $record)
             ->assertTableActionExists('edit');
+
+        // El clic en la fila abre la lectura en un modal (sin sacar al usuario de la mascota).
+        expect($component->instance()->getTable()->getRecordAction($record))->toBe('view');
+
+        $component->mountTableAction('view', $record)->assertTableActionMounted('view');
     }
 });
 
