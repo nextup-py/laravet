@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Concerns\FocusesOnOwnRecords;
 use App\Filament\Resources\TestResource;
 use App\Models\Test;
 use Filament\Tables;
@@ -10,9 +11,11 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class TestsWithoutResultWidget extends BaseWidget
 {
-    protected static ?int $sort = 2;
+    use FocusesOnOwnRecords;
 
-    protected int|string|array $columnSpan = 'full';
+    protected static ?int $sort = 4;
+
+    protected int|string|array $columnSpan = 1;
 
     public static function canView(): bool
     {
@@ -22,11 +25,11 @@ class TestsWithoutResultWidget extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
-            ->heading('Pruebas laboratoriales sin resultado')
+            ->heading(self::ownershipPrefix('pruebas laboratoriales sin resultado'))
             ->emptyStateHeading('No hay pruebas pendientes de resultado')
             ->emptyStateIcon('heroicon-o-beaker')
             ->query(
-                Test::query()
+                self::scopeToOwnRecords(Test::query())
                     ->with(['pet', 'pet.owner'])
                     ->withoutResult()
                     ->orderBy('date')

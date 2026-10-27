@@ -270,12 +270,6 @@ class PetResource extends Resource
                         false: fn (Builder $query) => $query->whereDoesntHave('vaccinations', fn (Builder $q) => $q->actionable()),
                         blank: fn (Builder $query) => $query,
                     ),
-                Tables\Filters\TernaryFilter::make('active')
-                    ->label('Estado')
-                    ->placeholder('Todas')
-                    ->trueLabel('Activas')
-                    ->falseLabel('Inactivas')
-                    ->default(true),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([

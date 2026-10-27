@@ -11,9 +11,9 @@ use Illuminate\Support\Carbon;
 
 class UpcomingVaccinationsWidget extends BaseWidget
 {
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 2;
 
-    protected int|string|array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 1;
 
     public static function canView(): bool
     {

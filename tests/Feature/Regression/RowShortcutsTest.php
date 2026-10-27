@@ -29,7 +29,7 @@ it('las mascotas inactivas no ofrecen atajos de alta', function () {
     $pet = Pet::factory()->create(['active' => false]);
 
     Livewire::test(ListPets::class)
-        ->filterTable('active', false)
+        ->set('activeTab', 'Inactivos')
         ->assertTableActionHidden('register_consultation', $pet);
 });
 
