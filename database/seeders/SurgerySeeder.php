@@ -59,11 +59,11 @@ class SurgerySeeder extends Seeder
             $vet = $vets->random();
 
             Surgery::create([
-                'date'        => $date,
-                'type'        => $type,
+                'date' => $date,
+                'type' => $type,
                 'observation' => $observation,
-                'pet_id'      => $pet->id,
-                'user_id'     => $vet->id,
+                'pet_id' => $pet->id,
+                'user_id' => $vet->id,
             ]);
         }
     }

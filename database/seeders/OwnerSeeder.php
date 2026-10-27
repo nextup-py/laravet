@@ -12,19 +12,20 @@ class OwnerSeeder extends Seeder
 {
     public function run(): void
     {
-        $central = Department::whereRaw("LOWER(name) LIKE ?", ['%central%'])->first();
+        $central = Department::whereRaw('LOWER(name) LIKE ?', ['%central%'])->first();
 
         // Fallback: cualquier barrio del departamento si la ciudad no tiene barrios propios
         $anyNeighborhood = Neighborhood::whereHas(
-            'city', fn($q) => $q->where('department_id', $central?->id)
+            'city', fn ($q) => $q->where('department_id', $central?->id)
         )->first();
 
-        $getCity = fn(string $search) => City::where('department_id', $central?->id)
-            ->where('name', 'LIKE', '%' . $search . '%')
+        $getCity = fn (string $search) => City::where('department_id', $central?->id)
+            ->where('name', 'LIKE', '%'.$search.'%')
             ->first();
 
         $getNeighborhood = function (?int $cityId) use ($anyNeighborhood): ?int {
             $nb = Neighborhood::where('city_id', $cityId)->first();
+
             return ($nb ?? $anyNeighborhood)?->id;
         };
 
@@ -45,16 +46,16 @@ class OwnerSeeder extends Seeder
             $city = $getCity($data['city']);
 
             Owner::create([
-                'ci'              => $data['ci'],
-                'first_name'      => $data['first_name'],
-                'last_name'       => $data['last_name'],
-                'gender'          => $data['gender'],
-                'email'           => $data['email'],
-                'phone'           => $data['phone'],
-                'department_id'   => $central?->id,
-                'city_id'         => $city?->id,
+                'ci' => $data['ci'],
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'gender' => $data['gender'],
+                'email' => $data['email'],
+                'phone' => $data['phone'],
+                'department_id' => $central?->id,
+                'city_id' => $city?->id,
                 'neighborhood_id' => $getNeighborhood($city?->id),
-                'address'         => $data['address'],
+                'address' => $data['address'],
             ]);
         }
     }

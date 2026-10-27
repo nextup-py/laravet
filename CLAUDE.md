@@ -169,7 +169,7 @@ Cómo probar la migración sin riesgo: rama de prueba (sin merge) con `filament/
 ### Trampas técnicas
 
 - **Los tests corren en SQLite y producción usa MySQL**: lo que SQLite tolera MySQL lo rechaza. Caso real: una subconsulta escalar (`addSelect` con `(select 1 …)`) que devuelve varias filas falla en MySQL con `1242 Subquery returns more than 1 row`; hay que usar `limit(1)`. Ante consultas con subconsultas, `groupBy` o funciones de fecha, probar también contra MySQL.
-- **Pint**: formatear solo los archivos tocados (`./vendor/bin/pint ruta/archivo.php`); sobre carpetas enteras reformatea archivos ajenos.
+- **Pint**: el repo está limpio y el CI (`Estilo (Pint)` en `tests.yml`) corre `vendor/bin/pint --test` en cada PR. Antes de commitear, `./vendor/bin/pint --dirty` formatea solo lo modificado; comprobar todo el repo con `./vendor/bin/pint --test`.
 - **Tinker**: para ejecutar código usar `php artisan tinker --execute="..."`; pasar un archivo abre una consola interactiva que se queda esperando.
 - **Pruebas de tablas Filament**: en filtros `multiple()` el helper `filterTable('x', ['a'])` recibe la lista directa, no `['values' => [...]]`; con muchas filas (ej. 450 barrios) los registros pueden quedar fuera de la primera página, acotar con `searchTable()`.
 - **Orden por defecto de listas**: no ordenar por una fecha de vencimiento ascendente si los registros históricos quedan vencidos para siempre (la primera página queda inútil).

@@ -6,6 +6,29 @@ on:
     branches: [main]
 
 jobs:
+  # Falla si algún PHP no sigue el estilo de Pint (preset de Laravel). Se arregla con `vendor/bin/pint --dirty`.
+  style:
+    name: Estilo (Pint)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v3
+        with:
+          composer-options: "--prefer-dist --no-progress"
+
+      - name: Check code style
+        run: vendor/bin/pint --test
+
   # Rápido y coincide con `php artisan test` en local (phpunit.xml usa SQLite en memoria).
   test-sqlite:
     name: Tests (SQLite)

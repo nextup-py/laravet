@@ -12,7 +12,7 @@ class PetSeeder extends Seeder
     public function run(): void
     {
         $owners = Owner::all();
-        $vets   = User::all();
+        $vets = User::all();
 
         // [nombre, especie, raza, género, nacimiento, tamaño, peso, pelaje, reproducción, owner_index]
         $pets = [
@@ -35,19 +35,19 @@ class PetSeeder extends Seeder
 
         foreach ($pets as $i => [$name, $species, $breed, $gender, $birthdate, $size, $weight, $fur, $reproduction, $ownerIdx]) {
             Pet::create([
-                'name'         => $name,
-                'species'      => $species,
-                'breed'        => $breed,
-                'gender'       => $gender,
-                'birthdate'    => $birthdate,
-                'size'         => $size,
-                'weight'       => $weight,
-                'fur'          => $fur,
+                'name' => $name,
+                'species' => $species,
+                'breed' => $breed,
+                'gender' => $gender,
+                'birthdate' => $birthdate,
+                'size' => $size,
+                'weight' => $weight,
+                'fur' => $fur,
                 'reproduction' => $reproduction,
-                'active'       => true,
-                'image'        => '',
-                'owner_id'     => $owners[$ownerIdx % $owners->count()]->id,
-                'user_id'      => $vets[$i % $vets->count()]->id,
+                'active' => true,
+                'image' => '',
+                'owner_id' => $owners[$ownerIdx % $owners->count()]->id,
+                'user_id' => $vets[$i % $vets->count()]->id,
             ]);
         }
     }

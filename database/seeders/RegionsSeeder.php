@@ -17,6 +17,7 @@ class RegionsSeeder extends Seeder
     {
         if (Department::exists()) {
             $this->command->info('Regions ya sembradas, se omite.');
+
             return;
         }
 
