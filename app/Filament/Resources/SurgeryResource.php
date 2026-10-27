@@ -6,6 +6,7 @@ use App\Enums\PetSpecies;
 use App\Filament\Resources\SurgeryResource\Pages;
 use App\Models\Pet;
 use App\Models\Surgery;
+use App\Settings\ClinicSettings;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
@@ -71,35 +72,7 @@ class SurgeryResource extends Resource
      */
     public static function typeOptions(): array
     {
-        $types = [
-            'Esterilización',
-            'Ovariohisterectomía',
-            'Castración',
-            'Cirugía Dental',
-            'Extracción de Tumores',
-            'Cirugía de Cuerpo Extraño',
-            'Reparación de Fracturas',
-            'Cesárea',
-            'Amputación',
-            'Enucleación Ocular',
-            'Cirugía de Ligamento Cruzado',
-            'Gastropexia Preventiva',
-            'Desungulación',
-            'Herniorrafia',
-            'Laparotomía Exploratoria',
-            'Onicectomía',
-            'Cistotomía',
-            'Uretrostomía Perineal',
-            'Esplenectomía',
-            'Tiroidectomía',
-            'Cirugía de Luxación de Rótula',
-            'Toracotomía',
-            'Resección Intestinal',
-            'Cirugía de Glándulas Perianales',
-            'Sutura de herida',
-            'Extracción dental',
-            'Desobstrucción uretral',
-        ];
+        $types = array_values(ClinicSettings::catalog('surgery_types'));
 
         usort($types, fn (string $a, string $b): int => strcmp(Str::lower(Str::ascii($a)), Str::lower(Str::ascii($b))));
 

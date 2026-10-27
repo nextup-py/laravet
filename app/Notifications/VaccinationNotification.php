@@ -5,7 +5,7 @@ namespace App\Notifications;
 use App\Filament\Resources\PetResource;
 use App\Models\Vaccination;
 use App\Settings\ClinicSettings;
-use Carbon\Carbon;
+use App\Support\ReminderMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -46,7 +46,7 @@ class VaccinationNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->greeting('¡Hola, '.$this->vaccination->pet->owner->first_name.'!')
             ->subject(__('Recordatorio de vacunación para tu mascota.'))
-            ->line('La vacuna de tu mascota '.$this->vaccination->pet->name.(Carbon::parse($this->vaccination->next_application)->startOfDay()->lt(today()) ? ' venció el ' : ' está por vencer el ').Carbon::parse($this->vaccination->next_application)->format('d/m/Y'))
+            ->line(ReminderMessage::email($this->vaccination))
             ->action('Ver detalles', PetResource::getUrl('edit', ['record' => $this->vaccination->pet_id]))
             ->salutation('Saludos, '.$clinic->name);
     }

@@ -44,7 +44,7 @@ class AdminPanelProvider extends PanelProvider
         try {
             if (Schema::hasTable('settings')) {
                 $settings = app(ClinicSettings::class);
-                $brandName = $settings->name ?? $brandName;
+                $brandName = $settings->short_name ?: ($settings->name ?? $brandName);
                 $brandLogo = $settings->logo ? Storage::url($settings->logo) : null;
                 $favicon = $settings->favicon ? Storage::url($settings->favicon) : null;
                 $primaryColor = $settings->primary_color;

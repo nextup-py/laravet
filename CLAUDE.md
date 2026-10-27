@@ -110,7 +110,11 @@ Las seis listas clínicas (mascotas, propietarios, vacunaciones, consultas, ciru
 
 ### Tareas programadas
 
-`routes/console.php` programa `send:vaccination-notifications` una vez al día (`->daily()`, zona `America/Asuncion`, `withoutOverlapping`). Avisa por email al propietario solo de vacunaciones **vigentes** (`current()`) sin `reminder_sent_at`, con próxima aplicación desde 30 días atrás hasta 3 días adelante; marca `reminder_sent_at` para no reenviar, y el texto dice "venció el…" o "está por vencer el…" según la fecha.
+`routes/console.php` programa `send:vaccination-notifications` una vez al día (`dailyAt(reminder_time)` en la zona horaria de la clínica, `withoutOverlapping`; sin settings legibles cae a medianoche de `America/Asuncion`). Avisa por email al propietario solo de vacunaciones **vigentes** (`current()`) sin `reminder_sent_at`, con próxima aplicación desde `reminder_days_overdue` días atrás (30) hasta `reminder_days_before` días adelante (3); marca `reminder_sent_at` para no reenviar. Se puede apagar con `reminders_enabled`. El texto sale de la plantilla de la clínica (`App\Support\ReminderMessage`, marcadores `{propietario}`, `{mascota}`, `{vacuna}`, `{fecha}`, `{estado}`, `{clinica}`), también usada por «Avisar por WhatsApp».
+
+### Configuración de la clínica
+
+`ClinicSettingsPage` («Configuración → Datos de la clínica», solo `admin`) edita `App\Settings\ClinicSettings` (spatie/laravel-settings) en cuatro pestañas: General (nombre, nombre corto, zona horaria, color, logo/favicon, contacto, datos fiscales, redes), Recordatorios, Documentos PDF (pie, firma/sello, texto legal; los usa `pdf/layout.blade.php`) y Listas (vacunas, fabricantes, tipos de cirugía y de prueba). Las listas alimentan `vaccineOptions()`, `manufacturerOptions()` y `typeOptions()` vía `ClinicSettings::catalog()`, que cae a las listas iniciales (`DEFAULT_*`) si los settings no se pueden leer o la lista queda vacía; quitar una opción no toca los registros existentes. La zona horaria se aplica en `AppServiceProvider::boot()`. Imágenes solo PNG/JPG/WebP (un SVG serviría script desde el origen de la app). Toda propiedad nueva de `ClinicSettings` necesita una migración de settings idempotente en `database/settings/` (el deploy no corre seeders), y el código debe leer los settings con `ClinicSettings::tryGet()` cuando pueda ejecutarse antes de migrar.
 
 ### Seeders
 
