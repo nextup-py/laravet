@@ -322,8 +322,8 @@ class ReportsPage extends Page implements HasForms
         $name = Str::slug($result->title).'-'.now()->format('Y-m-d');
 
         return match ($format) {
-            'csv' => TabularDownload::csv($name.'.csv', $result->headers, $result->rows),
-            'xlsx' => TabularDownload::xlsx($name.'.xlsx', $result->headers, $result->rows),
+            'csv' => TabularDownload::csv($name.'.csv', $result->headers, TabularDownload::protectFormulas($result->rows)),
+            'xlsx' => TabularDownload::xlsx($name.'.xlsx', $result->headers, TabularDownload::protectFormulas($result->rows)),
             default => response()->streamDownload(
                 fn () => print (app(PdfGeneratorService::class)->output(
                     'pdf.report',

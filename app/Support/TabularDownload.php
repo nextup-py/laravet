@@ -15,6 +15,25 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 final class TabularDownload
 {
     /**
+     * Evita la inyección de fórmulas (CSV injection): los textos que empiezan por =, +, -, @, tab o
+     * retorno de carro se prefijan con una comilla simple para que Excel/Sheets no los evalúen.
+     * Los exporters de listas ya lo hacen por columna; los reportes lo aplican a todas las celdas.
+     *
+     * @param  array<int, array<int, mixed>>  $rows
+     * @return array<int, array<int, mixed>>
+     */
+    public static function protectFormulas(array $rows): array
+    {
+        return array_map(
+            fn (array $row): array => array_map(
+                fn (mixed $value): mixed => is_string($value) && preg_match('/^[=+\-@\t\r]/', $value) ? "'".$value : $value,
+                $row,
+            ),
+            $rows,
+        );
+    }
+
+    /**
      * @param  array<int, string>  $headers
      * @param  array<int, array<int, mixed>>  $rows
      */

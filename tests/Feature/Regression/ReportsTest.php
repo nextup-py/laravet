@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Vaccination;
 use App\Reports\FixedReport;
 use App\Reports\ReportEntity;
+use App\Support\TabularDownload;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
@@ -251,4 +252,20 @@ it('todos los tipos de registro generan el reporte personalizado con todas sus c
             ->assertSet('total', fn (int $total): bool => $total >= 1)
             ->assertCount('headers', count($entity->columns()));
     }
+});
+
+it('la actividad por veterinario solo trae las columnas de los registros que el rol puede ver', function () {
+    $user = rolWithPermissions(['view_reports', 'view_any_consultation']);
+    Consultation::factory()->create(['consultation_date' => today(), 'user_id' => $user->id]);
+    Surgery::factory()->create(['date' => today(), 'user_id' => $user->id]);
+
+    $result = FixedReport::ActivityByVet->generate(today()->subDay(), today(), $user);
+
+    expect($result->headers)->toBe(['Veterinario', 'Consultas'])
+        ->and($result->rows)->toContain([$user->name, 1]);
+});
+
+it('las descargas de reportes neutralizan las celdas que parecen fórmulas', function () {
+    expect(TabularDownload::protectFormulas([['=HYPERLINK("x")', '+1', '-2', '@SUM', 'Normal', 5, null]]))
+        ->toBe([["'=HYPERLINK(\"x\")", "'+1", "'-2", "'@SUM", 'Normal', 5, null]]);
 });
