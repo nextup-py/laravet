@@ -15,7 +15,7 @@ class ListTests extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            DownloadExport::make(TestExporter::class, 'pruebas'),
+            DownloadExport::make(TestExporter::class, 'pruebas', 'Pruebas'),
             Actions\CreateAction::make(),
         ];
     }

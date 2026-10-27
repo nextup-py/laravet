@@ -2,6 +2,8 @@
 
 namespace App\Filament\Actions;
 
+use App\Filament\Exporters\OwnerExporter;
+use App\Models\ExportLog;
 use Filament\Actions\Action;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
@@ -34,8 +36,9 @@ final class DownloadExport
     /**
      * @param  class-string<Exporter>  $exporter
      * @param  string  $filename  Nombre base del archivo, sin extensión (se agrega la fecha).
+     * @param  string  $label  Nombre de la lista para el registro de exportaciones.
      */
-    public static function make(string $exporter, string $filename): Action
+    public static function make(string $exporter, string $filename, string $label): Action
     {
         return Action::make('export')
             ->label('Exportar')
@@ -60,7 +63,7 @@ final class DownloadExport
                     ->bulkToggleable()
                     ->required(),
             ])
-            ->action(function (array $data, ListRecords $livewire) use ($exporter, $filename): ?StreamedResponse {
+            ->action(function (array $data, ListRecords $livewire) use ($exporter, $filename, $label): ?StreamedResponse {
                 $query = $exporter::modifyQuery($livewire->getTableQueryForExport());
 
                 $total = $query->toBase()->getCountForPagination();
@@ -82,10 +85,34 @@ final class DownloadExport
                 $rows = self::rows($exporter, $columnMap, $query->get());
                 $name = $filename.'-'.now()->format('Y-m-d').'.'.$data['format'];
 
+                self::log($exporter, $label, count($rows), $data['format'], array_keys($columnMap));
+
                 return $data['format'] === 'csv'
                     ? self::csv($name, array_values($columnMap), $rows)
                     : self::xlsx($name, array_values($columnMap), $rows);
             });
+    }
+
+    /**
+     * Deja constancia de quién exportó qué (el archivo puede traer datos personales de propietarios).
+     *
+     * @param  class-string<Exporter>  $exporter
+     * @param  array<int, string>  $columns
+     */
+    private static function log(string $exporter, string $label, int $rows, string $format, array $columns): void
+    {
+        $user = auth()->user();
+
+        ExportLog::create([
+            'user_id' => $user?->getKey(),
+            'user_name' => $user?->name ?? '—',
+            'list' => $label,
+            'rows' => $rows,
+            'format' => $format,
+            'columns' => $columns,
+            'includes_owner_data' => $exporter === OwnerExporter::class
+                || collect($columns)->contains(fn (string $column): bool => str_starts_with($column, 'owner.') || str_starts_with($column, 'pet.owner.')),
+        ]);
     }
 
     /**

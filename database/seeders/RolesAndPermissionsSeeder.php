@@ -49,6 +49,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         Permission::firstOrCreate(['name' => 'use_ai_diagnostics', 'guard_name' => 'web']);
         Permission::firstOrCreate(['name' => 'export_data', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'view_export_log', 'guard_name' => 'web']);
 
         // admin = Super Admin (config/filament-shield.php): bypassea todos los
         // permisos, no necesita asignación explícita.
@@ -63,6 +64,7 @@ class RolesAndPermissionsSeeder extends Seeder
             ...$this->crud('test'),
             ...$this->crud('vaccination'),
             'use_ai_diagnostics',
+            'export_data',
         ]);
 
         $assistant = Role::firstOrCreate(['name' => ClinicRoles::ASSISTANT, 'guard_name' => 'web']);
@@ -73,6 +75,7 @@ class RolesAndPermissionsSeeder extends Seeder
             ...$this->view('surgery'),
             ...$this->view('test'),
             ...$this->view('vaccination'),
+            'export_data',
         ]);
     }
 

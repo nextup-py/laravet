@@ -18,7 +18,13 @@ it('las listas muestran Exportar solo a quien tiene el permiso export_data', fun
     actingAsRole('admin');
     Livewire::test($page)->assertActionVisible('export');
 
-    actingAsRole('assistant');
+    // Un rol que puede ver las listas pero no tiene el permiso de exportar.
+    $role = Role::create(['name' => 'sin-exportar', 'guard_name' => 'web']);
+    $role->givePermissionTo(['view_any_pet', 'view_any_owner', 'view_any_vaccination', 'view_any_consultation', 'view_any_surgery', 'view_any_test']);
+    $user = User::factory()->create();
+    $user->assignRole($role);
+    test()->actingAs($user);
+
     Livewire::test($page)->assertActionHidden('export');
 })->with([
     ListPets::class,
