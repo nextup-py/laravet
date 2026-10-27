@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\VaccinationResource\Pages;
 
+use App\Filament\Actions\DownloadExport;
 use App\Filament\Exporters\VaccinationExporter;
 use App\Filament\Resources\VaccinationResource;
 use Filament\Actions;
@@ -14,12 +15,7 @@ class ListVaccinations extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ExportAction::make()
-                ->exporter(VaccinationExporter::class)
-                ->label('Exportar')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->color('gray')
-                ->visible(fn (): bool => auth()->user()?->can('export_data') ?? false),
+            DownloadExport::make(VaccinationExporter::class, 'vacunaciones'),
             Actions\CreateAction::make(),
         ];
     }

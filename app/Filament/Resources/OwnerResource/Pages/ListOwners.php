@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\OwnerResource\Pages;
 
+use App\Filament\Actions\DownloadExport;
 use App\Filament\Exporters\OwnerExporter;
 use App\Filament\Resources\OwnerResource;
 use Filament\Actions;
@@ -14,12 +15,7 @@ class ListOwners extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ExportAction::make()
-                ->exporter(OwnerExporter::class)
-                ->label('Exportar')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->color('gray')
-                ->visible(fn (): bool => auth()->user()?->can('export_data') ?? false),
+            DownloadExport::make(OwnerExporter::class, 'propietarios'),
             Actions\CreateAction::make(),
         ];
     }

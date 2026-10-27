@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PetResource\Pages;
 
+use App\Filament\Actions\DownloadExport;
 use App\Filament\Exporters\PetExporter;
 use App\Filament\Resources\PetResource;
 use Filament\Actions;
@@ -16,12 +17,7 @@ class ListPets extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ExportAction::make()
-                ->exporter(PetExporter::class)
-                ->label('Exportar')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->color('gray')
-                ->visible(fn (): bool => auth()->user()?->can('export_data') ?? false),
+            DownloadExport::make(PetExporter::class, 'mascotas'),
             Actions\CreateAction::make(),
         ];
     }
