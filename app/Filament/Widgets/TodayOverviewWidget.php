@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Concerns\FocusesOnOwnRecords;
 use App\Models\Consultation;
 use App\Models\Surgery;
 use App\Models\Test;
@@ -16,7 +17,9 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
  */
 class TodayOverviewWidget extends BaseWidget
 {
-    protected static ?int $sort = 1;
+    use FocusesOnOwnRecords;
+
+    protected static ?int $sort = 0;
 
     public static function canView(): bool
     {
@@ -33,19 +36,19 @@ class TodayOverviewWidget extends BaseWidget
         $stats = [];
 
         if ($user?->can('view_any_consultation')) {
-            $stats[] = Stat::make('Consultas de hoy', Consultation::query()->whereDate('consultation_date', today())->count())
+            $stats[] = Stat::make(self::ownershipPrefix('consultas de hoy'), self::scopeToOwnRecords(Consultation::query())->whereDate('consultation_date', today())->count())
                 ->icon('heroicon-o-chat-bubble-left-right')
                 ->color('info');
         }
 
         if ($user?->can('view_any_surgery')) {
-            $stats[] = Stat::make('Cirugías próximas', Surgery::query()->upcoming()->count())
+            $stats[] = Stat::make(self::ownershipPrefix('cirugías próximas'), self::scopeToOwnRecords(Surgery::query())->upcoming()->count())
                 ->icon('heroicon-o-scissors')
                 ->color('warning');
         }
 
         if ($user?->can('view_any_test')) {
-            $stats[] = Stat::make('Pruebas sin resultado', Test::query()->withoutResult()->count())
+            $stats[] = Stat::make(self::ownershipPrefix('pruebas sin resultado'), self::scopeToOwnRecords(Test::query())->withoutResult()->count())
                 ->icon('heroicon-o-beaker')
                 ->color('danger');
         }

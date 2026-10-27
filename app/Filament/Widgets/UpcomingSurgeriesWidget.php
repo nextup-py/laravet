@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Concerns\FocusesOnOwnRecords;
 use App\Filament\Resources\SurgeryResource;
 use App\Models\Surgery;
 use Filament\Tables;
@@ -10,9 +11,11 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class UpcomingSurgeriesWidget extends BaseWidget
 {
-    protected static ?int $sort = 4;
+    use FocusesOnOwnRecords;
 
-    protected int|string|array $columnSpan = 'full';
+    protected static ?int $sort = 3;
+
+    protected int|string|array $columnSpan = 1;
 
     public static function canView(): bool
     {
@@ -22,11 +25,11 @@ class UpcomingSurgeriesWidget extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
-            ->heading('Cirugías próximas')
+            ->heading(self::ownershipPrefix('cirugías próximas'))
             ->emptyStateHeading('No hay cirugías programadas en los próximos días')
             ->emptyStateIcon('heroicon-o-scissors')
             ->query(
-                Surgery::query()
+                self::scopeToOwnRecords(Surgery::query())
                     ->with(['pet', 'pet.owner'])
                     ->upcoming()
                     ->orderBy('date')

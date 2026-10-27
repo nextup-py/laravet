@@ -9,17 +9,16 @@ use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * Gráfico de barras horizontales con la cantidad de mascotas por especie.
- * La clínica atiende las 8 especies del enum PetSpecies (no solo caninos y
- * felinos) — a diferencia de un set fijo de stat cards, esto se ajusta solo
- * si se agrega una especie nueva al enum.
+ * Muestra solo las especies que tienen mascotas registradas (la clínica puede
+ * atender cualquiera de las del enum PetSpecies), de mayor a menor.
  */
 class PetSpeciesOverview extends ChartWidget
 {
-    protected static ?int $sort = 0;
+    protected static ?int $sort = 1;
 
     protected static ?string $heading = 'Mascotas por especie';
 
-    protected int|string|array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 1;
 
     public static function canView(): bool
     {
@@ -48,6 +47,7 @@ class PetSpeciesOverview extends ChartWidget
                 'label' => $case->getLabel(),
                 'count' => (int) ($counts[$case->value] ?? 0),
             ])
+            ->filter(fn (array $species) => $species['count'] > 0)
             ->sortByDesc('count')
             ->values();
 

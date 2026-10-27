@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Concerns\FocusesOnOwnRecords;
 use App\Filament\Resources\ConsultationResource;
 use App\Models\Consultation;
 use Filament\Tables;
@@ -10,6 +11,8 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class RecentConsultationsWidget extends BaseWidget
 {
+    use FocusesOnOwnRecords;
+
     protected static ?int $sort = 5;
 
     protected int|string|array $columnSpan = 'full';
@@ -22,11 +25,11 @@ class RecentConsultationsWidget extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
-            ->heading('Consultas recientes')
+            ->heading(self::ownershipPrefix('consultas recientes'))
             ->emptyStateHeading('Todavía no hay consultas registradas')
             ->emptyStateIcon('heroicon-o-chat-bubble-left-right')
             ->query(
-                Consultation::query()
+                self::scopeToOwnRecords(Consultation::query())
                     ->with(['pet', 'user'])
                     ->latest('consultation_date')
                     ->limit(5)

@@ -10,16 +10,21 @@ use App\Models\Vaccination;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
-it('la lista de mascotas muestra solo las activas por defecto', function () {
+it('la lista de mascotas abre en «Todos» sin filtros activos y los tabs separan activas de inactivas', function () {
     actingAsRole('admin');
     $activa = Pet::factory()->create(['active' => true]);
     $inactiva = Pet::factory()->inactiva()->create();
 
     Livewire::test(ListPets::class)
+        ->assertSet('activeTab', 'Todos')
+        ->assertSet('tableFilters.active', null)
+        ->assertCanSeeTableRecords([$activa, $inactiva])
+        ->set('activeTab', 'Activos')
         ->assertCanSeeTableRecords([$activa])
         ->assertCanNotSeeTableRecords([$inactiva])
-        ->removeTableFilter('active')
-        ->assertCanSeeTableRecords([$activa, $inactiva]);
+        ->set('activeTab', 'Inactivos')
+        ->assertCanSeeTableRecords([$inactiva])
+        ->assertCanNotSeeTableRecords([$activa]);
 });
 
 it('filtra mascotas por propietario', function () {

@@ -72,9 +72,11 @@ Los diez Resources siguen la misma estructura; al tocar uno, mantenerla:
 
 ### Dashboard
 
-Widgets en `app/Filament/Widgets/`, todos con `canView()` gateado por permiso de Shield (`auth()->user()?->can('view_any_x')`) — un usuario solo ve el widget si tiene permiso de ver ese recurso, sin necesidad de tocar código cuando cambian los permisos de un rol:
+Widgets en `app/Filament/Widgets/`, todos con `canView()` gateado por permiso de Shield (`auth()->user()?->can('view_any_x')`) — un usuario solo ve el widget si tiene permiso de ver ese recurso, sin necesidad de tocar código cuando cambian los permisos de un rol.
 
-- `PetSpeciesOverview` — stats de cantidad de mascotas por especie (`view_any_pet`).
+**Orden y foco por rol**: arriba los KPIs del día (`$sort = 0`, ancho completo); luego especies y vacunas a media anchura (`$columnSpan = 1`, grilla de 2 columnas), cirugías y pruebas a media anchura, y consultas recientes a ancho completo. El trait `App\Filament\Concerns\FocusesOnOwnRecords` hace que un usuario con rol `veterinarian` (y sin `admin`) vea solo sus propias consultas, cirugías y pruebas (títulos «Mis …»); `assistant` y `admin` ven los de toda la clínica. Las vacunas siempre son de toda la clínica. Un widget nuevo debe respetar este orden y, si lista registros con `user_id`, usar el trait.
+
+- `PetSpeciesOverview` — barras horizontales de mascotas por especie; solo aparecen las especies con al menos una mascota (`view_any_pet`).
 - `TodayOverviewWidget` — KPIs del día: consultas de hoy, cirugías próximas (`Surgery::scopeUpcoming()`), pruebas sin resultado (`Test::scopeWithoutResult()`). A diferencia de los demás, cada stat se agrega al array solo si el usuario tiene el permiso correspondiente (`view_any_consultation`/`view_any_surgery`/`view_any_test`) — un usuario puede ver algunos KPIs de la fila y no otros, no es todo-o-nada como en los widgets de tabla.
 - `UpcomingVaccinationsWidget` / `UpcomingSurgeriesWidget` / `TestsWithoutResultWidget` / `RecentConsultationsWidget` — tablas de seguimiento operativo, cada una gateada por el permiso `view_any_x` de su modelo. Las de vacunas usan `actionable()` (solo vigentes); el contador del menú de Vacunaciones también.
 
@@ -188,6 +190,8 @@ Cómo probar la migración sin riesgo: rama de prueba (sin merge) con `filament/
 - **Idioma**: todo texto visible al usuario (labels, notificaciones, mensajes de validación, emails, prompt de IA) va en español neutro, con tuteo y sin voseo ("Intenta", "Revisa", no "Intentá"/"Revisá"); los identificadores de código (clases, tablas, columnas, rutas) siguen en inglés. `fallback_locale` es `es`. Un label vacío en un campo de formulario sale en inglés ("Department id"): ponerlo siempre.
 - **Tablas**: ID, "Registrado el" y "Actualizado el" ocultos por defecto (`toggleable`), fechas `d/m/Y`, orden por defecto explícito, conteos con `->counts('relación')`.
 - **Git**: una rama por tema desde `origin/main`, un PR por tema; mensajes de commit y PR en español.
+- **Documentación al día**: todo cambio que altere comportamiento, permisos, rutas, comandos, configuración o la interfaz que ve el usuario actualiza en el mismo PR: este `CLAUDE.md`, `README.md`/`CONTRIBUTING.md` si los afecta y, cuando exista, la guía de uso del panel (sección «Ayuda»). Antes de cerrar una tarea, revisar si algo de lo anterior quedó desactualizado.
+- **Listas con tabs**: si una lista tiene tabs (ej. Mascotas: Todos/Activos/Inactivos), no agregar un filtro con valor por defecto que se solape con ellos; el tab «Todos» debe abrir sin filtros activos.
 
 ===
 

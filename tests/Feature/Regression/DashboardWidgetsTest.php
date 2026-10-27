@@ -26,7 +26,7 @@ function callProtected(object $instance, string $method): mixed
     return $reflection->invoke($instance);
 }
 
-it('el gráfico de especies incluye las 8 especies del enum, no solo caninos y felinos', function () {
+it('el gráfico de especies muestra solo las especies con mascotas, de mayor a menor', function () {
     actingAsRole('veterinarian');
     Pet::factory()->create(['species' => PetSpecies::Reptil]);
     Pet::factory()->create(['species' => PetSpecies::Reptil]);
@@ -34,11 +34,33 @@ it('el gráfico de especies incluye las 8 especies del enum, no solo caninos y f
 
     $data = callProtected(Livewire::test(PetSpeciesOverview::class)->instance(), 'getData');
 
-    expect($data['labels'])->toHaveCount(8)
-        ->and($data['labels'])->toContain('Reptil', 'Canino', 'Bovino', 'Pez');
+    expect($data['labels'])->toBe(['Reptil', 'Canino'])
+        ->and($data['datasets'][0]['data'])->toBe([2, 1]);
+});
 
-    $reptilIndex = array_search('Reptil', $data['labels']);
-    expect($data['datasets'][0]['data'][$reptilIndex])->toBe(2);
+it('el veterinario ve en el dashboard solo sus consultas; el admin ve las de toda la clínica', function () {
+    $vet = actingAsRole('veterinarian');
+    Consultation::factory()->create(['user_id' => $vet->id, 'consultation_date' => today()]);
+    Consultation::factory()->create(['consultation_date' => today()]);
+
+    $stats = callProtected(Livewire::test(TodayOverviewWidget::class)->instance(), 'getStats');
+    $propias = collect($stats)->first(fn ($stat) => $stat->getLabel() === 'Mis consultas de hoy');
+
+    expect($propias->getValue())->toBe(1);
+
+    $records = Livewire::test(RecentConsultationsWidget::class)->instance()->getTable()->getRecords();
+    expect($records)->toHaveCount(1);
+
+    actingAsRole('admin');
+    $stats = callProtected(Livewire::test(TodayOverviewWidget::class)->instance(), 'getStats');
+    $todas = collect($stats)->first(fn ($stat) => $stat->getLabel() === 'Consultas de hoy');
+
+    expect($todas->getValue())->toBe(2);
+});
+
+it('los stats del día son el primer widget del dashboard, seguidos de especies', function () {
+    expect(TodayOverviewWidget::getSort())->toBeLessThan(PetSpeciesOverview::getSort())
+        ->and(PetSpeciesOverview::getSort())->toBeLessThan(UpcomingVaccinationsWidget::getSort());
 });
 
 it('Surgery::upcoming() incluye cirugías programadas dentro de los próximos 7 días, no las pasadas', function () {
@@ -117,7 +139,7 @@ it('TodayOverviewWidget solo incluye el stat de cirugías si el usuario tiene pe
 });
 
 it('el widget de cirugías próximas muestra solo las próximas y linkea al registro', function () {
-    actingAsRole('veterinarian');
+    actingAsRole('admin');
     $pet = Pet::factory()->create();
     $futura = Surgery::factory()->create(['pet_id' => $pet->id, 'date' => now()->addDays(2)]);
     Surgery::factory()->create(['pet_id' => $pet->id, 'date' => now()->subDays(2)]);
@@ -132,7 +154,7 @@ it('el widget de cirugías próximas muestra solo las próximas y linkea al regi
 });
 
 it('el widget de pruebas sin resultado muestra solo las que no tienen resultado cargado', function () {
-    actingAsRole('veterinarian');
+    actingAsRole('admin');
     $pet = Pet::factory()->create();
     $sinResultado = Test::factory()->create(['pet_id' => $pet->id, 'result' => null]);
     Test::factory()->create(['pet_id' => $pet->id, 'result' => ['archivo.pdf']]);
@@ -147,7 +169,7 @@ it('el widget de pruebas sin resultado muestra solo las que no tienen resultado 
 });
 
 it('el stat de consultas de hoy solo cuenta las de la fecha actual', function () {
-    actingAsRole('veterinarian');
+    actingAsRole('admin');
     Consultation::factory()->create(['consultation_date' => today()]);
     Consultation::factory()->create(['consultation_date' => today()->subDay()]);
 
