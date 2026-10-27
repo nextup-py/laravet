@@ -16,19 +16,27 @@ class PdfGeneratorService
      */
     public function inline(string $view, array $data, string $filename): Response
     {
-        $pdf = Pdf::loadView($view, [
-            ...$data,
-            'clinic' => app(ClinicSettings::class),
-        ])->setPaper('a4', 'portrait');
-
-        $pdf->render();
-        $this->paginate($pdf);
-
-        return response($pdf->output(), 200, [
+        return response($this->output($view, $data), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="'.$filename.'"',
             'X-Content-Type-Options' => 'nosniff',
         ]);
+    }
+
+    /**
+     * El PDF ya generado, para descargas armadas por quien lo llama (por ejemplo, los reportes).
+     */
+    public function output(string $view, array $data, string $orientation = 'portrait'): string
+    {
+        $pdf = Pdf::loadView($view, [
+            ...$data,
+            'clinic' => app(ClinicSettings::class),
+        ])->setPaper('a4', $orientation);
+
+        $pdf->render();
+        $this->paginate($pdf);
+
+        return $pdf->output();
     }
 
     private function paginate(PdfDocument $pdf): void
