@@ -56,6 +56,21 @@ it('sube la foto de perfil al disco público y la expone como avatar', function 
     expect($user->getFilamentAvatarUrl())->not->toBeNull();
 });
 
+it('rechaza como foto de perfil un SVG, que serviría script desde el origen de la app', function () {
+    Storage::fake('public');
+    $user = actingAsRole('veterinarian');
+
+    Livewire::test(EditProfile::class)
+        ->fillForm([
+            'avatar_url' => UploadedFile::fake()->createWithContent('foto.svg', '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"/>'),
+            ...profileLocation(),
+        ])
+        ->call('save')
+        ->assertHasFormErrors(['avatar_url']);
+
+    expect($user->refresh()->avatar_url)->toBeNull();
+});
+
 it('cambiar la contraseña exige la contraseña actual correcta', function () {
     $user = actingAsRole('veterinarian');
     $user->update(['password' => 'clave-vieja-123']);

@@ -26,7 +26,7 @@ class EditProfile extends BaseEditProfile
                         Forms\Components\FileUpload::make('avatar_url')
                             ->label('Foto de perfil')
                             ->avatar()
-                            ->image()
+                            ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
                             ->imageEditor()
                             ->circleCropper()
                             ->disk('public')
