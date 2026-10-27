@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\StaffAlert;
 use App\Filament\Concerns\ClinicRoles;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
@@ -33,6 +34,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'address', // Dirección de residencia
         'phone', // Teléfono de contacto
         'avatar_url', // Ruta de la foto de perfil en el disco público
+        'notification_preferences', // Canales elegidos por tipo de aviso (StaffAlert)
     ];
 
     /**
@@ -55,6 +57,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'notification_preferences' => 'array',
         ];
     }
 
@@ -141,6 +144,32 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         }
 
         return null;
+    }
+
+    /**
+     * El veterinario (sin ser admin) ve en el dashboard y en los avisos solo sus
+     * propias consultas, cirugías y pruebas; el resto del personal ve las de toda la clínica.
+     */
+    public function seesOnlyOwnRecords(): bool
+    {
+        return $this->hasRole(ClinicRoles::VETERINARIAN) && ! $this->hasRole(ClinicRoles::ADMIN);
+    }
+
+    /**
+     * Canales por los que el usuario recibe un aviso: los que eligió en su perfil
+     * (por defecto solo la campanita), y nada si su rol no puede ver ese recurso.
+     *
+     * @return array<int, string>
+     */
+    public function notificationChannels(StaffAlert $alert): array
+    {
+        if (! $this->can($alert->permission())) {
+            return [];
+        }
+
+        $chosen = $this->notification_preferences[$alert->value] ?? ['database'];
+
+        return array_values(array_intersect(['database', 'mail'], (array) $chosen));
     }
 
     public function getFilamentAvatarUrl(): ?string

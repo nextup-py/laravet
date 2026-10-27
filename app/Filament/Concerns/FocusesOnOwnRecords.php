@@ -14,11 +14,7 @@ trait FocusesOnOwnRecords
 {
     protected static function focusesOnOwnRecords(): bool
     {
-        $user = auth()->user();
-
-        return $user !== null
-            && $user->hasRole(ClinicRoles::VETERINARIAN)
-            && ! $user->hasRole(ClinicRoles::ADMIN);
+        return auth()->user()?->seesOnlyOwnRecords() ?? false;
     }
 
     protected static function scopeToOwnRecords(Builder $query): Builder

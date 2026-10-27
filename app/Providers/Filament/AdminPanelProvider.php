@@ -61,6 +61,7 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset()
             ->spa()
             ->databaseNotifications()
+            ->databaseNotificationsPolling('60s')
             ->profile(EditProfile::class, isSimple: false)
             ->sidebarCollapsibleOnDesktop()
             ->readOnlyRelationManagersOnResourceViewPagesByDefault(false)
