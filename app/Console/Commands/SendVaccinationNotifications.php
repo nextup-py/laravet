@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Vaccination;
 use App\Notifications\VaccinationNotification;
+use App\Settings\ClinicSettings;
 use Illuminate\Console\Command;
 
 class SendVaccinationNotifications extends Command
@@ -14,12 +15,6 @@ class SendVaccinationNotifications extends Command
      * @var string
      */
     protected $signature = 'send:vaccination-notifications';
-
-    /** Días antes del vencimiento desde los que se avisa. */
-    private const DAYS_BEFORE = 3;
-
-    /** Antigüedad máxima de una vacunación vencida para que todavía se avise. */
-    private const MAX_DAYS_OVERDUE = 30;
 
     /**
      * Descripción del comando de consola.
@@ -33,6 +28,17 @@ class SendVaccinationNotifications extends Command
      */
     public function handle(): void
     {
+        $clinic = ClinicSettings::tryGet();
+
+        if ($clinic && ! $clinic->reminders_enabled) {
+            return;
+        }
+
+        // Días antes del vencimiento desde los que se avisa, y antigüedad máxima de una
+        // vacunación vencida para que todavía se avise (configurables en «Datos de la clínica»).
+        $daysBefore = $clinic?->reminder_days_before ?? 3;
+        $maxDaysOverdue = $clinic?->reminder_days_overdue ?? 30;
+
         // Solo vacunaciones vigentes (la última aplicación de cada vacuna por mascota) cuya
         // próxima aplicación es en los próximos 3 días, o venció hace como máximo 30 días,
         // y que aún no recibieron un recordatorio (evita reenviar en cada corrida del schedule).
@@ -40,8 +46,8 @@ class SendVaccinationNotifications extends Command
             ->current()
             ->whereNull('reminder_sent_at')
             ->whereBetween('next_application', [
-                today()->subDays(self::MAX_DAYS_OVERDUE)->toDateString(),
-                today()->addDays(self::DAYS_BEFORE)->endOfDay()->toDateTimeString(),
+                today()->subDays($maxDaysOverdue)->toDateString(),
+                today()->addDays($daysBefore)->endOfDay()->toDateTimeString(),
             ])
             ->with(['pet.owner'])
             ->get();

@@ -65,8 +65,24 @@
         @if($clinic->ruc)
             &nbsp;|&nbsp; RUC: {{ $clinic->ruc }}
         @endif
+        @if($clinic->pdf_footer)
+            <br>{{ $clinic->pdf_footer }}
+        @endif
     </footer>
-    <main>@yield('content')</main>
+    <main>
+        @yield('content')
+
+        @if($clinic->pdf_signature || $clinic->pdf_legal_text)
+            <div style="margin-top: 36px;">
+                @if($clinic->pdf_signature)
+                    <img src="{{ \Illuminate\Support\Facades\Storage::path($clinic->pdf_signature) }}" alt="Firma" style="max-height: 70px;">
+                @endif
+                @if($clinic->pdf_legal_text)
+                    <p style="font-size: 9px; color: #6b7280; margin-top: 8px;">{{ $clinic->pdf_legal_text }}</p>
+                @endif
+            </div>
+        @endif
+    </main>
 </body>
 
 </html>

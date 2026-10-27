@@ -8,6 +8,7 @@ use App\Filament\Resources\TestResource\Pages;
 use App\Http\Controllers\TestResultController;
 use App\Models\Pet;
 use App\Models\Test;
+use App\Settings\ClinicSettings;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
@@ -71,20 +72,7 @@ class TestResource extends Resource
 
     public static function typeOptions(): array
     {
-        return [
-            'Hematología' => 'Hematología',
-            'Bioquímica' => 'Bioquímica',
-            'Inmunología' => 'Inmunología',
-            'Microbiología' => 'Microbiología',
-            'Parasitología' => 'Parasitología',
-            'Uroanálisis' => 'Uroanálisis',
-            'Coprología' => 'Coprología',
-            'Cultivo' => 'Cultivo',
-            'Prueba Rápida' => 'Prueba Rápida',
-            'PCR' => 'PCR',
-            'Serología' => 'Serología',
-            'Otros' => 'Otros',
-        ];
+        return ClinicSettings::catalog('test_types');
     }
 
     /**

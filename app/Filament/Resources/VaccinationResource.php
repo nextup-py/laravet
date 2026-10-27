@@ -7,6 +7,7 @@ use App\Enums\VaccinationStatus;
 use App\Filament\Resources\VaccinationResource\Pages;
 use App\Models\Vaccination;
 use App\Settings\ClinicSettings;
+use App\Support\ReminderMessage;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -78,43 +79,12 @@ class VaccinationResource extends Resource
 
     public static function vaccineOptions(): array
     {
-        return [
-            'Séptuple' => 'Séptuple',
-            'Rabia' => 'Rabia',
-            'Moquillo' => 'Moquillo',
-            'Parvovirus' => 'Parvovirus',
-            'Adenovirus' => 'Adenovirus',
-            'Leptospirosis' => 'Leptospirosis',
-            'Parainfluenza' => 'Parainfluenza',
-            'Bordetella' => 'Bordetella',
-            'Leucemia Felina' => 'Leucemia Felina',
-            'Panleucopenia' => 'Panleucopenia',
-            'Calicivirus' => 'Calicivirus',
-            'Rinotraqueítis Felina' => 'Rinotraqueítis Felina',
-            'Triple Felina' => 'Triple Felina',
-            'Lyme' => 'Lyme',
-            'Gripe Canina' => 'Gripe Canina',
-            'Tos de las Perreras' => 'Tos de las Perreras',
-            'Coronavirus Canino' => 'Coronavirus Canino',
-            'Giardia' => 'Giardia',
-            'Rabia Recombinante' => 'Rabia Recombinante',
-            'Antirrábica' => 'Antirrábica',
-            'Herpesvirus Equino' => 'Herpesvirus Equino',
-            'Mixomatosis' => 'Mixomatosis',
-            'Enfermedad Hemorrágica Vírica' => 'Enfermedad Hemorrágica Vírica',
-            'Vacuna Polivalente' => 'Vacuna Polivalente',
-        ];
+        return ClinicSettings::catalog('vaccines');
     }
 
     public static function manufacturerOptions(): array
     {
-        $manufacturers = [
-            'Zoetis', 'MSD', 'Elanco', 'Boehringer Ingelheim', 'Merial', 'Virbac', 'Ceva', 'Heska',
-            'Bayer', 'Vetoquinol', 'Phibro', 'Hipra', 'Biogénesis Bagó', 'Bioiberica', 'Syva',
-            'IDT Biologika', 'VECOL', 'Karnov', 'Labiana',
-        ];
-
-        return array_combine($manufacturers, $manufacturers);
+        return ClinicSettings::catalog('manufacturers');
     }
 
     /**
@@ -318,10 +288,7 @@ class VaccinationResource extends Resource
             ->visible(fn (Vaccination $record): bool => OwnerResource::canViewAny()
                 && in_array($record->status, [VaccinationStatus::Overdue, VaccinationStatus::DueSoon], true))
             ->url(fn (Vaccination $record): string => $record->pet->owner->whatsapp_url.'?text='.rawurlencode(
-                "Hola {$record->pet->owner->first_name}, te escribimos de ".app(ClinicSettings::class)->name.'. '
-                ."La vacuna {$record->vaccine} de {$record->pet->name} "
-                .($record->status === VaccinationStatus::Overdue ? 'venció' : 'vence')
-                .' el '.Carbon::parse($record->next_application)->format('d/m/Y').'. ¿Te agendamos un turno?'
+                ReminderMessage::whatsapp($record)
             ), shouldOpenInNewTab: true);
     }
 
