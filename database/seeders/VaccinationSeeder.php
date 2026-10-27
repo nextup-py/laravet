@@ -17,7 +17,7 @@ class VaccinationSeeder extends Seeder
         // [pet_index, vacuna, fecha_aplicación, próxima_aplicación, lote, fabricante, observación]
         $vaccinations = [
             [0,  'Séptuple',           '2024-01-15', '2025-01-15', 'L2401PY',  'Zoetis',              'Primera dosis del año. Paciente en buen estado general.'],
-            [0,  'Antirrábica',        '2024-01-15', '2025-01-15', 'R2401PY',  'Boehringer Ingelheim','Aplicada junto con Séptuple. Sin reacciones adversas.'],
+            [0,  'Antirrábica',        '2024-01-15', '2025-01-15', 'R2401PY',  'Boehringer Ingelheim', 'Aplicada junto con Séptuple. Sin reacciones adversas.'],
             [1,  'Séptuple',           '2024-02-20', '2025-02-20', 'L2402PY',  'Zoetis',              'Refuerzo anual. Paciente cooperadora.'],
             [1,  'Antirrábica',        '2024-02-20', '2025-02-20', 'R2402PY',  'MSD Animal Health',   null],
             [2,  'Séptuple',           '2023-11-10', '2024-11-10', 'L2311PY',  'Zoetis',              'Refuerzo. Propietario informado sobre próximo vencimiento.'],
@@ -33,7 +33,7 @@ class VaccinationSeeder extends Seeder
             [9,  'Séptuple',           '2024-01-08', '2025-01-08', 'L2401PY3', 'Boehringer Ingelheim', null],
             [9,  'Antirrábica',        '2024-01-08', '2025-01-08', 'R2401PY3', 'MSD Animal Health',   null],
             [10, 'Triple Felina',      '2024-03-25', '2025-03-25', 'TF2403PY', 'Zoetis',              'Primera vacunación del paciente. Sin historial previo.'],
-            [11, 'Triple Felina',      '2024-02-10', '2025-02-10', 'TF2402PY', 'Boehringer Ingelheim','Refuerzo anual. Paciente tranquila.'],
+            [11, 'Triple Felina',      '2024-02-10', '2025-02-10', 'TF2402PY', 'Boehringer Ingelheim', 'Refuerzo anual. Paciente tranquila.'],
             [11, 'Antirrábica',        '2024-02-10', '2025-02-10', 'R2402PY2', 'Zoetis',              null],
             [12, 'Triple Felina',      '2023-10-15', '2024-10-15', 'TF2310PY', 'MSD Animal Health',   'Refuerzo. Se recuerda al propietario dieta húmeda obligatoria.'],
             [13, 'Triple Felina',      '2024-04-01', '2024-07-01', 'TF2404PY', 'Zoetis',              'Primera dosis (gatita de 3 meses). Segunda dosis pendiente.'],
@@ -46,14 +46,14 @@ class VaccinationSeeder extends Seeder
             $vet = $vets->random();
 
             Vaccination::create([
-                'vaccine'          => $vaccine,
+                'vaccine' => $vaccine,
                 'application_date' => $appDate,
                 'next_application' => $nextApp,
-                'batch'            => $batch,
-                'manufacturer'     => $manufacturer,
-                'observation'      => $observation,
-                'pet_id'           => $pet->id,
-                'user_id'          => $vet->id,
+                'batch' => $batch,
+                'manufacturer' => $manufacturer,
+                'observation' => $observation,
+                'pet_id' => $pet->id,
+                'user_id' => $vet->id,
             ]);
         }
     }

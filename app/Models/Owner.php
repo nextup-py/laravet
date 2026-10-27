@@ -41,7 +41,7 @@ class Owner extends Model
 
     public function getFullNameAttribute(): string
     {
-        return $this->first_name . ' ' . $this->last_name;
+        return $this->first_name.' '.$this->last_name;
     }
 
     /**
@@ -55,12 +55,9 @@ class Owner extends Model
         return 'https://wa.me/'.$digits;
     }
 
-
     /**
      * Un dueño pertenece a un departamento.
      * Esta relación define que cada dueño está asociado con un departamento específico.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function department(): BelongsTo
     {
@@ -70,8 +67,6 @@ class Owner extends Model
     /**
      * Un dueño pertenece a una ciudad.
      * Esta relación define que cada dueño está asociado con una ciudad específica.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function city(): BelongsTo
     {
@@ -81,8 +76,6 @@ class Owner extends Model
     /**
      * Un dueño pertenece a un barrio.
      * Esta relación define que cada dueño está asociado con un barrio específico.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function neighborhood(): BelongsTo
     {
@@ -92,8 +85,6 @@ class Owner extends Model
     /**
      * Un dueño tiene muchas mascotas.
      * Esta relación define que un dueño puede tener múltiples mascotas asociadas.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function pets(): HasMany
     {

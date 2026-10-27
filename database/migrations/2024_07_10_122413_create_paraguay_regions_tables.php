@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateParaguayRegionsTables extends Migration
 {
@@ -59,6 +59,6 @@ class CreateParaguayRegionsTables extends Migration
     {
         Schema::dropIfExists('neighborhoods'); // Primero elimina 'neighborhoods' (depende de 'cities')
         Schema::dropIfExists('cities');      // Luego elimina 'cities' (depende de 'departments')
-        Schema::dropIfExists('departments');  // Finalmente elimina 'departments' 
+        Schema::dropIfExists('departments');  // Finalmente elimina 'departments'
     }
 }

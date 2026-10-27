@@ -15,34 +15,34 @@ class DemoSeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $central = Department::whereRaw("LOWER(name) LIKE ?", ['%central%'])->first();
+        $central = Department::whereRaw('LOWER(name) LIKE ?', ['%central%'])->first();
 
-        $luque      = City::whereRaw("LOWER(name) LIKE ?", ['%luque%'])->where('department_id', $central?->id)->first();
-        $sanLorenzo = City::whereRaw("LOWER(name) LIKE ?", ['%san lorenzo%'])->where('department_id', $central?->id)->first();
+        $luque = City::whereRaw('LOWER(name) LIKE ?', ['%luque%'])->where('department_id', $central?->id)->first();
+        $sanLorenzo = City::whereRaw('LOWER(name) LIKE ?', ['%san lorenzo%'])->where('department_id', $central?->id)->first();
 
-        $nbLuque      = Neighborhood::where('city_id', $luque?->id)->first();
+        $nbLuque = Neighborhood::where('city_id', $luque?->id)->first();
         $nbSanLorenzo = Neighborhood::where('city_id', $sanLorenzo?->id)->first();
 
         $vets = [
             [
-                'name'              => 'Dra. María González',
-                'email'             => 'maria.gonzalez@mbopivet.com.py',
-                'password'          => 'password',
+                'name' => 'Dra. María González',
+                'email' => 'maria.gonzalez@mbopivet.com.py',
+                'password' => 'password',
                 'email_verified_at' => now(),
-                'department_id'     => $central?->id,
-                'city_id'           => $luque?->id,
-                'neighborhood_id'   => $nbLuque?->id,
-                'address'           => 'Av. República 215',
+                'department_id' => $central?->id,
+                'city_id' => $luque?->id,
+                'neighborhood_id' => $nbLuque?->id,
+                'address' => 'Av. República 215',
             ],
             [
-                'name'              => 'Dr. Carlos Giménez',
-                'email'             => 'carlos.gimenez@mbopivet.com.py',
-                'password'          => 'password',
+                'name' => 'Dr. Carlos Giménez',
+                'email' => 'carlos.gimenez@mbopivet.com.py',
+                'password' => 'password',
                 'email_verified_at' => now(),
-                'department_id'     => $central?->id,
-                'city_id'           => $sanLorenzo?->id,
-                'neighborhood_id'   => $nbSanLorenzo?->id,
-                'address'           => 'Av. Defensores del Chaco 780',
+                'department_id' => $central?->id,
+                'city_id' => $sanLorenzo?->id,
+                'neighborhood_id' => $nbSanLorenzo?->id,
+                'address' => 'Av. Defensores del Chaco 780',
             ],
         ];
 
