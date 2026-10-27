@@ -88,6 +88,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return $this->belongsTo(Neighborhood::class);
     }
 
+    public function savedReports(): HasMany
+    {
+        return $this->hasMany(SavedReport::class);
+    }
+
     public function pets(): HasMany
     {
         return $this->hasMany(Pet::class);

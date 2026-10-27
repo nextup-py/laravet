@@ -4,6 +4,7 @@ namespace App\Filament\Actions;
 
 use App\Filament\Exporters\OwnerExporter;
 use App\Models\ExportLog;
+use App\Support\TabularDownload;
 use Filament\Actions\Action;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
@@ -13,10 +14,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Number;
-use League\Csv\Bom;
-use League\Csv\Writer;
-use OpenSpout\Common\Entity\Row;
-use OpenSpout\Writer\XLSX\Writer as XlsxWriter;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -88,8 +85,8 @@ final class DownloadExport
                 self::log($exporter, $label, count($rows), $data['format'], array_keys($columnMap));
 
                 return $data['format'] === 'csv'
-                    ? self::csv($name, array_values($columnMap), $rows)
-                    : self::xlsx($name, array_values($columnMap), $rows);
+                    ? TabularDownload::csv($name, array_values($columnMap), $rows)
+                    : TabularDownload::xlsx($name, array_values($columnMap), $rows);
             });
     }
 
@@ -136,47 +133,5 @@ final class DownloadExport
         $instance = new $exporter(new Export, $columnMap, []);
 
         return $records->map(fn ($record): array => $instance($record))->all();
-    }
-
-    /**
-     * @param  array<int, string>  $headers
-     * @param  array<int, array<int, mixed>>  $rows
-     */
-    private static function csv(string $name, array $headers, array $rows): StreamedResponse
-    {
-        $csv = Writer::createFromFileObject(new \SplTempFileObject);
-        $csv->setOutputBOM(Bom::Utf8); // para que Excel lea bien las tildes
-        $csv->insertOne($headers);
-        $csv->insertAll($rows);
-
-        return response()->streamDownload(fn () => print ($csv->toString()), $name, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-        ]);
-    }
-
-    /**
-     * @param  array<int, string>  $headers
-     * @param  array<int, array<int, mixed>>  $rows
-     */
-    private static function xlsx(string $name, array $headers, array $rows): StreamedResponse
-    {
-        $path = tempnam(sys_get_temp_dir(), 'export');
-
-        $writer = new XlsxWriter;
-        $writer->openToFile($path);
-        $writer->addRow(Row::fromValues($headers));
-
-        foreach ($rows as $row) {
-            $writer->addRow(Row::fromValues($row));
-        }
-
-        $writer->close();
-
-        return response()->streamDownload(function () use ($path): void {
-            readfile($path);
-            @unlink($path);
-        }, $name, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ]);
     }
 }
