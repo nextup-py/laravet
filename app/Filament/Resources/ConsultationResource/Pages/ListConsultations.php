@@ -15,7 +15,7 @@ class ListConsultations extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            DownloadExport::make(ConsultationExporter::class, 'consultas'),
+            DownloadExport::make(ConsultationExporter::class, 'consultas', 'Consultas'),
             Actions\CreateAction::make(),
         ];
     }

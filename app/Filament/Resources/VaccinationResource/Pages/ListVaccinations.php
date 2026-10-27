@@ -15,7 +15,7 @@ class ListVaccinations extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            DownloadExport::make(VaccinationExporter::class, 'vacunaciones'),
+            DownloadExport::make(VaccinationExporter::class, 'vacunaciones', 'Vacunaciones'),
             Actions\CreateAction::make(),
         ];
     }

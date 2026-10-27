@@ -15,7 +15,7 @@ class ListOwners extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            DownloadExport::make(OwnerExporter::class, 'propietarios'),
+            DownloadExport::make(OwnerExporter::class, 'propietarios', 'Propietarios'),
             Actions\CreateAction::make(),
         ];
     }

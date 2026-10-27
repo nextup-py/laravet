@@ -15,7 +15,7 @@ class ListSurgeries extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            DownloadExport::make(SurgeryExporter::class, 'cirugias'),
+            DownloadExport::make(SurgeryExporter::class, 'cirugias', 'Cirugías'),
             Actions\CreateAction::make(),
         ];
     }

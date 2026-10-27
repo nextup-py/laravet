@@ -17,7 +17,7 @@ class ListPets extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            DownloadExport::make(PetExporter::class, 'mascotas'),
+            DownloadExport::make(PetExporter::class, 'mascotas', 'Mascotas'),
             Actions\CreateAction::make(),
         ];
     }
