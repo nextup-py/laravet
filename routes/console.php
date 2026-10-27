@@ -17,3 +17,10 @@ Schedule::command('send:vaccination-notifications')
     ->dailyAt($clinic?->reminder_time ?? '00:00')
     ->timezone($clinic?->timezone ?? 'America/Asuncion')
     ->withoutOverlapping();
+
+// Avisos al personal (campanita y correo según las preferencias de cada usuario),
+// a primera hora en la zona horaria de la clínica.
+Schedule::command('send:staff-alerts')
+    ->dailyAt('07:00')
+    ->timezone($clinic?->timezone ?? 'America/Asuncion')
+    ->withoutOverlapping();
