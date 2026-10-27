@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\EditProfile;
 use App\Http\Controllers\PdfDocumentController;
 use App\Http\Controllers\TestResultController;
 use App\Settings\ClinicSettings;
@@ -60,7 +61,7 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset()
             ->spa()
             ->databaseNotifications()
-            ->profile(isSimple: false)
+            ->profile(EditProfile::class, isSimple: false)
             ->sidebarCollapsibleOnDesktop()
             ->readOnlyRelationManagersOnResourceViewPagesByDefault(false)
             ->brandName($brandName)

@@ -104,6 +104,10 @@ class UserResource extends Resource
                             ->afterStateUpdated(fn (?string $state, Set $set) => $set('email', Str::lower(trim((string) $state))))
                             ->dehydrateStateUsing(fn (?string $state): string => Str::lower(trim((string) $state)))
                             ->required(),
+                        Forms\Components\TextInput::make('phone')
+                            ->label('Teléfono')
+                            ->tel()
+                            ->maxLength(30),
                         Forms\Components\Select::make('role')
                             ->label('Rol')
                             ->options(self::roleOptions())
@@ -138,42 +142,51 @@ class UserResource extends Resource
                             ->dehydrated(false),
                     ]),
 
-                Section::make('Datos del domicilio')
-                    ->columns(3)
-                    ->schema([
-                        Forms\Components\Select::make('department_id')
-                            ->relationship(name: 'department', titleAttribute: 'name')
-                            ->searchable()
-                            ->preload()
-                            ->live()
-                            ->afterStateUpdated(function (Set $set) {
-                                $set('city_id', null);
-                                $set('neighborhood_id', null);
-                            })
-                            ->label('Departamento')
-                            ->required(),
+                self::locationSection(),
+            ]);
+    }
 
-                        Forms\Components\Select::make('city_id')
-                            ->options(fn (Get $get): Collection => City::query()->where('department_id', $get('department_id'))->pluck('name', 'id'))
-                            ->searchable()
-                            ->preload()
-                            ->live()
-                            ->afterStateUpdated(fn (Set $set) => $set('neighborhood_id', null))
-                            ->label('Ciudad')
-                            ->required(),
+    /**
+     * Sección de domicilio (departamento → ciudad → barrio + dirección),
+     * compartida con la página de perfil del propio usuario.
+     */
+    public static function locationSection(): Section
+    {
+        return Section::make('Datos del domicilio')
+            ->columns(3)
+            ->schema([
+                Forms\Components\Select::make('department_id')
+                    ->relationship(name: 'department', titleAttribute: 'name')
+                    ->searchable()
+                    ->preload()
+                    ->live()
+                    ->afterStateUpdated(function (Set $set) {
+                        $set('city_id', null);
+                        $set('neighborhood_id', null);
+                    })
+                    ->label('Departamento')
+                    ->required(),
 
-                        Forms\Components\Select::make('neighborhood_id')
-                            ->options(fn (Get $get): Collection => Neighborhood::query()->where('city_id', $get('city_id'))->pluck('name', 'id'))
-                            ->searchable()
-                            ->preload()
-                            ->label('Barrio')
-                            ->required(),
+                Forms\Components\Select::make('city_id')
+                    ->options(fn (Get $get): Collection => City::query()->where('department_id', $get('department_id'))->pluck('name', 'id'))
+                    ->searchable()
+                    ->preload()
+                    ->live()
+                    ->afterStateUpdated(fn (Set $set) => $set('neighborhood_id', null))
+                    ->label('Ciudad')
+                    ->required(),
 
-                        Forms\Components\TextInput::make('address')
-                            ->label('Dirección')
-                            ->columnSpanFull()
-                            ->required(),
-                    ]),
+                Forms\Components\Select::make('neighborhood_id')
+                    ->options(fn (Get $get): Collection => Neighborhood::query()->where('city_id', $get('city_id'))->pluck('name', 'id'))
+                    ->searchable()
+                    ->preload()
+                    ->label('Barrio')
+                    ->required(),
+
+                Forms\Components\TextInput::make('address')
+                    ->label('Dirección')
+                    ->columnSpanFull()
+                    ->required(),
             ]);
     }
 
