@@ -81,7 +81,7 @@ enum FixedReport: string
 
         return match ($this) {
             self::ClinicActivity => new ReportResult($this->label(), ['Concepto', 'Cantidad'], $this->clinicActivity($from, $to, $user), subtitle: $period),
-            self::ActivityByVet => new ReportResult($this->label(), ['Veterinario', 'Consultas', 'Vacunas aplicadas', 'Cirugías', 'Pruebas'], $this->activityByVet($from, $to, $user), subtitle: $period),
+            self::ActivityByVet => new ReportResult($this->label(), ...$this->activityByVet($from, $to, $user), subtitle: $period),
             self::PetsBySpecies => new ReportResult($this->label(), ['Especie', 'Activas', 'Inactivas', 'Total'], $this->petsBySpecies(), subtitle: $period),
             self::VaccinationsDue => $this->vaccinationsDue($user, $period),
             self::SurgeriesByType => new ReportResult($this->label(), ['Tipo de cirugía', 'Cantidad'], $this->surgeriesByType($from, $to, $user), subtitle: $period),
@@ -124,25 +124,37 @@ enum FixedReport: string
     }
 
     /**
-     * @return array<int, array<int, mixed>>
+     * Una columna por tipo de registro, solo de los que el usuario puede ver.
+     *
+     * @return array{0: array<int, string>, 1: array<int, array<int, mixed>>}
      */
     private function activityByVet(CarbonInterface $from, CarbonInterface $to, User $user): array
     {
-        return User::query()
+        $between = fn (string $column): \Closure => fn (Builder $q) => $q
+            ->whereDate($column, '>=', $from->toDateString())
+            ->whereDate($column, '<=', $to->toDateString());
+
+        $columns = collect([
+            ['Consultas', 'view_any_consultation', 'consultations', 'consultation_date'],
+            ['Vacunas aplicadas', 'view_any_vaccination', 'vaccinations', 'application_date'],
+            ['Cirugías', 'view_any_surgery', 'surgeries', 'date'],
+            ['Pruebas', 'view_any_test', 'tests', 'date'],
+        ])->filter(fn (array $column): bool => $user->can($column[1]))->values();
+
+        $counts = $columns->mapWithKeys(fn (array $column): array => ["{$column[2]} as {$column[2]}_in_range" => $between($column[3])])->all();
+
+        $rows = User::query()
             ->whereHas('roles')
             ->when($user->seesOnlyOwnRecords(), fn (Builder $users) => $users->whereKey($user->id))
-            ->withCount([
-                'consultations as consultations_in_range' => fn (Builder $q) => $q->whereDate('consultation_date', '>=', $from->toDateString())->whereDate('consultation_date', '<=', $to->toDateString()),
-                'vaccinations as vaccinations_in_range' => fn (Builder $q) => $q->whereDate('application_date', '>=', $from->toDateString())->whereDate('application_date', '<=', $to->toDateString()),
-                'surgeries as surgeries_in_range' => fn (Builder $q) => $q->whereDate('date', '>=', $from->toDateString())->whereDate('date', '<=', $to->toDateString()),
-                'tests as tests_in_range' => fn (Builder $q) => $q->whereDate('date', '>=', $from->toDateString())->whereDate('date', '<=', $to->toDateString()),
-            ])
+            ->withCount($counts)
             ->orderBy('name')
             ->get()
-            ->filter(fn (User $vet): bool => $vet->consultations_in_range + $vet->vaccinations_in_range + $vet->surgeries_in_range + $vet->tests_in_range > 0)
-            ->map(fn (User $vet): array => [$vet->name, $vet->consultations_in_range, $vet->vaccinations_in_range, $vet->surgeries_in_range, $vet->tests_in_range])
+            ->map(fn (User $vet): array => [$vet->name, ...$columns->map(fn (array $column): int => (int) $vet->{"{$column[2]}_in_range"})->all()])
+            ->filter(fn (array $row): bool => array_sum(array_slice($row, 1)) > 0)
             ->values()
             ->all();
+
+        return [['Veterinario', ...$columns->pluck(0)->all()], $rows];
     }
 
     /**
