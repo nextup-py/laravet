@@ -157,7 +157,7 @@ class PetResource extends Resource
                 ->label('Propietario')
                 ->relationship('owner', 'first_name')
                 ->default(fn () => request()->query('owner_id'))
-                ->searchable(['first_name', 'ci'])
+                ->searchable(OwnerResource::canViewAny() ? ['first_name', 'ci'] : ['first_name'])
                 ->preload()
                 ->live()
                 ->required(),

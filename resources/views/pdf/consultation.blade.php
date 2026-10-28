@@ -10,7 +10,7 @@
         </tr>
         <tr>
             <th>Propietario</th>
-            <td>{{ $consultation->pet->owner->full_name }}</td>
+            <td>{{ $showOwnerData ? $consultation->pet->owner->full_name : $consultation->pet->owner->first_name }}</td>
         </tr>
         <tr>
             <th>Fecha de consulta</th>

@@ -3,7 +3,7 @@
 @section('content')
     <h2 class="brand-title">Carnet de Vacunación</h2>
     <p>Mascota: {{ $pet->name }} | Especie: {{ $pet->species->getLabel() }} | Raza: {{ $pet->breed }} | Fecha de nacimiento: {{ $pet->birthdate->format('d/m/Y') }}</p>
-    <p>Responsable: {{ $pet->owner->full_name }} | Teléfono: {{ $pet->owner->phone }}</p>
+    <p>Responsable: {{ $showOwnerData ? $pet->owner->full_name : $pet->owner->first_name }} @if($showOwnerData)| Teléfono: {{ $pet->owner->phone }}@endif</p>
 
     <table>
         <thead>

@@ -42,15 +42,19 @@
     <table>
         <tr>
             <th>Nombre</th>
-            <td>{{ $pet->owner->full_name }}</td>
-            <th>CI</th>
-            <td>{{ $pet->owner->ci }}</td>
+            <td>{{ $showOwnerData ? $pet->owner->full_name : $pet->owner->first_name }}</td>
+            @if($showOwnerData)
+                <th>CI</th>
+                <td>{{ $pet->owner->ci }}</td>
+            @endif
         </tr>
-        <tr>
-            <th>Teléfono</th>
-            <td>{{ $pet->owner->phone }}</td>
-            <th>Dirección</th>
-            <td>{{ $pet->owner->address }}</td>
-        </tr>
+        @if($showOwnerData)
+            <tr>
+                <th>Teléfono</th>
+                <td>{{ $pet->owner->phone }}</td>
+                <th>Dirección</th>
+                <td>{{ $pet->owner->address }}</td>
+            </tr>
+        @endif
     </table>
 @endsection
