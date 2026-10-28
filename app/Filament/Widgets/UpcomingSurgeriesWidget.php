@@ -3,11 +3,13 @@
 namespace App\Filament\Widgets;
 
 use App\Filament\Concerns\FocusesOnOwnRecords;
+use App\Filament\Resources\OwnerResource;
 use App\Filament\Resources\SurgeryResource;
 use App\Models\Surgery;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Database\Eloquent\Model;
 
 class UpcomingSurgeriesWidget extends BaseWidget
 {
@@ -39,8 +41,11 @@ class UpcomingSurgeriesWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('pet.name')
                     ->label('Mascota')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('pet.owner.full_name')
-                    ->label('Propietario'),
+                Tables\Columns\TextColumn::make('pet.owner.first_name')
+                    ->label('Propietario')
+                    ->formatStateUsing(fn (Model $record): ?string => OwnerResource::canViewAny()
+                        ? $record->pet->owner?->full_name
+                        : $record->pet->owner?->first_name),
                 Tables\Columns\TextColumn::make('type')
                     ->label('Tipo'),
                 Tables\Columns\TextColumn::make('date')

@@ -2,11 +2,13 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Resources\OwnerResource;
 use App\Filament\Resources\VaccinationResource;
 use App\Models\Vaccination;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 class UpcomingVaccinationsWidget extends BaseWidget
@@ -37,8 +39,11 @@ class UpcomingVaccinationsWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('pet.name')
                     ->label('Mascota')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('pet.owner.full_name')
-                    ->label('Propietario'),
+                Tables\Columns\TextColumn::make('pet.owner.first_name')
+                    ->label('Propietario')
+                    ->formatStateUsing(fn (Model $record): ?string => OwnerResource::canViewAny()
+                        ? $record->pet->owner?->full_name
+                        : $record->pet->owner?->first_name),
                 Tables\Columns\TextColumn::make('vaccine')
                     ->label('Vacuna'),
                 Tables\Columns\TextColumn::make('next_application')

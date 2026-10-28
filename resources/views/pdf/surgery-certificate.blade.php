@@ -6,7 +6,7 @@
     <p>
         Se certifica que la mascota <strong>{{ $surgery->pet->name }}</strong>
         ({{ $surgery->pet->species->getLabel() }}, {{ $surgery->pet->breed }}),
-        propiedad de <strong>{{ $surgery->pet->owner->full_name }}</strong>,
+        propiedad de <strong>{{ $showOwnerData ? $surgery->pet->owner->full_name : $surgery->pet->owner->first_name }}</strong>,
         fue sometida a la siguiente intervención quirúrgica:
     </p>
 

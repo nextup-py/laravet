@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Owner;
 use App\Settings\ClinicSettings;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as PdfDocument;
@@ -31,6 +32,8 @@ class PdfGeneratorService
         $pdf = Pdf::loadView($view, [
             ...$data,
             'clinic' => app(ClinicSettings::class),
+            // Apellido, CI, teléfono y dirección del propietario solo para quien puede ver propietarios.
+            'showOwnerData' => auth()->user()?->can('viewAny', Owner::class) ?? false,
         ])->setPaper('a4', $orientation);
 
         $pdf->render();
