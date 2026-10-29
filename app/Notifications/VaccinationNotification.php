@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Filament\Resources\PetResource;
 use App\Models\Vaccination;
 use App\Settings\ClinicSettings;
+use App\Support\ClinicMail;
 use App\Support\ReminderMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -43,12 +44,12 @@ class VaccinationNotification extends Notification implements ShouldQueue
     {
         $clinic = app(ClinicSettings::class);
 
-        return (new MailMessage)
+        return ClinicMail::identify((new MailMessage)
             ->greeting('¡Hola, '.$this->vaccination->pet->owner->first_name.'!')
             ->subject(__('Recordatorio de vacunación para tu mascota.'))
             ->line(ReminderMessage::email($this->vaccination))
             ->action('Ver detalles', PetResource::getUrl('edit', ['record' => $this->vaccination->pet_id]))
-            ->salutation('Saludos, '.$clinic->name);
+            ->salutation('Saludos, '.$clinic->name));
     }
 
     /**

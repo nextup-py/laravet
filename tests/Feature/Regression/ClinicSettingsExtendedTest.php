@@ -7,8 +7,10 @@ use App\Filament\Resources\VaccinationResource;
 use App\Models\Vaccination;
 use App\Notifications\VaccinationNotification;
 use App\Settings\ClinicSettings;
+use App\Support\ClinicMail;
 use App\Support\ReminderMessage;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -103,6 +105,7 @@ it('los textos de recordatorio usan la plantilla configurada o el texto por defe
 
 it('el comando respeta el interruptor y la ventana de días configurados', function () {
     Notification::fake();
+    clinicEmail();
     $vencidaHaceDiezDias = Vaccination::factory()->create(['next_application' => now()->subDays(10)]);
 
     $settings = clinicSettings();
@@ -135,4 +138,80 @@ it('los PDFs incluyen el pie, la firma y el texto legal configurados', function 
     $html = view('pdf.layout', ['clinic' => $settings])->render();
 
     expect($html)->toContain('Pie personalizado', 'Documento válido con sello');
+});
+
+it('los correos salen desde la dirección elegida en el panel si es de un dominio verificado, y si no desde la predeterminada', function () {
+    config(['mail.from.address' => 'notificaciones@nextup.com.py', 'mail.allowed_from_domains' => []]);
+    $settings = clinicSettings();
+    $settings->name = 'Mbopivet';
+
+    $settings->mail_from_address = 'no-reply@nextup.com.py';
+    $settings->save();
+    expect(ClinicMail::identify(new MailMessage)->from)->toBe(['no-reply@nextup.com.py', 'Mbopivet']);
+
+    $settings->mail_from_address = 'alguien@otro-dominio.com';
+    $settings->save();
+    expect(ClinicMail::identify(new MailMessage)->from)->toBe(['notificaciones@nextup.com.py', 'Mbopivet']);
+
+    $settings->mail_from_address = '';
+    $settings->save();
+    expect(ClinicMail::identify(new MailMessage)->from)->toBe(['notificaciones@nextup.com.py', 'Mbopivet']);
+});
+
+it('el panel solo acepta una dirección de envío de un dominio verificado', function () {
+    config(['mail.from.address' => 'notificaciones@nextup.com.py', 'mail.allowed_from_domains' => ['otra-clinica.com.py']]);
+    actingAsRole('admin');
+
+    Livewire::test(ClinicSettingsPage::class)
+        ->fillForm(['email' => 'clinica@example.com', 'mail_from_address' => 'no-reply@desconocido.com'])
+        ->call('save')
+        ->assertHasFormErrors(['mail_from_address']);
+
+    Livewire::test(ClinicSettingsPage::class)
+        ->fillForm(['email' => 'clinica@example.com', 'mail_from_address' => 'no-reply@otra-clinica.com.py'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(clinicSettings()->refresh()->mail_from_address)->toBe('no-reply@otra-clinica.com.py');
+});
+
+it('el email de la clínica es obligatorio mientras los recordatorios estén activos', function () {
+    actingAsRole('admin');
+
+    Livewire::test(ClinicSettingsPage::class)
+        ->fillForm(['reminders_enabled' => true, 'email' => null])
+        ->call('save')
+        ->assertHasFormErrors(['email' => 'required']);
+
+    Livewire::test(ClinicSettingsPage::class)
+        ->fillForm(['reminders_enabled' => false, 'email' => null])
+        ->call('save')
+        ->assertHasNoFormErrors();
+});
+
+it('sin el email de la clínica no se envían recordatorios ni se marcan como avisados', function () {
+    Notification::fake();
+    clinicEmail(null);
+    $vaccination = Vaccination::factory()->proximaAVencer(2)->create();
+
+    test()->artisan('send:vaccination-notifications')->assertSuccessful();
+
+    Notification::assertNothingSent();
+    expect($vaccination->refresh()->reminder_sent_at)->toBeNull();
+
+    clinicEmail();
+    test()->artisan('send:vaccination-notifications')->assertSuccessful();
+
+    Notification::assertSentTo($vaccination->pet->owner, VaccinationNotification::class);
+});
+
+it('la dirección de envío es obligatoria y arranca con la de MAIL_FROM_ADDRESS', function () {
+    actingAsRole('admin');
+
+    expect(clinicSettings()->mail_from_address)->toBe(config('mail.from.address'));
+
+    Livewire::test(ClinicSettingsPage::class)
+        ->fillForm(['mail_from_address' => ''])
+        ->call('save')
+        ->assertHasFormErrors(['mail_from_address' => 'required']);
 });

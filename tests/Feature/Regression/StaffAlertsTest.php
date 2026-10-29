@@ -10,6 +10,8 @@ use App\Models\Test;
 use App\Models\User;
 use App\Models\Vaccination;
 use App\Notifications\StaffAlertNotification;
+use App\Notifications\VaccinationNotification;
+use App\Settings\ClinicSettings;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
@@ -121,4 +123,30 @@ it('el perfil de un rol sin permisos clínicos no ofrece avisos', function () {
     test()->actingAs($user);
 
     Livewire::test(EditProfile::class)->assertFormFieldDoesNotExist('notification_preferences.vaccinations');
+});
+
+it('el correo de aviso sale a nombre de la clínica y las respuestas van al email de la clínica', function () {
+    $user = actingAsRole('veterinarian');
+    $settings = app(ClinicSettings::class);
+    $settings->name = 'Mbopivet';
+    $settings->email = 'contacto@mbopivet.com.py';
+    $settings->save();
+
+    $mail = (new StaffAlertNotification(StaffAlert::Vaccinations, 2))->toMail($user);
+
+    expect($mail->from)->toBe([config('mail.from.address'), 'Mbopivet'])
+        ->and($mail->replyTo)->toBe([['contacto@mbopivet.com.py', 'Mbopivet']]);
+});
+
+it('sin email de la clínica no se agrega Reply-To y el recordatorio al propietario también usa el nombre de la clínica', function () {
+    $settings = app(ClinicSettings::class);
+    $settings->name = 'Mbopivet';
+    $settings->email = null;
+    $settings->save();
+
+    $vaccination = Vaccination::factory()->proximaAVencer(2)->create();
+    $mail = (new VaccinationNotification($vaccination))->toMail($vaccination->pet->owner);
+
+    expect($mail->from[1])->toBe('Mbopivet')
+        ->and($mail->replyTo)->toBeEmpty();
 });

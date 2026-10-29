@@ -25,7 +25,7 @@ En **Configuración → Roles y permisos** el administrador crea roles y marca q
 
 En **Configuración → Datos de la clínica** (solo administradores) hay cuatro pestañas:
 
-- **General**: nombre, nombre corto, zona horaria, color, logo, contacto y datos fiscales.
+- **General**: nombre, nombre corto, zona horaria, color, logo, contacto y datos fiscales. El **nombre** aparece como remitente de los correos del sistema, y el **email** es la casilla a la que llegan las respuestas de los propietarios (es obligatorio mientras los recordatorios estén activos). La **dirección de envío** es obligatoria y se puede cambiar por otra del mismo dominio verificado, por ejemplo una de «no responder».
 - **Recordatorios**: si se envían, cuántos días antes y después del vencimiento, a qué hora y con qué texto.
 - **Documentos PDF**: pie de página, firma o sello y texto legal.
 - **Listas**: vacunas, fabricantes, tipos de cirugía y tipos de prueba que aparecen en los formularios.

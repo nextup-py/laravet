@@ -26,7 +26,7 @@ Las opciones de vacunas y fabricantes las administra el administrador de la clí
 
 ## Avisar al propietario
 
-- **Automático**: cada día el sistema envía un correo a los propietarios con vacunas vigentes vencidas o por vencer, una sola vez por vacuna. La anticipación, el atraso máximo, la hora y el texto son configurables.
+- **Automático**: cada día el sistema envía un correo a los propietarios con vacunas vigentes vencidas o por vencer, una sola vez por vacuna. La anticipación, el atraso máximo, la hora y el texto son configurables. Para que se envíen, la clínica tiene que tener cargado su email en *Datos de la clínica*, porque a esa casilla responden los propietarios.
 - **Manual**: *Avisar por WhatsApp* en el menú de la fila abre WhatsApp con el mensaje listo. Solo aparece en vacunas vencidas o por vencer y si puedes ver propietarios.
 
 ## Carnet
