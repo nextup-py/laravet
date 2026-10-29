@@ -2,11 +2,11 @@
 
 namespace App\Notifications;
 
-use App\Filament\Resources\PetResource;
 use App\Models\Vaccination;
 use App\Settings\ClinicSettings;
 use App\Support\ClinicMail;
 use App\Support\ReminderMessage;
+use App\Support\WhatsappLink;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -42,14 +42,24 @@ class VaccinationNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $clinic = app(ClinicSettings::class);
+        $clinic = ClinicSettings::tryGet();
+        $pet = $this->vaccination->pet;
 
-        return ClinicMail::identify((new MailMessage)
-            ->greeting('¡Hola, '.$this->vaccination->pet->owner->first_name.'!')
-            ->subject(__('Recordatorio de vacunación para tu mascota.'))
+        $message = (new MailMessage)
+            ->greeting('¡Hola, '.$pet->owner->first_name.'!')
+            ->subject(ReminderMessage::subject($this->vaccination))
             ->line(ReminderMessage::email($this->vaccination))
-            ->action('Ver detalles', PetResource::getUrl('edit', ['record' => $this->vaccination->pet_id]))
-            ->salutation('Saludos, '.$clinic->name));
+            ->salutation('Saludos, '.($clinic?->name ?? config('app.name')));
+
+        // El propietario no tiene acceso al panel: el botón lo lleva a escribirle a la clínica.
+        if ($clinic && filled($clinic->whatsapp)) {
+            $message->action('Agendar turno por WhatsApp', WhatsappLink::url(
+                $clinic->whatsapp,
+                'Hola, quiero agendar un turno de vacunación para '.$pet->name.' ('.$this->vaccination->vaccine.').',
+            ));
+        }
+
+        return ClinicMail::identify($message);
     }
 
     /**

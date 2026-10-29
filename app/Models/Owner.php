@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\OwnerGender;
+use App\Support\WhatsappLink;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -49,10 +50,7 @@ class Owner extends Model
      */
     public function getWhatsappUrlAttribute(): string
     {
-        $digits = preg_replace('/\D+/', '', $this->phone);
-        $digits = str_starts_with($digits, '595') ? $digits : '595'.ltrim($digits, '0');
-
-        return 'https://wa.me/'.$digits;
+        return WhatsappLink::url($this->phone);
     }
 
     /**

@@ -37,10 +37,19 @@ final class ReminderMessage
         return self::render($clinic?->reminder_whatsapp_message ?: ClinicSettings::DEFAULT_REMINDER_WHATSAPP, $vaccination);
     }
 
+    /** Asunto del correo: dice de qué trata antes de abrirlo, p. ej. «Toby: la vacuna Séptuple vence el 02/11/2026». */
+    public static function subject(Vaccination $vaccination): string
+    {
+        $next = Carbon::parse($vaccination->next_application);
+
+        return $vaccination->pet->name.': la vacuna '.$vaccination->vaccine
+            .(self::isOverdue($vaccination) ? ' venció el ' : ' vence el ').$next->format('d/m/Y');
+    }
+
     public static function render(string $template, Vaccination $vaccination): string
     {
         $next = Carbon::parse($vaccination->next_application);
-        $overdue = $vaccination->status === VaccinationStatus::Overdue || $next->startOfDay()->lt(today());
+        $overdue = self::isOverdue($vaccination);
 
         return strtr($template, [
             '{propietario}' => (string) $vaccination->pet->owner?->first_name,
@@ -50,5 +59,11 @@ final class ReminderMessage
             '{estado}' => $overdue ? 'venció' : 'está por vencer',
             '{clinica}' => ClinicSettings::tryGet()?->name ?? config('app.name'),
         ]);
+    }
+
+    private static function isOverdue(Vaccination $vaccination): bool
+    {
+        return $vaccination->status === VaccinationStatus::Overdue
+            || Carbon::parse($vaccination->next_application)->startOfDay()->lt(today());
     }
 }
