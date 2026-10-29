@@ -22,11 +22,11 @@ class DepartmentResource extends Resource
 
     protected static ?string $slug = 'departamentos';
 
-    protected static ?string $navigationGroup = 'Configuración';
+    protected static ?string $navigationGroup = 'Catálogos';
 
     protected static ?string $navigationIcon = 'heroicon-o-building-library';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $modelLabel = 'departamento';
 

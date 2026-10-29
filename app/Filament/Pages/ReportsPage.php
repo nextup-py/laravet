@@ -47,7 +47,9 @@ class ReportsPage extends Page implements HasForms
 
     protected static ?string $slug = 'reportes';
 
-    protected static ?int $navigationSort = 90;
+    protected static ?string $navigationGroup = 'Historial clínico';
+
+    protected static ?int $navigationSort = 5;
 
     protected static string $view = 'filament.pages.reports-page';
 

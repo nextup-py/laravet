@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Enums\PetSpecies;
+use App\Filament\Concerns\FocusesOnOwnRecords;
 use App\Filament\Resources\SurgeryResource\Pages;
 use App\Models\Pet;
 use App\Models\Surgery;
@@ -26,6 +27,8 @@ use Illuminate\Support\Str;
  */
 class SurgeryResource extends Resource
 {
+    use FocusesOnOwnRecords;
+
     protected static ?string $model = Surgery::class;
 
     protected static ?string $slug = 'cirugias';
@@ -39,6 +42,24 @@ class SurgeryResource extends Resource
     protected static ?string $modelLabel = 'cirugía';
 
     protected static ?string $recordTitleAttribute = 'type';
+
+    /** Cirugías de hoy y de los próximos 7 días (las del veterinario, si solo ve las suyas). */
+    public static function getNavigationBadge(): ?string
+    {
+        $count = static::scopeToOwnRecords(static::getModel()::upcoming())->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'info';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Cirugías de hoy y de los próximos 7 días';
+    }
 
     public static function getRecordTitle(?Model $record): string|Htmlable|null
     {

@@ -73,15 +73,22 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
-                    ->label('Historial clínico')
-                    ->icon('heroicon-o-clipboard-document-list'),
-                NavigationGroup::make()
                     ->label('Pacientes')
                     ->icon('heroicon-o-heart'),
+                NavigationGroup::make()
+                    ->label('Historial clínico')
+                    ->icon('heroicon-o-clipboard-document-list'),
                 NavigationGroup::make()
                     ->label('Configuración')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->collapsed(),
+                NavigationGroup::make()
+                    ->label('Catálogos')
+                    ->icon('heroicon-o-map')
+                    ->collapsed(),
+                NavigationGroup::make()
+                    ->label('Ayuda')
+                    ->icon('heroicon-o-question-mark-circle'),
             ])
             ->authenticatedRoutes(function () {
                 Route::controller(PdfDocumentController::class)->group(function () {

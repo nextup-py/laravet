@@ -27,11 +27,11 @@ class NeighborhoodResource extends Resource
 
     protected static ?string $slug = 'barrios';
 
-    protected static ?string $navigationGroup = 'Configuración';
+    protected static ?string $navigationGroup = 'Catálogos';
 
     protected static ?string $navigationIcon = 'heroicon-o-home-modern';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $modelLabel = 'barrio';
 
