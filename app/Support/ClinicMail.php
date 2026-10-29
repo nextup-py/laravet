@@ -16,15 +16,14 @@ use Illuminate\Support\Str;
  */
 final class ClinicMail
 {
-    public static function identify(MailMessage $message): MailMessage
+    /**
+     * @param  bool  $withReplyTo  false cuando el mensaje define su propio Reply-To (p. ej. un reporte, que se responde al usuario)
+     */
+    public static function identify(MailMessage $message, bool $withReplyTo = true): MailMessage
     {
         $clinic = ClinicSettings::tryGet();
 
-        // Respaldo: si la guardada dejó de ser válida (p. ej. un dominio ya no permitido), se usa la del .env
-        // para que los correos nunca dejen de salir.
-        $address = $clinic && self::isAllowedAddress($clinic->mail_from_address)
-            ? $clinic->mail_from_address
-            : config('mail.from.address');
+        $address = self::fromAddress($clinic);
 
         if ($clinic && filled($clinic->name)) {
             $message->from($address, $clinic->name);
@@ -32,11 +31,22 @@ final class ClinicMail
             $message->from($address);
         }
 
-        if ($clinic && filled($clinic->email)) {
+        if ($withReplyTo && $clinic && filled($clinic->email)) {
             $message->replyTo($clinic->email, $clinic->name);
         }
 
         return $message;
+    }
+
+    /**
+     * Dirección desde la que salen los correos: la de «Datos de la clínica» y, si dejó de ser válida
+     * (p. ej. un dominio ya no permitido), la del .env para que los correos nunca dejen de salir.
+     */
+    public static function fromAddress(?ClinicSettings $clinic): string
+    {
+        return $clinic && self::isAllowedAddress($clinic->mail_from_address)
+            ? $clinic->mail_from_address
+            : (string) config('mail.from.address');
     }
 
     /**

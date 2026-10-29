@@ -11,5 +11,6 @@ return [
         'export_data' => 'Exportar listas a CSV/Excel',
         'view_export_log' => 'Ver el registro de exportaciones',
         'view_reports' => 'Ver la sección de reportes',
+        'manage_problem_reports' => 'Ver y gestionar los reportes de problemas del personal',
     ],
 ];
