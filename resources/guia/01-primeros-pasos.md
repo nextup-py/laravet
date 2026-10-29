@@ -10,7 +10,7 @@ Bienvenido al sistema de gestión clínica. Esta guía te explica cómo moverte 
 
 ## Moverte por el panel
 
-- **Menú lateral**: agrupa las secciones (Historial clínico, Pacientes, Configuración). Puedes contraerlo con el botón de arriba.
+- **Menú lateral**: agrupa las secciones: Pacientes, Historial clínico (incluye los Reportes), Configuración, Catálogos (departamentos, ciudades y barrios) y Ayuda. Configuración y Catálogos están plegados; haz clic en el nombre del grupo para abrirlos. Junto a Vacunaciones, Cirugías y Pruebas verás un número con lo que está pendiente (vacunas vencidas o por vencer, cirugías de hoy y de la próxima semana, pruebas sin resultado); si eres veterinario, cuenta solo lo tuyo. Puedes contraerlo con el botón de arriba.
 - **Buscador**: la barra superior busca a la vez en mascotas, propietarios, consultas, vacunas y demás registros que puedas ver.
 - **Tabla de cada lista**: haz clic en una fila para abrir su ficha. El menú de tres puntos de la fila ofrece las acciones (editar, atajos para crear registros, documentos).
 - **Eliminar** no está en las listas: se hace desde el botón *Eliminar* dentro de la pantalla de edición, para evitar borrados por error.

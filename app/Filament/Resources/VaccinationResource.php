@@ -43,7 +43,14 @@ class VaccinationResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return (string) static::getModel()::actionable()->count();
+        $count = static::getModel()::actionable()->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Vacunaciones vencidas o por vencer';
     }
 
     public static function getNavigationBadgeColor(): ?string

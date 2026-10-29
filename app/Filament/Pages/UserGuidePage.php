@@ -21,7 +21,9 @@ class UserGuidePage extends Page
 
     protected static ?string $slug = 'guia-de-uso';
 
-    protected static ?int $navigationSort = 100;
+    protected static ?string $navigationGroup = 'Ayuda';
+
+    protected static ?int $navigationSort = 1;
 
     protected static string $view = 'filament.pages.user-guide-page';
 

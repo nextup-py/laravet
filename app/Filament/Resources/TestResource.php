@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\PetSpecies;
 use App\Enums\TestStatus;
+use App\Filament\Concerns\FocusesOnOwnRecords;
 use App\Filament\Resources\TestResource\Pages;
 use App\Http\Controllers\TestResultController;
 use App\Models\Pet;
@@ -28,6 +29,8 @@ use Illuminate\Support\HtmlString;
  */
 class TestResource extends Resource
 {
+    use FocusesOnOwnRecords;
+
     protected static ?string $model = Test::class;
 
     protected static ?string $slug = 'pruebas';
@@ -43,6 +46,24 @@ class TestResource extends Resource
     protected static ?string $pluralModelLabel = 'pruebas laboratoriales';
 
     protected static ?string $recordTitleAttribute = 'type';
+
+    /** Pruebas sin resultado cargado (las del veterinario, si solo ve las suyas). */
+    public static function getNavigationBadge(): ?string
+    {
+        $count = static::scopeToOwnRecords(static::getModel()::withoutResult())->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Pruebas sin resultado';
+    }
 
     public static function getRecordTitle(?Model $record): string|Htmlable|null
     {
