@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Settings\ClinicSettings;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -36,6 +37,53 @@ final class ClinicMail
         }
 
         return $message;
+    }
+
+    /**
+     * Datos de marca para las plantillas de correo (encabezado, botón y pie): nombre, logo (URL
+     * absoluta), color principal con el color de texto que contrasta, y los datos de contacto cargados.
+     *
+     * @return array{name: string, logo: ?string, color: string, on_color: string, contact: array<int, string>, email: ?string, website: ?string}
+     */
+    public static function brand(): array
+    {
+        $clinic = ClinicSettings::tryGet();
+
+        $color = $clinic?->primary_color;
+        $color = is_string($color) && preg_match('/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i', $color) ? $color : '#f59e0b';
+
+        $contact = [];
+
+        if ($clinic) {
+            $contact = array_values(array_filter([
+                filled($clinic->phone) ? 'Tel. '.$clinic->phone : null,
+                filled($clinic->whatsapp) ? 'WhatsApp '.$clinic->whatsapp : null,
+                $clinic->address,
+                $clinic->business_hours,
+                $clinic->facebook,
+                $clinic->instagram,
+            ], filled(...)));
+        }
+
+        return [
+            'name' => filled($clinic?->name) ? $clinic->name : (string) config('app.name'),
+            'logo' => $clinic && filled($clinic->logo) ? url(Storage::url($clinic->logo)) : null,
+            'color' => $color,
+            'on_color' => self::contrastingText($color),
+            'contact' => $contact,
+            'email' => filled($clinic?->email) ? $clinic->email : null,
+            'website' => filled($clinic?->website) ? $clinic->website : null,
+        ];
+    }
+
+    /** Blanco o casi negro, el que mejor se lee sobre el color de fondo (luminancia percibida). */
+    private static function contrastingText(string $hex): string
+    {
+        $hex = ltrim($hex, '#');
+        $hex = strlen($hex) === 3 ? preg_replace('/(.)/', '$1$1', $hex) : $hex;
+        [$r, $g, $b] = array_map(hexdec(...), str_split($hex, 2));
+
+        return (0.299 * $r + 0.587 * $g + 0.114 * $b) > 160 ? '#18181b' : '#ffffff';
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Enums\StaffAlert;
 use App\Models\User;
+use App\Settings\ClinicSettings;
 use App\Support\ClinicMail;
 use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
@@ -55,6 +56,7 @@ class StaffAlertNotification extends Notification implements ShouldQueue
             ->greeting('Hola, '.$notifiable->name)
             ->line($this->alert->title($this->count).'.')
             ->action('Ver en el panel', $this->alert->url())
-            ->line('Puedes elegir qué avisos recibir y por qué canal desde tu perfil.'));
+            ->line('Puedes elegir qué avisos recibir y por qué canal desde tu perfil.')
+            ->salutation('Saludos, '.(ClinicSettings::tryGet()?->name ?? config('app.name'))));
     }
 }

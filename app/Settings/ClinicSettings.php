@@ -8,7 +8,10 @@ use Spatie\LaravelSettings\Settings;
 class ClinicSettings extends Settings
 {
     /** Textos por defecto de los recordatorios; admiten los marcadores de `ReminderMessage::PLACEHOLDERS`. */
-    public const DEFAULT_REMINDER_EMAIL = 'La vacuna {vacuna} de tu mascota {mascota} {estado} el {fecha}.';
+    public const DEFAULT_REMINDER_EMAIL = 'La vacuna {vacuna} de {mascota} {estado} el {fecha}. Mantenerla al día protege a {mascota} de enfermedades graves. Escríbenos por WhatsApp o responde este correo y te agendamos un turno.';
+
+    /** Texto anterior del recordatorio por correo; la migración lo reemplaza solo si la clínica no lo editó. */
+    public const PREVIOUS_REMINDER_EMAIL = 'La vacuna {vacuna} de tu mascota {mascota} {estado} el {fecha}.';
 
     public const DEFAULT_REMINDER_WHATSAPP = 'Hola {propietario}, te escribimos de {clinica}. La vacuna {vacuna} de {mascota} {estado} el {fecha}. ¿Te agendamos un turno?';
 
