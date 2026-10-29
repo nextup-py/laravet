@@ -30,6 +30,8 @@ class TestResource extends Resource
 {
     protected static ?string $model = Test::class;
 
+    protected static ?string $slug = 'pruebas';
+
     protected static ?string $navigationGroup = 'Historial clínico';
 
     protected static ?string $navigationIcon = 'heroicon-o-beaker';

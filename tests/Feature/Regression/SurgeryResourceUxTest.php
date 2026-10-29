@@ -147,7 +147,7 @@ it('la ficha no enlaza a la mascota si el usuario no puede verla', function () {
 
     Livewire::test(ViewSurgery::class, ['record' => $cirugia->getRouteKey()])
         ->assertSee($cirugia->pet->name)
-        ->assertDontSee(route('filament.admin.resources.pets.view', ['record' => $cirugia->pet_id]));
+        ->assertDontSee(route('filament.admin.resources.mascotas.view', ['record' => $cirugia->pet_id]));
 });
 
 it('la búsqueda global de cirugías incluye mascota, fecha y estado', function () {

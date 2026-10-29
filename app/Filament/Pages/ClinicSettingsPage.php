@@ -28,7 +28,7 @@ class ClinicSettingsPage extends Page implements HasForms
 
     protected static ?string $title = 'Datos de la clínica';
 
-    protected static ?string $slug = 'clinic-settings';
+    protected static ?string $slug = 'datos-de-la-clinica';
 
     protected static string $view = 'filament.pages.clinic-settings-page';
 

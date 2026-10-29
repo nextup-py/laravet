@@ -43,7 +43,7 @@ it('el RoleResource publicado en app es el único registrado y marcar el permiso
     actingAsRole('admin');
     $rol = Role::create(['name' => 'auxiliar', 'guard_name' => 'web']);
 
-    expect(config('filament-shield.shield_resource.slug'))->toBe('shield/roles')
+    expect(config('filament-shield.shield_resource.slug'))->toBe('roles')
         ->and(collect(Filament::getCurrentPanel()->getResources())->filter(fn ($r) => str_ends_with($r, '\\RoleResource'))->all())
         ->toHaveCount(1)
         ->toContain(RoleResource::class);

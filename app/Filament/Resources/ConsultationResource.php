@@ -31,6 +31,8 @@ class ConsultationResource extends Resource
 {
     protected static ?string $model = Consultation::class;
 
+    protected static ?string $slug = 'consultas';
+
     protected static ?string $navigationGroup = 'Historial clínico';
 
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';

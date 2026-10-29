@@ -205,7 +205,7 @@ it('la ficha no enlaza a la mascota si el usuario no puede verla', function () {
 
     Livewire::test(ViewTest::class, ['record' => $prueba->getRouteKey()])
         ->assertSee($prueba->pet->name)
-        ->assertDontSee(route('filament.admin.resources.pets.view', ['record' => $prueba->pet_id]));
+        ->assertDontSee(route('filament.admin.resources.mascotas.view', ['record' => $prueba->pet_id]));
 });
 
 it('la búsqueda global de pruebas incluye mascota, fecha y estado', function () {

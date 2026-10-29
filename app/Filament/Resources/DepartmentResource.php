@@ -20,6 +20,8 @@ class DepartmentResource extends Resource
 {
     protected static ?string $model = Department::class;
 
+    protected static ?string $slug = 'departamentos';
+
     protected static ?string $navigationGroup = 'Configuración';
 
     protected static ?string $navigationIcon = 'heroicon-o-building-library';
