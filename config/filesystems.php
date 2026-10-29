@@ -47,6 +47,17 @@ return [
             'throw' => false,
         ],
 
+        // Capturas de «Reportar un problema»: privado, se sirve solo a quien administra los reportes
+        // (ver ProblemReportAttachmentController); no es accesible por URL pública.
+        'problem-reports' => [
+            'driver' => 'local',
+            'root' => storage_path('app/problem-reports'),
+            'url' => env('APP_URL').'/archivos-privados/reportes',
+            'visibility' => 'private',
+            'serve' => false,
+            'throw' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

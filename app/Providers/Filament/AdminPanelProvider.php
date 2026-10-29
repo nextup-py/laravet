@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\EditProfile;
 use App\Http\Controllers\PdfDocumentController;
+use App\Http\Controllers\ProblemReportAttachmentController;
 use App\Http\Controllers\TestResultController;
 use App\Settings\ClinicSettings;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -102,6 +103,8 @@ class AdminPanelProvider extends PanelProvider
                 Route::get('/pruebas/{test}/resultados/{index}', TestResultController::class)
                     ->whereNumber('index')
                     ->name('tests.result');
+                Route::get('/reportes-de-problemas/{report}/captura', ProblemReportAttachmentController::class)
+                    ->name('problem-reports.attachment');
             })
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

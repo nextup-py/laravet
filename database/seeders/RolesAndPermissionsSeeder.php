@@ -51,6 +51,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'export_data', 'guard_name' => 'web']);
         Permission::firstOrCreate(['name' => 'view_export_log', 'guard_name' => 'web']);
         Permission::firstOrCreate(['name' => 'view_reports', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'manage_problem_reports', 'guard_name' => 'web']);
 
         // admin = Super Admin (config/filament-shield.php): bypassea todos los
         // permisos, no necesita asignación explícita.
