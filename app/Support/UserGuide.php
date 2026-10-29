@@ -55,20 +55,7 @@ final class UserGuide
     {
         // El prefijo numérico del archivo solo ordena el directorio; no forma parte de la URL.
         $slug = preg_replace('/^\d+-/', '', pathinfo($path, PATHINFO_FILENAME));
-        $content = str_replace("\r\n", "\n", File::get($path));
-        $meta = [];
-        $body = $content;
-
-        if (preg_match('/\A---\n(.*?)\n---\n(.*)\z/s', $content, $matches)) {
-            foreach (explode("\n", $matches[1]) as $line) {
-                if (str_contains($line, ':')) {
-                    [$key, $value] = explode(':', $line, 2);
-                    $meta[trim($key)] = trim($value);
-                }
-            }
-
-            $body = $matches[2];
-        }
+        ['meta' => $meta, 'body' => $body] = FrontMatter::parse(File::get($path));
 
         return [
             'slug' => $slug,
@@ -76,7 +63,7 @@ final class UserGuide
             'icon' => $meta['icon'] ?? 'heroicon-o-book-open',
             'order' => (int) ($meta['order'] ?? 100),
             'permission' => ($meta['permission'] ?? '') !== '' ? $meta['permission'] : null,
-            'body' => trim($body),
+            'body' => $body,
         ];
     }
 }

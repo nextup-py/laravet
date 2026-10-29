@@ -15,6 +15,9 @@ class ClinicSettings extends Settings
 
     public const DEFAULT_REMINDER_WHATSAPP = 'Hola {propietario}, te escribimos de {clinica}. La vacuna {vacuna} de {mascota} {estado} el {fecha}. ¿Te agendamos un turno?';
 
+    /** Correo de soporte del sistema por defecto; se edita en «Datos de la clínica». */
+    public const DEFAULT_SUPPORT_EMAIL = 'laravet@nextup.com.py';
+
     /** Listas iniciales; la clínica las edita desde «Datos de la clínica → Listas». */
     public const DEFAULT_VACCINES = [
         'Séptuple', 'Rabia', 'Moquillo', 'Parvovirus', 'Adenovirus', 'Leptospirosis', 'Parainfluenza',
@@ -66,6 +69,9 @@ class ClinicSettings extends Settings
 
     /** Dirección de envío de los correos, obligatoria y de un dominio verificado (ver ClinicMail, que usa MAIL_FROM_ADDRESS de respaldo). */
     public string $mail_from_address;
+
+    /** Correo de soporte del sistema: se muestra en Ayuda → Soporte y recibe los reportes de problemas. */
+    public string $support_email;
 
     public ?string $business_hours;
 

@@ -148,6 +148,11 @@ class ClinicSettingsPage extends Page implements HasForms
                                 $fail('La dirección debe ser de uno de estos dominios verificados: '.implode(', ', ClinicMail::allowedDomains()).'.');
                             }
                         }),
+                    Forms\Components\TextInput::make('support_email')
+                        ->label('Correo de soporte del sistema')
+                        ->helperText('Se muestra a todo el personal en Ayuda → Soporte: es la casilla a la que escriben cuando algo del sistema falla o tienen una duda.')
+                        ->email()
+                        ->required(),
                     Forms\Components\TextInput::make('business_hours')
                         ->label('Horario de atención')
                         ->helperText('Aparece en el encabezado de los PDFs generados.'),
