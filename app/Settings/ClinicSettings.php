@@ -61,6 +61,9 @@ class ClinicSettings extends Settings
 
     public ?string $email;
 
+    /** Dirección de envío de los correos, obligatoria y de un dominio verificado (ver ClinicMail, que usa MAIL_FROM_ADDRESS de respaldo). */
+    public string $mail_from_address;
+
     public ?string $business_hours;
 
     public ?string $ruc;

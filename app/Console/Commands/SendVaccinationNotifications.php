@@ -6,6 +6,7 @@ use App\Models\Vaccination;
 use App\Notifications\VaccinationNotification;
 use App\Settings\ClinicSettings;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class SendVaccinationNotifications extends Command
 {
@@ -31,6 +32,15 @@ class SendVaccinationNotifications extends Command
         $clinic = ClinicSettings::tryGet();
 
         if ($clinic && ! $clinic->reminders_enabled) {
+            return;
+        }
+
+        // Los propietarios responden a un correo del sistema: sin el email de la clínica esas
+        // respuestas se perderían, así que no se envía (ni se marca como avisado) hasta cargarlo.
+        if ($clinic && blank($clinic->email)) {
+            Log::warning('Recordatorios de vacunación no enviados: falta el email de la clínica en «Datos de la clínica».');
+            $this->warn('Falta el email de la clínica: no se envían recordatorios.');
+
             return;
         }
 

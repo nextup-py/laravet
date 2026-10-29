@@ -4,11 +4,13 @@ namespace App\Filament\Pages;
 
 use App\Filament\Concerns\ClinicRoles;
 use App\Settings\ClinicSettings;
+use App\Support\ClinicMail;
 use App\Support\ReminderMessage;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 
@@ -88,7 +90,7 @@ class ClinicSettingsPage extends Page implements HasForms
                 ->schema([
                     Forms\Components\TextInput::make('name')
                         ->label('Nombre de la clínica')
-                        ->helperText('Aparece en el encabezado de los PDFs generados y en los correos.')
+                        ->helperText('Aparece en el encabezado de los PDFs generados y como nombre del remitente de los correos.')
                         ->required(),
                     Forms\Components\TextInput::make('short_name')
                         ->label('Nombre corto')
@@ -133,7 +135,19 @@ class ClinicSettingsPage extends Page implements HasForms
                         ->tel(),
                     Forms\Components\TextInput::make('email')
                         ->label('Email')
-                        ->email(),
+                        ->helperText('Los propietarios que respondan a un correo del sistema escriben a esta casilla. Es obligatorio para enviar recordatorios.')
+                        ->email()
+                        ->required(fn (Get $get): bool => (bool) $get('reminders_enabled')),
+                    Forms\Components\TextInput::make('mail_from_address')
+                        ->label('Dirección de envío de los correos')
+                        ->helperText('Desde qué dirección salen los correos del sistema (por ejemplo, una de «no responder»). Solo se admiten direcciones de: '.implode(', ', ClinicMail::allowedDomains()).'.')
+                        ->email()
+                        ->required()
+                        ->rule(fn (): \Closure => function (string $attribute, mixed $value, \Closure $fail): void {
+                            if (filled($value) && ! ClinicMail::isAllowedAddress((string) $value)) {
+                                $fail('La dirección debe ser de uno de estos dominios verificados: '.implode(', ', ClinicMail::allowedDomains()).'.');
+                            }
+                        }),
                     Forms\Components\TextInput::make('business_hours')
                         ->label('Horario de atención')
                         ->helperText('Aparece en el encabezado de los PDFs generados.'),
@@ -180,6 +194,8 @@ class ClinicSettingsPage extends Page implements HasForms
                 ->schema([
                     Forms\Components\Toggle::make('reminders_enabled')
                         ->label('Enviar recordatorios automáticos')
+                        ->helperText('Requiere el email de la clínica (pestaña General): es la casilla a la que responden los propietarios.')
+                        ->live()
                         ->columnSpanFull(),
                     Forms\Components\TextInput::make('reminder_days_before')
                         ->label('Avisar con (días de anticipación)')

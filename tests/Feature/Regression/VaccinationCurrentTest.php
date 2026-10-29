@@ -107,6 +107,7 @@ it('el filtro de vacunas de la lista de mascotas ignora las renovadas', function
 
 it('los recordatorios solo se envían por vigentes: próximas o vencidas hace ≤ 30 días', function () {
     Notification::fake();
+    clinicEmail();
 
     [, $viejaRenovada] = mascotaConVacunaRenovada();
     $proxima = Vaccination::factory()->create(['next_application' => today()->addDays(2)]);

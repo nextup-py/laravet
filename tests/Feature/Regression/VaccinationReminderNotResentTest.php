@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Notification;
 
 it('no reenvía el recordatorio a una vacunación que ya lo tiene enviado', function () {
     Notification::fake();
+    clinicEmail();
 
     $vencidaConRecordatorio = Vaccination::factory()->recordatorioYaEnviado()->create([
         'next_application' => now()->addDay(),

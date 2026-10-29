@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Settings\ClinicSettings;
 use Database\Seeders\RegionsSeeder;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -30,4 +31,14 @@ function actingAsRole(string $role): User
     test()->actingAs($user);
 
     return $user;
+}
+
+/**
+ * Carga (o quita, con null) el email de la clínica: sin él no se envían recordatorios a propietarios.
+ */
+function clinicEmail(?string $email = 'clinica@example.com'): void
+{
+    $settings = app(ClinicSettings::class);
+    $settings->email = $email;
+    $settings->save();
 }

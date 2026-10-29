@@ -113,4 +113,18 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Dominios de envío permitidos
+    |--------------------------------------------------------------------------
+    |
+    | Dominios (separados por coma) verificados en el proveedor de correo, además
+    | del de MAIL_FROM_ADDRESS, desde los que la clínica puede elegir la dirección
+    | de envío en «Datos de la clínica». Un dominio sin verificar haría fallar
+    | todos los envíos.
+    |
+    */
+
+    'allowed_from_domains' => array_values(array_filter(array_map('trim', explode(',', (string) env('MAIL_ALLOWED_FROM_DOMAINS', ''))))),
+
 ];
