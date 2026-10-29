@@ -26,6 +26,8 @@ class PetResource extends Resource
 {
     protected static ?string $model = Pet::class;
 
+    protected static ?string $slug = 'mascotas';
+
     protected static ?string $navigationGroup = 'Pacientes';
 
     protected static ?string $navigationIcon = 'heroicon-o-identification';

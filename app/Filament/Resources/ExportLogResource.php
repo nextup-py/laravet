@@ -17,6 +17,8 @@ class ExportLogResource extends Resource
 {
     protected static ?string $model = ExportLog::class;
 
+    protected static ?string $slug = 'exportaciones';
+
     protected static ?string $navigationGroup = 'Configuración';
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-down-tray';

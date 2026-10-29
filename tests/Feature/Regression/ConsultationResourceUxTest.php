@@ -125,5 +125,5 @@ it('la ficha de consulta no enlaza a la mascota si el usuario no puede verla', f
 
     Livewire::test(ViewConsultation::class, ['record' => $consulta->getRouteKey()])
         ->assertSee($consulta->pet->name)
-        ->assertDontSee(route('filament.admin.resources.pets.view', ['record' => $consulta->pet_id]));
+        ->assertDontSee(route('filament.admin.resources.mascotas.view', ['record' => $consulta->pet_id]));
 });

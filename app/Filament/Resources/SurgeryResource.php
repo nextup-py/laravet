@@ -28,6 +28,8 @@ class SurgeryResource extends Resource
 {
     protected static ?string $model = Surgery::class;
 
+    protected static ?string $slug = 'cirugias';
+
     protected static ?string $navigationGroup = 'Historial clínico';
 
     protected static ?string $navigationIcon = 'heroicon-o-scissors';

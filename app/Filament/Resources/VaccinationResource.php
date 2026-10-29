@@ -27,6 +27,8 @@ class VaccinationResource extends Resource
 {
     protected static ?string $model = Vaccination::class;
 
+    protected static ?string $slug = 'vacunaciones';
+
     protected static ?string $navigationGroup = 'Historial clínico';
 
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';

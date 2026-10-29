@@ -57,6 +57,8 @@ Toda la funcionalidad CRUD vive en `/app/Filament/Resources/`. No hay controlado
 
 Los recursos principales son `PetResource` y `OwnerResource`. La ficha de `OwnerResource` lista las mascotas solo con su RelationManager (solo lectura: enlaza a la ficha de la mascota; el alta es el botón "Registrar mascota" con `?owner_id=`), sin sección duplicada en el infolist. En los RelationManagers de la mascota (consultas, vacunas, cirugías, pruebas) el clic en la fila abre la lectura en un modal (`recordAction('view')` con un `ViewAction` oculto por CSS, porque Filament no monta acciones `hidden()`) y el menú ofrece «Abrir ficha» y «Editar». `PetResource` agrupa los cuatro tipos de registros médicos como **RelationManagers** (en `/app/Filament/Resources/PetResource/RelationManagers/`), permitiendo gestión contextual desde la ficha de la mascota.
 
+**URLs en español**: cada Resource declara `protected static ?string $slug` (mascotas, propietarios, consultas, vacunaciones, cirugias, pruebas, usuarios, departamentos, ciudades, barrios, roles —`config('filament-shield.shield_resource.slug')`—, exportaciones) y las páginas propias su `$slug` (`datos-de-la-clinica`, `reportes`, `guia-de-uso`, `perfil`); sin tildes. Los nombres de ruta siguen ese slug (`filament.admin.resources.mascotas.view`). Las URLs viejas en inglés dan 404 a propósito (sin redirecciones); los subtramos `create` y `edit` siguen en inglés. Un Resource nuevo debe declarar su `$slug` en español y `SpanishSlugsTest` lo lista.
+
 `ConsultationResource`, `SurgeryResource` y `TestResource` usan página tipo `ManageRecords` (sin List/Create/Edit separados). `VaccinationResource` tiene páginas Create y Edit propias.
 
 ### Patrones de los Resources

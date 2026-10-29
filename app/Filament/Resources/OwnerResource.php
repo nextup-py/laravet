@@ -28,6 +28,8 @@ class OwnerResource extends Resource
 {
     protected static ?string $model = Owner::class;
 
+    protected static ?string $slug = 'propietarios';
+
     protected static ?string $navigationGroup = 'Pacientes';
 
     protected static ?string $navigationIcon = 'heroicon-o-user';

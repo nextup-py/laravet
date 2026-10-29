@@ -25,6 +25,8 @@ class NeighborhoodResource extends Resource
 {
     protected static ?string $model = Neighborhood::class;
 
+    protected static ?string $slug = 'barrios';
+
     protected static ?string $navigationGroup = 'Configuración';
 
     protected static ?string $navigationIcon = 'heroicon-o-home-modern';

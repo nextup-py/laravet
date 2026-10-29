@@ -173,7 +173,7 @@ it('la ficha no enlaza a la mascota si el usuario no puede verla', function () {
 
     Livewire::test(ViewVaccination::class, ['record' => $vacunacion->getRouteKey()])
         ->assertSee($vacunacion->pet->name)
-        ->assertDontSee(route('filament.admin.resources.pets.view', ['record' => $vacunacion->pet_id]));
+        ->assertDontSee(route('filament.admin.resources.mascotas.view', ['record' => $vacunacion->pet_id]));
 });
 
 it('la búsqueda global de vacunaciones incluye mascota, estado y fecha', function () {

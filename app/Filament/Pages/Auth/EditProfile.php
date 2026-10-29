@@ -17,6 +17,8 @@ use Filament\Pages\Auth\EditProfile as BaseEditProfile;
  */
 class EditProfile extends BaseEditProfile
 {
+    protected static ?string $slug = 'perfil';
+
     /**
      * Avisos que el usuario puede recibir según los permisos de su rol.
      *
