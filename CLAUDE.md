@@ -146,18 +146,42 @@ patrón `ProductionSeeder`/`DemoSeeder`:
   Si el admin se crea por primera vez, se genera una password aleatoria con
   `Str::password(16)` que se muestra **una sola vez** por consola — hay que
   guardarla en ese momento.
-- **`DemoSeeder`** corre solo en entornos `local`/`testing` (`php artisan
-  migrate:fresh --seed`). Crea 2 veterinarios ficticios (Dra. María González,
-  Dr. Carlos Giménez) y luego datos contextualizados en Paraguay:
+- **`RolesAndPermissionsSeeder`** solo **agrega** permisos a los roles base
+  (`givePermissionTo`, nunca `syncPermissions`): volver a correrlo no quita lo que un admin
+  sumó desde el panel. Los cambios de permisos en producción siguen yendo en una migración
+  idempotente (el deploy no corre seeders); `SeedersTest` verifica que seeder y migraciones
+  dejen a los roles los mismos permisos.
+- **`DemoSeeder`** corre en `local`, `testing` y `staging` (capacitación); **nunca en
+  producción** (usa contraseña `password` y correos fijos, y `DemoSeeder`/`DemoVolumeSeeder`
+  se niegan a correr con `APP_ENV=production` aunque se invoquen con `--class`). Crea 2
+  veterinarios (Dra. María González, Dr. Carlos Giménez) y 1 asistente (Laura Benítez, para
+  probar permisos reducidos) y datos contextualizados en Paraguay. **Es idempotente**: usa
+  `updateOrCreate` por clave natural (CI del propietario; propietario+nombre de la mascota;
+  mascota+diagnóstico/lote/tipo en el historial), así que se puede volver a correr para
+  refrescar fechas sin duplicar. Los datos de las mascotas y propietarios están en las
+  constantes `PetSeeder::PETS` y `OwnerSeeder::OWNERS`; el historial las referencia por
+  posición (trait `Concerns\UsesDemoData`: `demoPets()`/`demoVets()`, el historial se reparte
+  en orden entre los veterinarios, nunca al azar ni al admin). **Las fechas son relativas a
+  hoy**, para que el demo siempre muestre vacunas vencidas / por vencer / al día / renovadas,
+  cirugías realizadas / de hoy / programadas y pruebas pendientes / con resultado (estas
+  últimas con un PDF de ejemplo en el disco privado `test-results`). Al agregar un registro
+  demo, usar días relativos y mantener esa mezcla de estados.
 
 | Seeder | Contenido |
 |--------|-----------|
-| `OwnerSeeder` | 10 propietarios con CI, teléfono y dirección paraguayos |
+| `OwnerSeeder` | 10 propietarios con CI, teléfono y dirección paraguayos (ciudades por nombre exacto: `Areguá`, `Itauguá`…) |
 | `PetSeeder` | 15 mascotas (10 caninos, 5 felinos) con razas y datos reales |
 | `ConsultationSeeder` | 12 consultas con casos clínicos veterinarios reales |
-| `VaccinationSeeder` | 23 registros (Séptuple, Antirrábica, Triple Felina, Leucemia Felina) |
-| `SurgerySeeder` | 6 cirugías (castraciones, OVH, suturas, extracción dental) |
-| `TestSeeder` | 9 exámenes (hemograma, bioquímica, ELISA, urinálisis, radiografía) |
+| `VaccinationSeeder` | 24 registros (Séptuple, Antirrábica, Triple Felina, Leucemia Felina), con casos vencidos, por vencer, al día y renovada |
+| `SurgerySeeder` | 8 cirugías (castraciones, OVH, suturas, extracción dental), una de hoy y una programada |
+| `TestSeeder` | 9 exámenes (hemograma, bioquímica, ELISA, urinálisis, radiografía), 6 con resultado y 3 pendientes |
+
+- **`DemoVolumeSeeder`** (opcional, `php artisan db:seed --class=DemoVolumeSeeder`, después del
+  demo): agrega `DEMO_VOLUME` mascotas (200 por defecto, `config('app.demo_volume')`) con
+  propietarios e historial vía factories, para probar paginación, filtros y el tope de
+  exportación. No es idempotente a propósito (cada corrida suma datos).
+- Staging debe usar `APP_ENV=staging` para que `db:seed` incluya el demo; ojo con la contraseña
+  `password` si ese entorno es accesible desde internet.
 
 Credenciales demo por defecto en `.env`/`.env.example`:
 `ADMIN_EMAIL=admin@mbopivet.com.py` (la password se genera y se muestra al

@@ -119,10 +119,14 @@ php artisan db:seed
 ```
 
 Este comando llena la base de datos con datos de ejemplo contextualizados en Paraguay:
-- 3 veterinarios con ubicaciones del departamento Central
+- 2 veterinarios y 1 asistente (contraseña `password`) con ubicaciones del departamento Central
 - 10 propietarios con nombres, CI y teléfonos paraguayos
 - 15 mascotas (caninos y felinos) con razas y datos clínicos reales
-- 12 consultas veterinarias, 23 vacunaciones, 6 cirugías y 9 exámenes de laboratorio
+- 12 consultas veterinarias, 24 vacunaciones, 8 cirugías y 9 exámenes de laboratorio
+- Las fechas son relativas a hoy (siempre hay vacunas vencidas, por vencer y al día; cirugías de hoy y programadas); puedes volver a ejecutar el seeder sin duplicar datos
+- Los datos demo solo se siembran en los entornos `local`, `testing` y `staging`, nunca en producción
+
+Para probar con más volumen (paginación, filtros, exportación), después del demo: `php artisan db:seed --class=DemoVolumeSeeder` (cantidad con `DEMO_VOLUME` en `.env`, 200 por defecto).
 
 ### Paso 7: Iniciar el Servidor de Desarrollo
 

@@ -10,7 +10,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(ProductionSeeder::class);
 
-        if (app()->environment(['local', 'testing'])) {
+        // Los datos demo (contraseña fija) no se siembran en producción; 'staging' sirve para capacitación.
+        if (app()->environment(['local', 'testing', 'staging'])) {
             $this->call(DemoSeeder::class);
         }
     }

@@ -3,16 +3,17 @@
 namespace Database\Seeders;
 
 use App\Models\Consultation;
-use App\Models\Pet;
-use App\Models\User;
+use Database\Seeders\Concerns\UsesDemoData;
 use Illuminate\Database\Seeder;
 
 class ConsultationSeeder extends Seeder
 {
+    use UsesDemoData;
+
     public function run(): void
     {
-        $pets = Pet::all();
-        $vets = User::all();
+        $pets = $this->demoPets();
+        $vets = $this->demoVets();
 
         // [pet_index, anamnesis, diagnóstico, tratamiento, observación, días_atrás]
         $consultations = [
@@ -114,20 +115,18 @@ class ConsultationSeeder extends Seeder
             ],
         ];
 
-        foreach ($consultations as [$petIdx, $anamnesis, $diagnosis, $treatment, $observation, $daysAgo]) {
+        foreach ($consultations as $i => [$petIdx, $anamnesis, $diagnosis, $treatment, $observation, $daysAgo]) {
             $pet = $pets[$petIdx % $pets->count()];
-            $vet = $vets->random();
+            $date = now()->subDays($daysAgo);
 
-            Consultation::create([
+            Consultation::updateOrCreate(['pet_id' => $pet->id, 'diagnosis' => $diagnosis], [
                 'anamnesis' => $anamnesis,
-                'diagnosis' => $diagnosis,
                 'treatment' => $treatment,
                 'observation' => $observation,
-                'consultation_date' => now()->subDays($daysAgo)->toDateString(),
-                'pet_id' => $pet->id,
-                'user_id' => $vet->id,
-                'created_at' => now()->subDays($daysAgo),
-                'updated_at' => now()->subDays($daysAgo),
+                'consultation_date' => $date->toDateString(),
+                'user_id' => $vets[$i % $vets->count()]->id,
+                'created_at' => $date,
+                'updated_at' => $date,
             ]);
         }
     }

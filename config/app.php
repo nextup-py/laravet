@@ -108,6 +108,9 @@ return [
     'admin_name' => env('ADMIN_NAME', 'Administrador'),
     'admin_email' => env('ADMIN_EMAIL'),
 
+    // Cantidad de mascotas que siembra DemoVolumeSeeder (solo desarrollo/staging).
+    'demo_volume' => (int) env('DEMO_VOLUME', 200),
+
     /*
     |--------------------------------------------------------------------------
     | Maintenance Mode Driver

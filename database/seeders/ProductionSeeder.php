@@ -31,7 +31,7 @@ class ProductionSeeder extends Seeder
         );
 
         if ($user->wasRecentlyCreated) {
-            $this->command->warn("Usuario admin creado ({$email}). Password generada: {$password} — guardala ya que no se vuelve a mostrar.");
+            $this->command->warn("Usuario admin creado ({$email}). Password generada: {$password} — guárdala ya que no se vuelve a mostrar.");
         } else {
             $this->command->info("Usuario admin ya existía ({$email}), no se modifica la password.");
         }
