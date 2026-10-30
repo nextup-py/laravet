@@ -2193,5 +2193,125 @@
         "id": 467,
         "city_id": 87,
         "name": "Barrio Centro"
+    },
+    {
+        "id": 468,
+        "city_id": 85,
+        "name": "San Miguel"
+    },
+    {
+        "id": 469,
+        "city_id": 85,
+        "name": "Santo Domingo"
+    },
+    {
+        "id": 470,
+        "city_id": 85,
+        "name": "San Roque"
+    },
+    {
+        "id": 471,
+        "city_id": 85,
+        "name": "Las Mercedes"
+    },
+    {
+        "id": 472,
+        "city_id": 85,
+        "name": "Boquerón"
+    },
+    {
+        "id": 473,
+        "city_id": 85,
+        "name": "San Cayetano"
+    },
+    {
+        "id": 474,
+        "city_id": 85,
+        "name": "Santa Catalina"
+    },
+    {
+        "id": 475,
+        "city_id": 85,
+        "name": "Estanzuela"
+    },
+    {
+        "id": 476,
+        "city_id": 85,
+        "name": "Kokue Guasu"
+    },
+    {
+        "id": 477,
+        "city_id": 85,
+        "name": "Pindolo"
+    },
+    {
+        "id": 478,
+        "city_id": 85,
+        "name": "San Antonio"
+    },
+    {
+        "id": 479,
+        "city_id": 85,
+        "name": "María Auxiliadora"
+    },
+    {
+        "id": 480,
+        "city_id": 85,
+        "name": "Costa Fleitas"
+    },
+    {
+        "id": 481,
+        "city_id": 85,
+        "name": "Jukyty"
+    },
+    {
+        "id": 482,
+        "city_id": 85,
+        "name": "Valle Pucú"
+    },
+    {
+        "id": 483,
+        "city_id": 85,
+        "name": "Jukyry"
+    },
+    {
+        "id": 484,
+        "city_id": 85,
+        "name": "Isla Valle"
+    },
+    {
+        "id": 485,
+        "city_id": 85,
+        "name": "San Miguel (compañía)"
+    },
+    {
+        "id": 486,
+        "city_id": 85,
+        "name": "Caacupemí"
+    },
+    {
+        "id": 487,
+        "city_id": 85,
+        "name": "Fracción Yvoty"
+    },
+    {
+        "id": 488,
+        "city_id": 85,
+        "name": "Fracción Alicia"
+    },
+    {
+        "id": 489,
+        "city_id": 85,
+        "name": "Villa Salvador"
+    },
+    {
+        "id": 490,
+        "city_id": 85,
+        "name": "Villa Rosita"
+    },
+    {
+        "id": 491,
+        "city_id": 85,
+        "name": "Tajy Poty"
     }
 ]
