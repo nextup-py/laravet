@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\VaccinationResource\Pages;
 
 use App\Filament\Resources\PetResource;
+use App\Filament\Resources\UserResource;
 use App\Filament\Resources\VaccinationResource;
 use Carbon\Carbon;
 use Filament\Actions;
@@ -51,6 +52,10 @@ class ViewVaccination extends ViewRecord
                         TextEntry::make('application_date')->label('Fecha de aplicación')->date('d/m/Y'),
                         TextEntry::make('next_application')->label('Próxima aplicación')->date('d/m/Y'),
                         TextEntry::make('status')->label('Estado')->badge(),
+                        TextEntry::make('user.name')->label('Veterinario')
+                            ->url(fn ($record): ?string => auth()->user()?->can('view_user')
+                                ? UserResource::getUrl('view', ['record' => $record->user_id])
+                                : null),
                         TextEntry::make('reminder_sent_at')->label('Recordatorio')
                             ->state(fn ($record): string => filled($record->reminder_sent_at)
                                 ? 'Enviado el '.Carbon::parse($record->reminder_sent_at)->format('d/m/Y H:i')
