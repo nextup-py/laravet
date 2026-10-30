@@ -18,6 +18,7 @@ use Database\Seeders\OwnerSeeder;
 use Database\Seeders\PetSeeder;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -118,6 +119,35 @@ describe('DemoSeeder', function () {
         }
     });
 
+    it('usa DEMO_PASSWORD si está definida', function () {
+        Storage::fake('test-results');
+        config(['app.demo_password' => 'clave-demo-123']);
+
+        $this->seed(DemoSeeder::class);
+
+        $vet = User::where('email', 'maria.gonzalez@mbopivet.com.py')->firstOrFail();
+        expect(Hash::check('clave-demo-123', $vet->password))->toBeTrue();
+    });
+
+    it('usa password en local y una aleatoria que no se repite en staging', function () {
+        Storage::fake('test-results');
+
+        $this->seed(DemoSeeder::class);
+        $vet = User::where('email', 'maria.gonzalez@mbopivet.com.py')->firstOrFail();
+        expect(Hash::check('password', $vet->password))->toBeTrue();
+
+        User::query()->delete();
+        app()->detectEnvironment(fn () => 'staging');
+        $this->seed(DemoSeeder::class);
+        $staging = User::where('email', 'maria.gonzalez@mbopivet.com.py')->firstOrFail();
+        expect(Hash::check('password', $staging->password))->toBeFalse();
+
+        // Volver a sembrar no cambia una contraseña ya generada.
+        $hash = $staging->password;
+        $this->seed(DemoSeeder::class);
+        expect($staging->fresh()->password)->toBe($hash);
+    });
+
     it('no corre en producción', function () {
         app()->detectEnvironment(fn () => 'production');
 
@@ -145,6 +175,16 @@ describe('DemoVolumeSeeder', function () {
         $this->seed(DemoVolumeSeeder::class);
 
         expect(Pet::count())->toBe($base + 6);
+
+        // Volver a correrlo no suma más: ya llegó a la cantidad configurada.
+        $this->seed(DemoVolumeSeeder::class);
+
+        expect(Pet::count())->toBe($base + 6);
+
+        config(['app.demo_volume' => 8]);
+        $this->seed(DemoVolumeSeeder::class);
+
+        expect(Pet::count())->toBe($base + 8);
     });
 
     it('no corre en producción', function () {

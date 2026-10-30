@@ -177,11 +177,16 @@ patrón `ProductionSeeder`/`DemoSeeder`:
 | `TestSeeder` | 9 exámenes (hemograma, bioquímica, ELISA, urinálisis, radiografía), 6 con resultado y 3 pendientes |
 
 - **`DemoVolumeSeeder`** (opcional, `php artisan db:seed --class=DemoVolumeSeeder`, después del
-  demo): agrega `DEMO_VOLUME` mascotas (200 por defecto, `config('app.demo_volume')`) con
+  demo): completa hasta `DEMO_VOLUME` mascotas (200 por defecto, `config('app.demo_volume')`) con
   propietarios e historial vía factories, para probar paginación, filtros y el tope de
-  exportación. No es idempotente a propósito (cada corrida suma datos).
-- Staging debe usar `APP_ENV=staging` para que `db:seed` incluya el demo; ojo con la contraseña
-  `password` si ese entorno es accesible desde internet.
+  exportación. Es idempotente: sus propietarios llevan un correo `@volumen.test` y solo agrega
+  las que faltan.
+- **Contraseña de los usuarios demo**: `DEMO_PASSWORD` (`config('app.demo_password')`) si está
+  definida (se aplica siempre); si no, `password` en `local`/`testing` y, en `staging`, una
+  aleatoria que se muestra una sola vez al crear el usuario (volver a sembrar no la cambia).
+  Staging debe usar `APP_ENV=staging` para que `db:seed` incluya el demo.
+- Verificado con MariaDB 10.11 además de SQLite (`migrate:fresh --seed`, segunda corrida sin
+  duplicados y `SeedersTest`).
 
 Credenciales demo por defecto en `.env`/`.env.example`:
 `ADMIN_EMAIL=admin@mbopivet.com.py` (la password se genera y se muestra al

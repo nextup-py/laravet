@@ -9,12 +9,15 @@ use App\Models\Neighborhood;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
 
 class DemoSeeder extends Seeder
 {
     /**
-     * Personal demo: contraseña `password` y correos fijos, por eso nunca corre en producción.
+     * Personal demo con correos fijos, por eso nunca corre en producción. La contraseña sale de
+     * `DEMO_PASSWORD` (se aplica siempre); si no está definida, `password` en local/testing y una
+     * aleatoria que se muestra una sola vez en staging (solo al crear el usuario, no se cambia después).
      * Es idempotente: se puede volver a ejecutar y actualiza (no duplica) lo ya sembrado.
      */
     public function run(): void
@@ -39,7 +42,6 @@ class DemoSeeder extends Seeder
             [
                 'name' => 'Dra. María González',
                 'email' => 'maria.gonzalez@mbopivet.com.py',
-                'password' => 'password',
                 'email_verified_at' => now(),
                 'department_id' => $central?->id,
                 'city_id' => $luque?->id,
@@ -50,7 +52,6 @@ class DemoSeeder extends Seeder
             [
                 'name' => 'Dr. Carlos Giménez',
                 'email' => 'carlos.gimenez@mbopivet.com.py',
-                'password' => 'password',
                 'email_verified_at' => now(),
                 'department_id' => $central?->id,
                 'city_id' => $sanLorenzo?->id,
@@ -61,7 +62,6 @@ class DemoSeeder extends Seeder
             [
                 'name' => 'Laura Benítez',
                 'email' => 'laura.benitez@mbopivet.com.py',
-                'password' => 'password',
                 'email_verified_at' => now(),
                 'department_id' => $central?->id,
                 'city_id' => $luque?->id,
@@ -71,10 +71,25 @@ class DemoSeeder extends Seeder
             ],
         ];
 
+        $fixedPassword = config('app.demo_password');
+
         foreach ($staff as $member) {
             $role = Arr::pull($member, 'role');
 
-            $user = User::updateOrCreate(['email' => $member['email']], $member);
+            $user = User::firstOrNew(['email' => $member['email']]);
+            $user->fill($member);
+
+            if ($fixedPassword) {
+                $user->password = $fixedPassword;
+            } elseif (! $user->exists) {
+                $user->password = $generated = $this->defaultPassword();
+
+                if ($generated !== 'password') {
+                    $this->command?->warn("Usuario demo {$member['email']} creado. Password generada: {$generated} — guárdala, no se vuelve a mostrar.");
+                }
+            }
+
+            $user->save();
             $user->syncRoles([$role]);
         }
 
@@ -86,5 +101,10 @@ class DemoSeeder extends Seeder
             SurgerySeeder::class,
             TestSeeder::class,
         ]);
+    }
+
+    private function defaultPassword(): string
+    {
+        return app()->environment(['local', 'testing']) ? 'password' : Str::password(16);
     }
 }

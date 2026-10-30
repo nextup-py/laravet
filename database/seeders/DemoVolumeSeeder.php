@@ -10,16 +10,21 @@ use App\Models\Test;
 use App\Models\Vaccination;
 use Database\Seeders\Concerns\UsesDemoData;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 /**
  * Volumen opcional para probar paginación, filtros, búsqueda y el tope de exportación (5.000 filas):
  * `php artisan db:seed --class=DemoVolumeSeeder` crea `config('app.demo_volume')` mascotas (env
  * `DEMO_VOLUME`, 200 por defecto) con sus propietarios y algo de historial, usando las factories.
- * No es idempotente a propósito (cada corrida suma datos) y no corre en producción.
+ * Es idempotente: sus propietarios llevan un correo `@volumen.test` y solo completa hasta llegar a
+ * la cantidad configurada (cuenta las mascotas de esos propietarios). No corre en producción.
  */
 class DemoVolumeSeeder extends Seeder
 {
     use UsesDemoData;
+
+    /** Dominio de los correos de los propietarios de volumen: así se reconocen y no se duplican. */
+    public const EMAIL_DOMAIN = 'volumen.test';
 
     public function run(): void
     {
@@ -38,12 +43,14 @@ class DemoVolumeSeeder extends Seeder
         }
 
         $total = max(0, (int) config('app.demo_volume'));
+        $existing = Pet::whereHas('owner', fn ($owners) => $owners->where('email', 'like', '%@'.self::EMAIL_DOMAIN))->count();
+        $missing = max(0, $total - $existing);
         $owner = null;
 
-        for ($i = 0; $i < $total; $i++) {
+        for ($i = 0; $i < $missing; $i++) {
             // Un propietario cada dos mascotas, para que haya propietarios con varias.
             if ($i % 2 === 0) {
-                $owner = Owner::factory()->create();
+                $owner = Owner::factory()->create(['email' => Str::lower(Str::random(12)).'@'.self::EMAIL_DOMAIN]);
             }
 
             $vet = $vets[$i % $vets->count()];
@@ -61,6 +68,6 @@ class DemoVolumeSeeder extends Seeder
             }
         }
 
-        $this->command?->info("Se crearon {$total} mascotas demo con su historial.");
+        $this->command?->info("Mascotas de volumen: {$missing} nuevas, {$total} en total.");
     }
 }
