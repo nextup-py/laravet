@@ -51,6 +51,8 @@ La localización sigue la jerarquía paraguaya: `Department → City → Neighbo
 
 **Estados como enums** (cada uno con `HasLabel` + `HasColor`, accessor `status` en el modelo y filtro en la tabla): `VaccinationStatus` (Vencida / Por vencer ≤ 7 días / Al día / Renovada), `SurgeryStatus` (Programada / Hoy / Realizada, por fecha) y `TestStatus` (Pendiente / Con resultado, según haya archivos). `OwnerGender` es el enum del género del propietario (valores guardados `Male`/`Female`, etiquetas en español).
 
+**Próxima aplicación opcional**: `next_application` puede ser `null` (dosis única, «Sin refuerzo»); esa vacunación cuenta como `UpToDate` (`upToDate()` incluye los `null`) y nunca es `Overdue`/`DueSoon` ni `actionable()`. Todo código que formatee la fecha debe tolerar `null`.
+
 **Vacunación "vigente"**: solo la última aplicación de cada vacuna por mascota cuenta (misma mascota + mismo nombre de vacuna; ante igual fecha gana el id mayor). Las anteriores quedan `Renovada` y no generan alertas. Scopes en `Vaccination`: `current()`, `renewed()`, `actionable()` (vigentes vencidas o por vencer), `withStatus()` y `withRenewedFlag()` (agrega `is_renewed` a la consulta para no hacer una consulta por fila).
 
 ### Panel admin (Filament)
@@ -67,6 +69,7 @@ Los once Resources con ficha (mascotas, propietarios, consultas, vacunaciones, c
 
 Los diez Resources siguen la misma estructura; al tocar uno, mantenerla:
 
+- **Validaciones de formulario**: textos cortos con `maxLength(255)` y observaciones con `maxLength(5000)` más ayuda «Máximo 5000 caracteres.»; el teléfono (propietarios, usuarios y perfil) usa el regex paraguayo `/^(\+595|0)\d{8,9}$/`. La imagen de `Pet` es opcional (cae al avatar con la inicial, `initials_avatar_url`). `Consultation` guarda `weight` (kg, 0,1–150) y `temperature` (°C, 30–45, un decimal) opcionales, definidos en `ConsultationResource::vitalsFields()` y compartidos con el RelationManager.
 - **Campos y filtros compartidos**: el formulario de un Resource que también aparece como RelationManager en la ficha de mascota expone `formFields()` (o `formSchema()` en `PetResource`) y lo reutiliza el RelationManager; los filtros comunes viven en métodos estáticos (`VaccinationResource::statusFilter()`, `TestResource::statusFilter()`). No duplicar listas de opciones (`vaccineOptions()`, `manufacturerOptions()`, `typeOptions()`).
 - **Título del registro**: sobrescribir `getRecordTitle()` con el mismo título que la ficha y la búsqueda global (ej. "Consulta de Toby · 11/10/2026"); si no, el rastro de navegación muestra el atributo crudo (`recordTitleAttribute`).
 - **Búsqueda global**: `getGloballySearchableAttributes()`, `getGlobalSearchEloquentQuery()` con `with(...)` y `getGlobalSearchResultDetails()`.

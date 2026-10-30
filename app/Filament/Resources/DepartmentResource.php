@@ -53,11 +53,13 @@ class DepartmentResource extends Resource
                     ->label('Nombre')
                     ->autofocus()
                     ->string()
+                    ->maxLength(255)
                     ->unique(ignoreRecord: true)
                     ->required(),
                 Forms\Components\TextInput::make('capital')
                     ->label('Capital')
                     ->string()
+                    ->maxLength(255)
                     ->required(),
             ]);
     }

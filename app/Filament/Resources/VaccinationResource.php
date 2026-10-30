@@ -84,7 +84,7 @@ class VaccinationResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Próxima aplicación' => Carbon::parse($record->next_application)->format('d/m/Y'),
+            'Próxima aplicación' => filled($record->next_application) ? Carbon::parse($record->next_application)->format('d/m/Y') : 'Sin refuerzo',
             'Estado' => $record->status->getLabel(),
         ];
     }
@@ -135,8 +135,7 @@ class VaccinationResource extends Resource
                 }),
             Forms\Components\DatePicker::make('next_application')
                 ->label('Próxima aplicación')
-                ->helperText('Se sugiere un año después de la aplicación; puede modificarla.')
-                ->required()
+                ->helperText('Se sugiere un año después de la aplicación; puede modificarla. Déjela vacía si es una dosis única, sin refuerzo.')
                 ->native(false)
                 ->displayFormat('d/m/Y')
                 ->closeOnDateSelection()
@@ -145,6 +144,7 @@ class VaccinationResource extends Resource
             Forms\Components\TextInput::make('batch')
                 ->label('Lote')
                 ->string()
+                ->maxLength(255)
                 ->required(),
             Forms\Components\Select::make('manufacturer')
                 ->label('Fabricante')
@@ -155,6 +155,8 @@ class VaccinationResource extends Resource
             Forms\Components\Textarea::make('observation')
                 ->label('Observación')
                 ->autosize()
+                ->maxLength(5000)
+                ->helperText('Máximo 5000 caracteres.')
                 ->columnSpanFull(),
         ];
     }
@@ -204,6 +206,7 @@ class VaccinationResource extends Resource
                 Tables\Columns\TextColumn::make('next_application')
                     ->label('Próxima aplicación')
                     ->date('d/m/Y')
+                    ->placeholder('Sin refuerzo')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label('Estado')

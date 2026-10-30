@@ -68,6 +68,7 @@ class CityResource extends Resource
                     ->required(),
                 Forms\Components\TextInput::make('name')
                     ->label('Nombre')
+                    ->maxLength(255)
                     ->autofocus()
                     ->unique(
                         ignoreRecord: true,

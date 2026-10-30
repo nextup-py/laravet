@@ -150,6 +150,8 @@ class SurgeryResource extends Resource
             Forms\Components\Textarea::make('observation')
                 ->label('Observación')
                 ->autosize()
+                ->maxLength(5000)
+                ->helperText('Máximo 5000 caracteres.')
                 ->columnSpanFull(),
         ];
     }

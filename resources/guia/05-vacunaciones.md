@@ -13,10 +13,12 @@ De cada vacuna de una mascota cuenta **solo la última aplicación**. Las anteri
 
 Estados:
 
-- **Al día**: la próxima aplicación está lejos.
+- **Al día**: la próxima aplicación está lejos, o la vacuna no tiene refuerzo.
 - **Por vencer**: vence en 7 días o menos.
 - **Vencida**: la próxima aplicación ya pasó.
 - **Renovada**: ya existe una aplicación más nueva de la misma vacuna.
+
+Si una vacuna es de **dosis única**, deja vacía la **próxima aplicación**: figura como «Sin refuerzo», queda siempre *Al día* y nunca genera avisos.
 
 ## La ficha de la vacunación
 

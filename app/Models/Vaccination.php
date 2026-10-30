@@ -25,7 +25,7 @@ class Vaccination extends Model
     protected $fillable = [
         'vaccine', // Nombre de la vacuna aplicada
         'application_date', // Fecha de aplicación de la vacuna
-        'next_application', // Fecha de la próxima aplicación de la vacuna
+        'next_application', // Fecha de la próxima aplicación (null: dosis única, sin refuerzo)
         'batch', // Número de lote de la vacuna
         'manufacturer', // Fabricante de la vacuna
         'observation', // Observaciones adicionales sobre la vacunación
@@ -122,6 +122,10 @@ class Vaccination extends Model
                 return VaccinationStatus::Renewed;
             }
 
+            if (blank($this->next_application)) {
+                return VaccinationStatus::UpToDate;
+            }
+
             $next = Carbon::parse($this->next_application)->startOfDay();
 
             return match (true) {
@@ -159,7 +163,9 @@ class Vaccination extends Model
 
     public function scopeUpToDate(Builder $query): Builder
     {
-        return $query->where('next_application', '>', today()->addDays(VaccinationStatus::DUE_SOON_DAYS)->endOfDay()->toDateTimeString());
+        return $query->where(fn (Builder $q) => $q
+            ->whereNull('next_application')
+            ->orWhere('next_application', '>', today()->addDays(VaccinationStatus::DUE_SOON_DAYS)->endOfDay()->toDateTimeString()));
     }
 
     public function scopeWithStatus(Builder $query, VaccinationStatus $status): Builder

@@ -73,6 +73,11 @@ class EditProfile extends BaseEditProfile
                         Forms\Components\TextInput::make('phone')
                             ->label('Teléfono')
                             ->tel()
+                            ->regex('/^(\+595|0)\d{8,9}$/')
+                            ->helperText('Sin espacios ni guiones. Ej.: 0981123456 o +595981123456.')
+                            ->validationMessages([
+                                'regex' => 'Ingrese un teléfono paraguayo válido, ej.: 0981123456 o +595981123456.',
+                            ])
                             ->maxLength(30),
                     ]),
 

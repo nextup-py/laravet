@@ -83,11 +83,13 @@ class OwnerResource extends Resource
                         Forms\Components\TextInput::make('first_name')
                             ->label('Nombre(s)')
                             ->required()
-                            ->string(),
+                            ->string()
+                            ->maxLength(255),
                         Forms\Components\TextInput::make('last_name')
                             ->label('Apellido(s)')
                             ->required()
-                            ->string(),
+                            ->string()
+                            ->maxLength(255),
                         Forms\Components\Radio::make('gender')
                             ->label('Género')
                             ->required()
@@ -97,6 +99,7 @@ class OwnerResource extends Resource
                         Forms\Components\TextInput::make('email')
                             ->label('Correo electrónico')
                             ->email()
+                            ->maxLength(255)
                             ->unique(ignoreRecord: true)
                             ->required(),
                         Forms\Components\TextInput::make('phone')
@@ -140,6 +143,7 @@ class OwnerResource extends Resource
                             ->required(),
                         Forms\Components\TextInput::make('address')
                             ->label('Dirección')
+                            ->maxLength(255)
                             ->required(),
                     ]),
 

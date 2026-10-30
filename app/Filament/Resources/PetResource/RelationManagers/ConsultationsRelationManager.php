@@ -105,6 +105,7 @@ class ConsultationsRelationManager extends RelationManager
                             ->native(false)
                             ->maxDate(now())
                             ->default(now()),
+                        ...ConsultationResource::vitalsFields(),
                         Forms\Components\Textarea::make('anamnesis')
                             ->label('Anamnesis')
                             ->columnSpanFull()

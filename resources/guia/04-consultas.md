@@ -10,7 +10,7 @@ permission: view_any_consultation
 ## Registrar una consulta
 
 1. Entra a **Consultas → Nueva consulta**, o usa *Nueva consulta* desde la fila de la mascota (la mascota queda elegida).
-2. Completa la fecha, la **anamnesis**, el **diagnóstico** y el **tratamiento**.
+2. Completa la fecha, la **anamnesis**, el **diagnóstico** y el **tratamiento**. Si quieres, anota también el **peso** del paciente (entre 0,1 y 150 kg) y su **temperatura** (entre 30 y 45 °C, con un decimal, por ejemplo 38,5): son opcionales.
 3. Guarda. La consulta queda a tu nombre.
 
 ## Asistir con IA

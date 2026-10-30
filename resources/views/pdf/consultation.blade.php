@@ -16,6 +16,18 @@
             <th>Fecha de consulta</th>
             <td>{{ $consultation->consultation_date->format('d/m/Y') }}</td>
         </tr>
+        @if(filled($consultation->weight))
+            <tr>
+                <th>Peso</th>
+                <td>{{ $consultation->weight }} kg</td>
+            </tr>
+        @endif
+        @if(filled($consultation->temperature))
+            <tr>
+                <th>Temperatura</th>
+                <td>{{ $consultation->temperature }} °C</td>
+            </tr>
+        @endif
         <tr>
             <th>Veterinario</th>
             <td>{{ $consultation->user->name }}</td>

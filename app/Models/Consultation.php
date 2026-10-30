@@ -24,6 +24,8 @@ class Consultation extends Model
         'treatment', // Tratamiento prescrito
         'observation', // Observaciones adicionales
         'consultation_date', // Fecha en la que ocurrió la consulta
+        'weight', // Peso del paciente en la consulta (kg)
+        'temperature', // Temperatura corporal del paciente en la consulta (°C)
         'pet_id', // ID de la mascota asociada a la consulta
         'user_id', // ID del usuario (veterinario) que creó la consulta
         'ai_diagnosis_suggestion', // Diagnóstico crudo sugerido por la IA (para auditoría)
@@ -38,6 +40,8 @@ class Consultation extends Model
     {
         return [
             'consultation_date' => 'date',
+            'weight' => 'decimal:2',
+            'temperature' => 'decimal:1',
             'ai_urgency' => AiUrgencyLevel::class,
             'ai_suggested_at' => 'datetime',
         ];

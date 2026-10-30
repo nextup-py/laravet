@@ -77,6 +77,7 @@ class PetResource extends Resource
                     Forms\Components\TextInput::make('name')
                         ->label('Nombre')
                         ->string()
+                        ->maxLength(255)
                         ->required(),
                     Forms\Components\Select::make('species')
                         ->label('Especie')
@@ -88,6 +89,7 @@ class PetResource extends Resource
                     Forms\Components\TextInput::make('breed')
                         ->label('Raza')
                         ->string()
+                        ->maxLength(255)
                         ->required(),
                     Forms\Components\DatePicker::make('birthdate')
                         ->label('Fecha de nacimiento')
@@ -139,6 +141,7 @@ class PetResource extends Resource
                     Forms\Components\TextInput::make('fur')
                         ->label('Pelaje')
                         ->string()
+                        ->maxLength(255)
                         ->required(),
                     Forms\Components\FileUpload::make('image')
                         ->label('Imagen')
@@ -146,8 +149,7 @@ class PetResource extends Resource
                         ->imageEditor()
                         ->downloadable()
                         ->columnSpanFull()
-                        ->uploadingMessage('Subiendo archivo adjunto...')
-                        ->required(),
+                        ->uploadingMessage('Subiendo archivo adjunto...'),
                 ]),
         ];
     }

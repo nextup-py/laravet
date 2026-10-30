@@ -162,6 +162,32 @@ class ConsultationResource extends Resource
         return 'No se pudo generar la sugerencia. Intenta nuevamente en unos minutos.';
     }
 
+    /**
+     * Peso y temperatura del paciente en la consulta (opcionales); los comparte el RelationManager de la mascota.
+     *
+     * @return array<int, Forms\Components\Component>
+     */
+    public static function vitalsFields(): array
+    {
+        return [
+            Forms\Components\TextInput::make('weight')
+                ->label('Peso')
+                ->suffix('kg')
+                ->numeric()
+                ->inputMode('decimal')
+                ->minValue(0.1)
+                ->maxValue(150),
+            Forms\Components\TextInput::make('temperature')
+                ->label('Temperatura')
+                ->suffix('°C')
+                ->numeric()
+                ->inputMode('decimal')
+                ->step(0.1)
+                ->minValue(30)
+                ->maxValue(45),
+        ];
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -191,6 +217,7 @@ class ConsultationResource extends Resource
                             ->native(false)
                             ->maxDate(now())
                             ->default(now()),
+                        ...self::vitalsFields(),
                     ]),
                 Section::make('Consulta')
                     ->schema([

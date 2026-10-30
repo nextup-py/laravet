@@ -16,6 +16,8 @@ Toda mascota pertenece a un propietario. Lo más cómodo es empezar por el propi
 
 También puedes crear la mascota desde **Mascotas → Nueva mascota** y elegir al propietario.
 
+La **foto** es opcional: si no la cargas, la mascota se muestra con un círculo con su inicial. Puedes agregarla más tarde editando la mascota.
+
 ## La ficha de la mascota
 
 Al abrir una mascota ves sus datos y, debajo, sus registros médicos en pestañas: **consultas, vacunaciones, cirugías y pruebas**. Puedes leer cada registro en una ventana haciendo clic en su fila, y editarlo o abrir su ficha completa desde el menú de la fila.
