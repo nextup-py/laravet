@@ -18,6 +18,10 @@ Estados:
 - **Vencida**: la próxima aplicación ya pasó.
 - **Renovada**: ya existe una aplicación más nueva de la misma vacuna.
 
+## La ficha de la vacunación
+
+Al hacer clic en una vacunación ves su ficha con la mascota, la vacuna, las fechas, el estado, el lote, el fabricante y el **veterinario** que la aplicó (con un enlace a su ficha si tu rol puede ver usuarios).
+
 ## Registrar y revacunar
 
 Crea la vacunación desde **Vacunaciones → Nueva vacunación** o desde la fila de la mascota. Para aplicar de nuevo la misma vacuna usa **Revacunar** en el menú de la fila: abre el formulario con la mascota y la vacuna elegidas. Al guardar, la aplicación anterior pasa a *Renovada*.

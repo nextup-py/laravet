@@ -21,13 +21,6 @@ class ViewPet extends ViewRecord
         return $this->record->name;
     }
 
-    public function getSubheading(): ?string
-    {
-        $pet = $this->record;
-
-        return "{$pet->species->getLabel()} · {$pet->breed} · {$pet->age} · {$pet->weight} kg";
-    }
-
     protected function getHeaderActions(): array
     {
         return [
