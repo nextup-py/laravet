@@ -191,9 +191,11 @@ patrón `ProductionSeeder`/`DemoSeeder`:
 | `TestSeeder` | 9 exámenes (hemograma, bioquímica, ELISA, urinálisis, radiografía), 6 con resultado y 3 pendientes |
 
 - **Contexto Paraguay**: nombres y apellidos locales, CI de 7 dígitos, celulares 09XX y ciudades
-  de Central. El barrio es obligatorio en `owners` y en el JSON solo Luque y San Lorenzo tienen
-  barrios (11 de las 20 ciudades de Central no tienen, y `Fernando de la Mora` repite los de
-  Luque), por eso el demo no usa Areguá, Itauguá ni Fernando de la Mora. `OwnerFactory` y
+  de Central. El barrio es obligatorio en `owners` y en el JSON solo Luque, San Lorenzo y Fernando de la
+  Mora tienen barrios (11 de las 20 ciudades de Central no tienen, entre ellas Areguá e
+  Itauguá), por eso el demo no usa esas ciudades. Los barrios de Fernando de la Mora estaban
+  copiados de Luque: la migración `fix_fernando_de_la_mora_neighborhoods` los corrige en bases
+  ya sembradas (conserva los que alguien usa) y el JSON ya trae los reales. `OwnerFactory` y
   `PetFactory` usan listas locales (Faker no tiene `es_PY`). `DemoSeeder` completa, solo si están
   vacíos, los datos de ejemplo de la clínica (dirección, teléfono, WhatsApp, horario, RUC, razón
   social) y **no** carga el correo de la clínica (sin él no se envían recordatorios). Los
