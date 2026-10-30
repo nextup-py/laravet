@@ -97,7 +97,7 @@ class ConsultationsRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Section::make('Consulta')
+                Section::make('Información general')
                     ->schema([
                         Forms\Components\DatePicker::make('consultation_date')
                             ->label('Fecha de consulta')
@@ -105,7 +105,13 @@ class ConsultationsRelationManager extends RelationManager
                             ->native(false)
                             ->maxDate(now())
                             ->default(now()),
-                        ...ConsultationResource::vitalsFields(),
+                    ]),
+                Section::make('Signos vitales')
+                    ->description('Opcional: peso y temperatura del paciente durante la consulta.')
+                    ->columns(2)
+                    ->schema(ConsultationResource::vitalsFields()),
+                Section::make('Consulta')
+                    ->schema([
                         Forms\Components\Textarea::make('anamnesis')
                             ->label('Anamnesis')
                             ->columnSpanFull()

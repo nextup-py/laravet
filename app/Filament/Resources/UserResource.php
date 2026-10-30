@@ -114,6 +114,11 @@ class UserResource extends Resource
                                 'regex' => 'Ingrese un teléfono paraguayo válido, ej.: 0981123456 o +595981123456.',
                             ])
                             ->maxLength(30),
+                    ]),
+
+                Section::make('Acceso')
+                    ->columns(3)
+                    ->schema([
                         Forms\Components\Select::make('role')
                             ->label('Rol')
                             ->options(self::roleOptions())

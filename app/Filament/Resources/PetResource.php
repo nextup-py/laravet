@@ -70,10 +70,6 @@ class PetResource extends Resource
             Section::make('Datos identificatorios')
                 ->columns(3)
                 ->schema([
-                    Forms\Components\TextInput::make('id')
-                        ->label('ID')
-                        ->hiddenOn('create')
-                        ->readOnly(),
                     Forms\Components\TextInput::make('name')
                         ->label('Nombre')
                         ->string()
@@ -112,6 +108,10 @@ class PetResource extends Resource
                         ->live()
                         ->options(PetReproductionStatus::class)
                         ->required(),
+                    Forms\Components\TextInput::make('id')
+                        ->label('ID')
+                        ->hiddenOn('create')
+                        ->readOnly(),
                     Forms\Components\Toggle::make('active')
                         ->label('Activo')
                         ->hiddenOn('create')
@@ -159,7 +159,6 @@ class PetResource extends Resource
         $schema = self::formSchema();
 
         $schema[0] = $schema[0]->schema([
-            ...$schema[0]->getChildComponents(),
             Forms\Components\Select::make('owner_id')
                 ->label('Propietario')
                 ->relationship('owner', 'first_name')
@@ -168,6 +167,7 @@ class PetResource extends Resource
                 ->preload()
                 ->live()
                 ->required(),
+            ...$schema[0]->getChildComponents(),
         ]);
 
         return $form->schema($schema);

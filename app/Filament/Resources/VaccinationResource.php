@@ -11,6 +11,7 @@ use App\Settings\ClinicSettings;
 use App\Support\ReminderMessage;
 use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -163,19 +164,30 @@ class VaccinationResource extends Resource
 
     public static function form(Form $form): Form
     {
+        $fields = collect(self::formFields())->keyBy(fn ($field) => $field->getName());
+
         return $form
             ->schema([
-                Forms\Components\Select::make('pet_id')
-                    ->label('Mascota')
-                    ->relationship('pet', 'name', modifyQueryUsing: fn (Builder $query, ?Vaccination $record) => $query->where(
-                        fn (Builder $q) => $q->where('active', true)
-                            ->when($record?->pet_id, fn (Builder $q, $petId) => $q->orWhere('id', $petId))
-                    ))
-                    ->default(fn () => request()->query('pet_id'))
-                    ->searchable(['name', 'id'])
-                    ->preload()
-                    ->required(),
-                ...self::formFields(),
+                Section::make('Información general')
+                    ->columns(2)
+                    ->schema([
+                        Forms\Components\Select::make('pet_id')
+                            ->label('Mascota')
+                            ->relationship('pet', 'name', modifyQueryUsing: fn (Builder $query, ?Vaccination $record) => $query->where(
+                                fn (Builder $q) => $q->where('active', true)
+                                    ->when($record?->pet_id, fn (Builder $q, $petId) => $q->orWhere('id', $petId))
+                            ))
+                            ->default(fn () => request()->query('pet_id'))
+                            ->searchable(['name', 'id'])
+                            ->preload()
+                            ->required(),
+                        ...$fields->only(['vaccine', 'manufacturer', 'batch'])->values()->all(),
+                    ]),
+                Section::make('Fechas')
+                    ->columns(2)
+                    ->schema([
+                        ...$fields->only(['application_date', 'next_application', 'observation'])->values()->all(),
+                    ]),
             ]);
     }
 

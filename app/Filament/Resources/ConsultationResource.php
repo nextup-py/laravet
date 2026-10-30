@@ -217,8 +217,11 @@ class ConsultationResource extends Resource
                             ->native(false)
                             ->maxDate(now())
                             ->default(now()),
-                        ...self::vitalsFields(),
                     ]),
+                Section::make('Signos vitales')
+                    ->description('Opcional: peso y temperatura del paciente durante la consulta.')
+                    ->columns(2)
+                    ->schema(self::vitalsFields()),
                 Section::make('Consulta')
                     ->schema([
                         Forms\Components\Textarea::make('anamnesis')
