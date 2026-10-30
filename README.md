@@ -115,14 +115,22 @@ Este comando:
 
 ### Paso 6: Llenar la Base de Datos con los datos de demo
 ```bash
+php artisan laravet:seed      # guiado: te pregunta qué sembrar y muestra los usuarios al final
+# o, sin preguntas:
 php artisan db:seed
 ```
 
+Atajos: `composer run seed` (menú), `composer run seed:demo` (crear o refrescar el demo) y `composer run seed:volume`. Opciones de `laravet:seed`: `--base`, `--demo`, `--volume[=N]`, `--reset-demo` (borra solo los datos demo; pide confirmación o `--force`).
+
 Este comando llena la base de datos con datos de ejemplo contextualizados en Paraguay:
-- 3 veterinarios con ubicaciones del departamento Central
+- 2 veterinarios y 1 asistente (contraseña `password` en local, o la de `DEMO_PASSWORD` si la defines; en staging se genera una aleatoria) con ubicaciones del departamento Central
 - 10 propietarios con nombres, CI y teléfonos paraguayos
 - 15 mascotas (caninos y felinos) con razas y datos clínicos reales
-- 12 consultas veterinarias, 23 vacunaciones, 6 cirugías y 9 exámenes de laboratorio
+- 12 consultas veterinarias, 24 vacunaciones, 8 cirugías y 9 exámenes de laboratorio
+- Las fechas son relativas a hoy (siempre hay vacunas vencidas, por vencer y al día; cirugías de hoy y programadas); puedes volver a ejecutar el seeder sin duplicar datos
+- Los datos demo solo se siembran en los entornos `local`, `testing` y `staging`, nunca en producción
+
+Para probar con más volumen (paginación, filtros, exportación), después del demo: `php artisan db:seed --class=DemoVolumeSeeder` (cantidad con `DEMO_VOLUME` en `.env`, 200 por defecto; puedes repetirlo sin duplicar).
 
 ### Paso 7: Iniciar el Servidor de Desarrollo
 

@@ -23,6 +23,7 @@ php artisan test --filter=NombreDelTest
 php artisan migrate
 php artisan db:seed
 php artisan migrate:fresh --seed   # Resetea y rellena con datos demo
+php artisan laravet:seed           # Siembra guiada (menú); atajos: composer run seed | seed:demo | seed:volume
 
 # Filament
 php artisan filament:make-resource NombreRecurso --generate
@@ -146,18 +147,72 @@ patrón `ProductionSeeder`/`DemoSeeder`:
   Si el admin se crea por primera vez, se genera una password aleatoria con
   `Str::password(16)` que se muestra **una sola vez** por consola — hay que
   guardarla en ese momento.
-- **`DemoSeeder`** corre solo en entornos `local`/`testing` (`php artisan
-  migrate:fresh --seed`). Crea 2 veterinarios ficticios (Dra. María González,
-  Dr. Carlos Giménez) y luego datos contextualizados en Paraguay:
+- **`php artisan laravet:seed`** (`App\Console\Commands\SeedCommand`) es la forma guiada de
+  sembrar: sin opciones y con terminal muestra un menú (base / demo / volumen / borrar demo) y
+  explica cada paso; con opciones sirve para scripts: `--base`, `--demo` (crear o refrescar las
+  fechas a hoy), `--volume[=N]`, `--reset-demo` (pide confirmación, o `--force` sin
+  interacción) y `--force` (producción). Sin interacción ni opciones corre `DatabaseSeeder`.
+  En producción solo permite `--base`; demo, volumen y borrado se niegan. Al terminar imprime
+  una **tabla de usuarios y contraseñas** (`App\Support\SeedReport`, singleton que anotan
+  `ProductionSeeder` y `DemoSeeder`; también la imprime `db:seed`) y avisa de que las
+  contraseñas generadas no se vuelven a mostrar. `DemoSeeder` siembra solo la base si faltan
+  roles o regiones, y `DemoVolumeSeeder` siembra el demo si faltan los veterinarios.
+  `App\Support\DemoDataReset` borra solo lo demo (propietarios por CI o `@volumen.test`,
+  con mascotas e historial en cascada, y los usuarios demo que no atendieron pacientes de la
+  clínica; esos se conservan). Los atajos de Composer son `seed`, `seed:demo` y `seed:volume`.
+- **`RolesAndPermissionsSeeder`** solo **agrega** permisos a los roles base
+  (`givePermissionTo`, nunca `syncPermissions`): volver a correrlo no quita lo que un admin
+  sumó desde el panel. Los cambios de permisos en producción siguen yendo en una migración
+  idempotente (el deploy no corre seeders); `SeedersTest` verifica que seeder y migraciones
+  dejen a los roles los mismos permisos.
+- **`DemoSeeder`** corre en `local`, `testing` y `staging` (capacitación); **nunca en
+  producción** (usa contraseña `password` y correos fijos, y `DemoSeeder`/`DemoVolumeSeeder`
+  se niegan a correr con `APP_ENV=production` aunque se invoquen con `--class`). Crea 2
+  veterinarios (Dra. María González, Dr. Carlos Giménez) y 1 asistente (Laura Benítez, para
+  probar permisos reducidos) y datos contextualizados en Paraguay. **Es idempotente**: usa
+  `updateOrCreate` por clave natural (CI del propietario; propietario+nombre de la mascota;
+  mascota+diagnóstico/lote/tipo en el historial), así que se puede volver a correr para
+  refrescar fechas sin duplicar. Los datos de las mascotas y propietarios están en las
+  constantes `PetSeeder::PETS` y `OwnerSeeder::OWNERS`; el historial las referencia por
+  posición (trait `Concerns\UsesDemoData`: `demoPets()`/`demoVets()`, el historial se reparte
+  en orden entre los veterinarios, nunca al azar ni al admin). **Las fechas son relativas a
+  hoy**, para que el demo siempre muestre vacunas vencidas / por vencer / al día / renovadas,
+  cirugías realizadas / de hoy / programadas y pruebas pendientes / con resultado (estas
+  últimas con un PDF de ejemplo en el disco privado `test-results`). Al agregar un registro
+  demo, usar días relativos y mantener esa mezcla de estados.
 
 | Seeder | Contenido |
 |--------|-----------|
-| `OwnerSeeder` | 10 propietarios con CI, teléfono y dirección paraguayos |
-| `PetSeeder` | 15 mascotas (10 caninos, 5 felinos) con razas y datos reales |
+| `OwnerSeeder` | 10 propietarios con CI, teléfono y dirección paraguayos, en Luque y San Lorenzo con un barrio real de su ciudad (por nombre exacto) |
+| `PetSeeder` | 15 mascotas (10 caninos, 5 felinos) con razas y datos reales; cachorros y gatitos con edad en meses relativa a hoy para que concuerden con las notas |
 | `ConsultationSeeder` | 12 consultas con casos clínicos veterinarios reales |
-| `VaccinationSeeder` | 23 registros (Séptuple, Antirrábica, Triple Felina, Leucemia Felina) |
-| `SurgerySeeder` | 6 cirugías (castraciones, OVH, suturas, extracción dental) |
-| `TestSeeder` | 9 exámenes (hemograma, bioquímica, ELISA, urinálisis, radiografía) |
+| `VaccinationSeeder` | 24 registros (Séptuple, Antirrábica, Triple Felina, Leucemia Felina), con casos vencidos, por vencer, al día y renovada |
+| `SurgerySeeder` | 8 cirugías (castraciones, OVH, suturas, extracción dental), una de hoy y una programada |
+| `TestSeeder` | 9 exámenes (hemograma, bioquímica, ELISA, urinálisis, radiografía), 6 con resultado y 3 pendientes |
+
+- **Contexto Paraguay**: nombres y apellidos locales, CI de 7 dígitos, celulares 09XX y ciudades
+  de Central. El barrio es obligatorio en `owners` y en el JSON solo Areguá, Luque, San Lorenzo y
+  Fernando de la Mora tienen barrios (10 de las 20 ciudades de Central no tienen, entre ellas
+  Itauguá: no se puede registrar a un propietario ahí), por eso el demo no usa esas ciudades.
+  Los barrios de Fernando de la Mora estaban copiados de Luque: la migración
+  `fix_fernando_de_la_mora_neighborhoods` los corrige en bases ya sembradas (conserva los que
+  alguien usa) y `add_aregua_neighborhoods` carga los de Areguá; el JSON ya trae ambos. `OwnerFactory` y
+  `PetFactory` usan listas locales (Faker no tiene `es_PY`). `DemoSeeder` completa, solo si están
+  vacíos, los datos de ejemplo de la clínica (dirección, teléfono, WhatsApp, horario, RUC, razón
+  social) y **no** carga el correo de la clínica (sin él no se envían recordatorios). Los
+  propietarios demo usan correos `@mbopivet-demo.test` y teléfonos `09XX0001NN` ficticios, para que
+  ningún aviso del demo (correo o «Avisar por WhatsApp») llegue a una persona real.
+- **`DemoVolumeSeeder`** (opcional, `php artisan db:seed --class=DemoVolumeSeeder`, después del
+  demo): completa hasta `DEMO_VOLUME` mascotas (200 por defecto, `config('app.demo_volume')`) con
+  propietarios e historial vía factories, para probar paginación, filtros y el tope de
+  exportación. Es idempotente: sus propietarios llevan un correo `@volumen.test` y solo agrega
+  las que faltan.
+- **Contraseña de los usuarios demo**: `DEMO_PASSWORD` (`config('app.demo_password')`) si está
+  definida (se aplica siempre); si no, `password` en `local`/`testing` y, en `staging`, una
+  aleatoria que se muestra una sola vez al crear el usuario (volver a sembrar no la cambia).
+  Staging debe usar `APP_ENV=staging` para que `db:seed` incluya el demo.
+- Verificado con MariaDB 10.11 además de SQLite (`migrate:fresh --seed`, segunda corrida sin
+  duplicados y `SeedersTest`).
 
 Credenciales demo por defecto en `.env`/`.env.example`:
 `ADMIN_EMAIL=admin@mbopivet.com.py` (la password se genera y se muestra al

@@ -13,6 +13,11 @@ use Spatie\Permission\PermissionRegistrar;
  * se define acá y con `php artisan shield:generate` (ver CLAUDE.md); un admin puede
  * crear roles nuevos y armar combinaciones de estos permisos desde el panel
  * ("Configuración → Roles y permisos"), sin tocar código.
+ *
+ * Con los roles base solo se AGREGAN permisos (`givePermissionTo`): volver a ejecutarlo no quita
+ * los permisos que un admin sumó desde el panel (sí vuelve a otorgar los por defecto). Quitar un
+ * permiso por defecto requiere una migración, igual que otorgarlo en producción (el deploy no
+ * corre seeders).
  */
 class RolesAndPermissionsSeeder extends Seeder
 {
@@ -58,7 +63,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Role::firstOrCreate(['name' => ClinicRoles::ADMIN, 'guard_name' => 'web']);
 
         $veterinarian = Role::firstOrCreate(['name' => ClinicRoles::VETERINARIAN, 'guard_name' => 'web']);
-        $veterinarian->syncPermissions([
+        $veterinarian->givePermissionTo([
             ...$this->crud('owner'),
             ...$this->crud('pet'),
             ...$this->crud('consultation'),
@@ -71,7 +76,7 @@ class RolesAndPermissionsSeeder extends Seeder
         ]);
 
         $assistant = Role::firstOrCreate(['name' => ClinicRoles::ASSISTANT, 'guard_name' => 'web']);
-        $assistant->syncPermissions([
+        $assistant->givePermissionTo([
             ...$this->crud('owner', canDelete: false),
             ...$this->crud('pet', canDelete: false),
             ...$this->view('consultation'),
@@ -81,6 +86,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'export_data',
             'view_reports',
         ]);
+
+        $this->command?->info('Roles y permisos listos (admin, veterinarian, assistant).');
     }
 
     /**

@@ -48,6 +48,15 @@
             "Composer\\Config::disableProcessTimeout",
             "npx concurrently -c \"#93c5fd,#c4b5fd\" \"php artisan serve\" \"npm run dev\" --names=server,vite"
         ],
+        "seed": [
+            "@php artisan laravet:seed"
+        ],
+        "seed:demo": [
+            "@php artisan laravet:seed --demo"
+        ],
+        "seed:volume": [
+            "@php artisan laravet:seed --demo --volume"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi",

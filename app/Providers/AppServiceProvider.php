@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Settings\ClinicSettings;
+use App\Support\SeedReport;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -12,7 +13,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(SeedReport::class);
     }
 
     /**

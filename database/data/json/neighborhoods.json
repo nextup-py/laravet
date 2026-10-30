@@ -480,146 +480,6 @@
         "name": "Nueva Asunción"
     },
     {
-        "id": 97,
-        "city_id": 87,
-        "name": "Campo Grande"
-    },
-    {
-        "id": 98,
-        "city_id": 87,
-        "name": "Laurelty"
-    },
-    {
-        "id": 99,
-        "city_id": 87,
-        "name": "Hugua de seda"
-    },
-    {
-        "id": 100,
-        "city_id": 87,
-        "name": "Isla Bogado"
-    },
-    {
-        "id": 101,
-        "city_id": 87,
-        "name": "Cañada San Rafael"
-    },
-    {
-        "id": 102,
-        "city_id": 87,
-        "name": "Costa Sosa"
-    },
-    {
-        "id": 103,
-        "city_id": 87,
-        "name": "Ykuá Duré"
-    },
-    {
-        "id": 104,
-        "city_id": 87,
-        "name": "Maka'i"
-    },
-    {
-        "id": 105,
-        "city_id": 87,
-        "name": "Jaguareté Corá"
-    },
-    {
-        "id": 106,
-        "city_id": 87,
-        "name": "Maramburé"
-    },
-    {
-        "id": 107,
-        "city_id": 87,
-        "name": "Primer Barrio"
-    },
-    {
-        "id": 108,
-        "city_id": 87,
-        "name": "Segundo Barrio"
-    },
-    {
-        "id": 109,
-        "city_id": 87,
-        "name": "Tercer Barrio"
-    },
-    {
-        "id": 110,
-        "city_id": 87,
-        "name": "Cuarto Barrio"
-    },
-    {
-        "id": 111,
-        "city_id": 87,
-        "name": "Zárate Isla"
-    },
-    {
-        "id": 112,
-        "city_id": 87,
-        "name": "Loma Merlo"
-    },
-    {
-        "id": 113,
-        "city_id": 87,
-        "name": "Ykuá Karanda'y"
-    },
-    {
-        "id": 114,
-        "city_id": 87,
-        "name": "Y ka'a"
-    },
-    {
-        "id": 115,
-        "city_id": 87,
-        "name": "Mora Kue"
-    },
-    {
-        "id": 116,
-        "city_id": 87,
-        "name": "Cañada Garay"
-    },
-    {
-        "id": 117,
-        "city_id": 87,
-        "name": "Yukyry"
-    },
-    {
-        "id": 118,
-        "city_id": 87,
-        "name": "Itá Angu'a"
-    },
-    {
-        "id": 119,
-        "city_id": 87,
-        "name": "Marin Ka'aguy"
-    },
-    {
-        "id": 120,
-        "city_id": 87,
-        "name": "Tarumandy"
-    },
-    {
-        "id": 121,
-        "city_id": 87,
-        "name": "Itapuami 1"
-    },
-    {
-        "id": 122,
-        "city_id": 87,
-        "name": "Itapuami 2"
-    },
-    {
-        "id": 123,
-        "city_id": 87,
-        "name": "Tarumandy del Rio Salado"
-    },
-    {
-        "id": 124,
-        "city_id": 87,
-        "name": "Nueva Asunción"
-    },
-    {
         "id": 125,
         "city_id": 92,
         "name": "Palomar"
@@ -2258,5 +2118,200 @@
         "id": 452,
         "city_id": 152,
         "name": "Pisadera"
+    },
+    {
+        "id": 453,
+        "city_id": 87,
+        "name": "Bernardino Caballero"
+    },
+    {
+        "id": 454,
+        "city_id": 87,
+        "name": "Ita Ka'aguy"
+    },
+    {
+        "id": 455,
+        "city_id": 87,
+        "name": "Kokue Guazu"
+    },
+    {
+        "id": 456,
+        "city_id": 87,
+        "name": "Laguna Grande"
+    },
+    {
+        "id": 457,
+        "city_id": 87,
+        "name": "Laguna Satí"
+    },
+    {
+        "id": 458,
+        "city_id": 87,
+        "name": "Orilla del Campo Grande"
+    },
+    {
+        "id": 459,
+        "city_id": 87,
+        "name": "Pitiantuta"
+    },
+    {
+        "id": 460,
+        "city_id": 87,
+        "name": "Villa Ofelia"
+    },
+    {
+        "id": 461,
+        "city_id": 87,
+        "name": "Domingo Savio"
+    },
+    {
+        "id": 462,
+        "city_id": 87,
+        "name": "Estanzuela"
+    },
+    {
+        "id": 463,
+        "city_id": 87,
+        "name": "IPVU"
+    },
+    {
+        "id": 464,
+        "city_id": 87,
+        "name": "Las Residentas"
+    },
+    {
+        "id": 465,
+        "city_id": 87,
+        "name": "San Juan"
+    },
+    {
+        "id": 466,
+        "city_id": 87,
+        "name": "Tres Bocas"
+    },
+    {
+        "id": 467,
+        "city_id": 87,
+        "name": "Barrio Centro"
+    },
+    {
+        "id": 468,
+        "city_id": 85,
+        "name": "San Miguel"
+    },
+    {
+        "id": 469,
+        "city_id": 85,
+        "name": "Santo Domingo"
+    },
+    {
+        "id": 470,
+        "city_id": 85,
+        "name": "San Roque"
+    },
+    {
+        "id": 471,
+        "city_id": 85,
+        "name": "Las Mercedes"
+    },
+    {
+        "id": 472,
+        "city_id": 85,
+        "name": "Boquerón"
+    },
+    {
+        "id": 473,
+        "city_id": 85,
+        "name": "San Cayetano"
+    },
+    {
+        "id": 474,
+        "city_id": 85,
+        "name": "Santa Catalina"
+    },
+    {
+        "id": 475,
+        "city_id": 85,
+        "name": "Estanzuela"
+    },
+    {
+        "id": 476,
+        "city_id": 85,
+        "name": "Kokue Guasu"
+    },
+    {
+        "id": 477,
+        "city_id": 85,
+        "name": "Pindolo"
+    },
+    {
+        "id": 478,
+        "city_id": 85,
+        "name": "San Antonio"
+    },
+    {
+        "id": 479,
+        "city_id": 85,
+        "name": "María Auxiliadora"
+    },
+    {
+        "id": 480,
+        "city_id": 85,
+        "name": "Costa Fleitas"
+    },
+    {
+        "id": 481,
+        "city_id": 85,
+        "name": "Jukyty"
+    },
+    {
+        "id": 482,
+        "city_id": 85,
+        "name": "Valle Pucú"
+    },
+    {
+        "id": 483,
+        "city_id": 85,
+        "name": "Jukyry"
+    },
+    {
+        "id": 484,
+        "city_id": 85,
+        "name": "Isla Valle"
+    },
+    {
+        "id": 485,
+        "city_id": 85,
+        "name": "San Miguel (compañía)"
+    },
+    {
+        "id": 486,
+        "city_id": 85,
+        "name": "Caacupemí"
+    },
+    {
+        "id": 487,
+        "city_id": 85,
+        "name": "Fracción Yvoty"
+    },
+    {
+        "id": 488,
+        "city_id": 85,
+        "name": "Fracción Alicia"
+    },
+    {
+        "id": 489,
+        "city_id": 85,
+        "name": "Villa Salvador"
+    },
+    {
+        "id": 490,
+        "city_id": 85,
+        "name": "Villa Rosita"
+    },
+    {
+        "id": 491,
+        "city_id": 85,
+        "name": "Tajy Poty"
     }
 ]

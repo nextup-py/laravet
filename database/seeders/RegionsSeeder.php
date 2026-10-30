@@ -16,22 +16,22 @@ class RegionsSeeder extends Seeder
     public function run(): void
     {
         if (Department::exists()) {
-            $this->command->info('Regions ya sembradas, se omite.');
+            $this->command?->info('Las regiones de Paraguay ya estaban sembradas, se omiten.');
 
             return;
         }
 
-        $this->command->info('Sembrando departments...');
+        $this->command?->info('Sembrando departamentos...');
         Department::insert(
             json_decode(file_get_contents(database_path('data/json/departments.json')), true)
         );
 
-        $this->command->info('Sembrando cities...');
+        $this->command?->info('Sembrando ciudades...');
         City::insert(
             json_decode(file_get_contents(database_path('data/json/cities.json')), true)
         );
 
-        $this->command->info('Sembrando neighborhoods...');
+        $this->command?->info('Sembrando barrios...');
         Neighborhood::insert(
             json_decode(file_get_contents(database_path('data/json/neighborhoods.json')), true)
         );
