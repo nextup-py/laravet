@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\OpensViewFirst;
 use App\Filament\Resources\DepartmentResource\Pages;
 use App\Filament\Resources\DepartmentResource\RelationManagers;
 use App\Models\Department;
@@ -18,6 +19,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class DepartmentResource extends Resource
 {
+    use OpensViewFirst;
+
     protected static ?string $model = Department::class;
 
     protected static ?string $slug = 'departamentos';

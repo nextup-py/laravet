@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Concerns\ClinicRoles;
+use App\Filament\Concerns\OpensViewFirst;
 use App\Filament\Resources\RoleResource\Pages;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
@@ -28,7 +29,7 @@ use Spatie\Permission\Models\Role;
 
 class RoleResource extends Resource implements HasShieldPermissions
 {
-    use HasShieldFormComponents;
+    use HasShieldFormComponents, OpensViewFirst;
 
     protected static ?string $recordTitleAttribute = 'name';
 

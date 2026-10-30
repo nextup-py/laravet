@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\OpensViewFirst;
 use App\Filament\Resources\NeighborhoodResource\Pages;
 use App\Models\City;
 use App\Models\Department;
@@ -23,6 +24,8 @@ use Illuminate\Validation\Rules\Unique;
  */
 class NeighborhoodResource extends Resource
 {
+    use OpensViewFirst;
+
     protected static ?string $model = Neighborhood::class;
 
     protected static ?string $slug = 'barrios';

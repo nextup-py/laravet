@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\PetSpecies;
 use App\Filament\Concerns\FocusesOnOwnRecords;
+use App\Filament\Concerns\OpensViewFirst;
 use App\Filament\Resources\SurgeryResource\Pages;
 use App\Models\Pet;
 use App\Models\Surgery;
@@ -27,7 +28,7 @@ use Illuminate\Support\Str;
  */
 class SurgeryResource extends Resource
 {
-    use FocusesOnOwnRecords;
+    use FocusesOnOwnRecords, OpensViewFirst;
 
     protected static ?string $model = Surgery::class;
 

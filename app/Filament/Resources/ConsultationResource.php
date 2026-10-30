@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\AiUrgencyLevel;
 use App\Enums\AiUsageStatus;
 use App\Enums\PetSpecies;
+use App\Filament\Concerns\OpensViewFirst;
 use App\Filament\Resources\ConsultationResource\Pages;
 use App\Models\Consultation;
 use App\Models\Pet;
@@ -29,6 +30,8 @@ use Illuminate\Support\HtmlString;
  */
 class ConsultationResource extends Resource
 {
+    use OpensViewFirst;
+
     protected static ?string $model = Consultation::class;
 
     protected static ?string $slug = 'consultas';

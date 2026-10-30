@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\OpensViewFirst;
 use App\Filament\Resources\CityResource\Pages;
 use App\Filament\Resources\CityResource\RelationManagers;
 use App\Models\City;
@@ -20,6 +21,8 @@ use Illuminate\Validation\Rules\Unique;
  */
 class CityResource extends Resource
 {
+    use OpensViewFirst;
+
     protected static ?string $model = City::class;
 
     protected static ?string $slug = 'ciudades';

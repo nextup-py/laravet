@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PetResource\Pages;
 
 use App\Filament\Actions\DownloadExport;
+use App\Filament\Concerns\OpensViewOnRowClick;
 use App\Filament\Exporters\PetExporter;
 use App\Filament\Resources\PetResource;
 use Filament\Actions;
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ListPets extends ListRecords
 {
+    use OpensViewOnRowClick;
+
     protected static string $resource = PetResource::class;
 
     protected function getHeaderActions(): array
