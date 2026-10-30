@@ -5,11 +5,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-# Development (PHP server + Vite en una terminal)
+# Development (servidor PHP + worker de la cola + Vite en una terminal)
 composer run dev
 
 # Individual servers
 php artisan serve
+php artisan queue:listen --tries=1   # QUEUE_CONNECTION=database: sin worker no salen correos ni avisos
 npm run dev
 
 # Tests
@@ -270,6 +271,7 @@ Cómo probar la migración sin riesgo: rama de prueba (sin merge) con `filament/
 - **Tablas**: ID, "Registrado el" y "Actualizado el" ocultos por defecto (`toggleable`), fechas `d/m/Y`, orden por defecto explícito, conteos con `->counts('relación')`.
 - **Git**: una rama por tema desde `origin/main`, un PR por tema; mensajes de commit y PR en español.
 - **Documentación al día**: todo cambio que altere comportamiento, permisos, rutas, comandos, configuración o la interfaz que ve el usuario actualiza en el mismo PR: este `CLAUDE.md`, `README.md`/`CONTRIBUTING.md` si los afecta, una entrada en `resources/novedades/` (ver «Ayuda») y la guía de uso del panel (`resources/guia/*.md`, ver «Guía de uso»): si el cambio altera lo que ve o hace un usuario (pantallas, botones, flujos, avisos, permisos), se edita el tema correspondiente o se agrega uno nuevo. Antes de cerrar una tarea, revisar si algo de lo anterior quedó desactualizado.
+- **Variables de entorno**: `.env.example` refleja solo lo que el código lee (APP, base de datos, cola/caché/sesión en `database`, correo, IA, siembra) con comentarios en español y un bloque «Producción» de referencia. Al agregar una variable nueva al código, agrégala ahí con su comentario y, si cambia el despliegue, en la tabla de variables del `README.md`. El correo con Resend usa `RESEND_API_KEY` (el paquete también acepta `RESEND_KEY`).
 - **Listas con tabs**: si una lista tiene tabs (ej. Mascotas: Todos/Activos/Inactivos), no agregar un filtro con valor por defecto que se solape con ellos; el tab «Todos» debe abrir sin filtros activos.
 
 ===
