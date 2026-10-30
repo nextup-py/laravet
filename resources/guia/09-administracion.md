@@ -19,7 +19,7 @@ Protecciones:
 
 ## Roles y permisos
 
-En **Configuración → Roles y permisos** el administrador crea roles y marca qué puede hacer cada uno (ver, crear, editar, eliminar cada tipo de registro, usar la IA, exportar). Los roles base (administrador, veterinario y asistente) no se pueden eliminar, ni los que tienen usuarios asignados.
+En **Configuración → Roles y permisos** el administrador crea roles y marca qué puede hacer cada uno (ver, crear, editar, eliminar cada tipo de registro, usar la IA, exportar). Los roles base (administrador, veterinario y asistente) no se pueden eliminar ni cambiar de nombre (sí puedes editar sus permisos), y tampoco se eliminan los roles que tienen usuarios asignados.
 
 ## Datos de la clínica
 

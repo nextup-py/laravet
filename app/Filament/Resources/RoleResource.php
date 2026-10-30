@@ -18,6 +18,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\HtmlString;
@@ -30,6 +31,14 @@ class RoleResource extends Resource implements HasShieldPermissions
     use HasShieldFormComponents;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    /**
+     * Título del rol en migas, fichas y búsquedas: la etiqueta en español de los roles base.
+     */
+    public static function getRecordTitle(?Model $record): string|Htmlable|null
+    {
+        return $record ? ClinicRoles::label($record->name) : null;
+    }
 
     /**
      * Etiquetas de los permisos personalizados en español (lang/es/permissions.php). Shield solo
@@ -74,7 +83,11 @@ class RoleResource extends Resource implements HasShieldPermissions
                                         modifyRuleUsing: fn (Unique $rule) => Utils::isTenancyEnabled() ? $rule->where(Utils::getTenantModelForeignKey(), Filament::getTenant()?->id) : $rule
                                     )
                                     ->required()
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->disabled(fn (?Model $record): bool => $record !== null && ClinicRoles::isBase($record->name))
+                                    ->helperText(fn (?Model $record): ?string => $record !== null && ClinicRoles::isBase($record->name)
+                                        ? 'El nombre de un rol base no se puede cambiar: el sistema lo usa para dar acceso. Sí puedes editar sus permisos.'
+                                        : null),
 
                                 Forms\Components\TextInput::make('guard_name')
                                     ->label(__('filament-shield::filament-shield.field.guard_name'))
@@ -114,9 +127,11 @@ class RoleResource extends Resource implements HasShieldPermissions
                 Tables\Columns\TextColumn::make('name')
                     ->weight('font-medium')
                     ->label(__('filament-shield::filament-shield.column.name'))
-                    ->formatStateUsing(fn ($state): string => Str::headline($state))
+                    ->formatStateUsing(fn ($state): string => ClinicRoles::isBase($state) ? ClinicRoles::label($state) : Str::headline($state))
+                    ->description(fn (Model $record): ?string => ClinicRoles::isBase($record->name) ? $record->name : null)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('guard_name')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->badge()
                     ->color('warning')
                     ->label(__('filament-shield::filament-shield.column.guard_name')),
@@ -174,7 +189,7 @@ class RoleResource extends Resource implements HasShieldPermissions
      */
     public static function deletionBlockedReason(Model $role): ?string
     {
-        if (in_array($role->name, ClinicRoles::all(), true)) {
+        if (ClinicRoles::isBase($role->name)) {
             return 'Es un rol base del sistema.';
         }
 

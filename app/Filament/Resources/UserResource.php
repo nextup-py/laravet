@@ -73,16 +73,10 @@ class UserResource extends Resource
      */
     public static function roleOptions(): array
     {
-        $defaultLabels = [
-            ClinicRoles::ADMIN => 'Administrador',
-            ClinicRoles::VETERINARIAN => 'Veterinario',
-            ClinicRoles::ASSISTANT => 'Asistente',
-        ];
-
         return Role::query()
             ->orderBy('name')
             ->pluck('name')
-            ->mapWithKeys(fn (string $name): array => [$name => $defaultLabels[$name] ?? $name])
+            ->mapWithKeys(fn (string $name): array => [$name => ClinicRoles::label($name)])
             ->all();
     }
 
