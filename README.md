@@ -115,8 +115,12 @@ Este comando:
 
 ### Paso 6: Llenar la Base de Datos con los datos de demo
 ```bash
+php artisan laravet:seed      # guiado: te pregunta qué sembrar y muestra los usuarios al final
+# o, sin preguntas:
 php artisan db:seed
 ```
+
+Atajos: `composer run seed` (menú), `composer run seed:demo` (crear o refrescar el demo) y `composer run seed:volume`. Opciones de `laravet:seed`: `--base`, `--demo`, `--volume[=N]`, `--reset-demo` (borra solo los datos demo; pide confirmación o `--force`).
 
 Este comando llena la base de datos con datos de ejemplo contextualizados en Paraguay:
 - 2 veterinarios y 1 asistente (contraseña `password` en local, o la de `DEMO_PASSWORD` si la defines; en staging se genera una aleatoria) con ubicaciones del departamento Central

@@ -23,6 +23,7 @@ php artisan test --filter=NombreDelTest
 php artisan migrate
 php artisan db:seed
 php artisan migrate:fresh --seed   # Resetea y rellena con datos demo
+php artisan laravet:seed           # Siembra guiada (menú); atajos: composer run seed | seed:demo | seed:volume
 
 # Filament
 php artisan filament:make-resource NombreRecurso --generate
@@ -146,6 +147,19 @@ patrón `ProductionSeeder`/`DemoSeeder`:
   Si el admin se crea por primera vez, se genera una password aleatoria con
   `Str::password(16)` que se muestra **una sola vez** por consola — hay que
   guardarla en ese momento.
+- **`php artisan laravet:seed`** (`App\Console\Commands\SeedCommand`) es la forma guiada de
+  sembrar: sin opciones y con terminal muestra un menú (base / demo / volumen / borrar demo) y
+  explica cada paso; con opciones sirve para scripts: `--base`, `--demo` (crear o refrescar las
+  fechas a hoy), `--volume[=N]`, `--reset-demo` (pide confirmación, o `--force` sin
+  interacción) y `--force` (producción). Sin interacción ni opciones corre `DatabaseSeeder`.
+  En producción solo permite `--base`; demo, volumen y borrado se niegan. Al terminar imprime
+  una **tabla de usuarios y contraseñas** (`App\Support\SeedReport`, singleton que anotan
+  `ProductionSeeder` y `DemoSeeder`; también la imprime `db:seed`) y avisa de que las
+  contraseñas generadas no se vuelven a mostrar. `DemoSeeder` siembra solo la base si faltan
+  roles o regiones, y `DemoVolumeSeeder` siembra el demo si faltan los veterinarios.
+  `App\Support\DemoDataReset` borra solo lo demo (propietarios por CI o `@volumen.test`,
+  con mascotas e historial en cascada, y los usuarios demo que no atendieron pacientes de la
+  clínica; esos se conservan). Los atajos de Composer son `seed`, `seed:demo` y `seed:volume`.
 - **`RolesAndPermissionsSeeder`** solo **agrega** permisos a los roles base
   (`givePermissionTo`, nunca `syncPermissions`): volver a correrlo no quita lo que un admin
   sumó desde el panel. Los cambios de permisos en producción siguen yendo en una migración

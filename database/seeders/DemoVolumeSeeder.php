@@ -37,9 +37,9 @@ class DemoVolumeSeeder extends Seeder
         $vets = $this->demoVets();
 
         if ($vets->isEmpty()) {
-            $this->command?->error('No hay veterinarios demo: ejecuta antes DemoSeeder.');
-
-            return;
+            $this->command?->warn('Faltan los veterinarios demo: se siembra primero el demo.');
+            $this->call(DemoSeeder::class);
+            $vets = $this->demoVets();
         }
 
         $total = max(0, (int) config('app.demo_volume'));

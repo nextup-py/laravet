@@ -86,6 +86,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'export_data',
             'view_reports',
         ]);
+
+        $this->command?->info('Roles y permisos listos (admin, veterinarian, assistant).');
     }
 
     /**

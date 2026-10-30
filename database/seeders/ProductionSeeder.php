@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Filament\Concerns\ClinicRoles;
 use App\Models\User;
+use App\Support\SeedReport;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -18,7 +20,7 @@ class ProductionSeeder extends Seeder
         $email = config('app.admin_email');
 
         if (empty($email)) {
-            $this->command->warn('ADMIN_EMAIL no está configurado; se omite la creación del usuario admin.');
+            $this->command?->warn('ADMIN_EMAIL no está configurado: se omite el usuario admin. Defínelo en .env y vuelve a ejecutar la siembra.');
 
             return;
         }
@@ -31,11 +33,13 @@ class ProductionSeeder extends Seeder
         );
 
         if ($user->wasRecentlyCreated) {
-            $this->command->warn("Usuario admin creado ({$email}). Password generada: {$password} — guárdala ya que no se vuelve a mostrar.");
+            $this->command?->warn("Usuario admin creado ({$email}). Password generada: {$password} — guárdala ya que no se vuelve a mostrar.");
         } else {
-            $this->command->info("Usuario admin ya existía ({$email}), no se modifica la password.");
+            $this->command?->info("Usuario admin ya existía ({$email}), no se modifica la password.");
         }
 
-        $user->syncRoles(['admin']);
+        $user->syncRoles([ClinicRoles::ADMIN]);
+
+        app(SeedReport::class)->user($email, ClinicRoles::ADMIN, $user->wasRecentlyCreated ? $password : null);
     }
 }

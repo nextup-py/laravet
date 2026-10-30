@@ -7,13 +7,22 @@ use App\Models\City;
 use App\Models\Department;
 use App\Models\Neighborhood;
 use App\Models\User;
+use App\Support\SeedReport;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 class DemoSeeder extends Seeder
 {
+    /** Correos del personal demo (los usa el borrado seguro del demo). */
+    public const STAFF_EMAILS = [
+        'maria.gonzalez@mbopivet.com.py',
+        'carlos.gimenez@mbopivet.com.py',
+        'laura.benitez@mbopivet.com.py',
+    ];
+
     /**
      * Personal demo con correos fijos, por eso nunca corre en producción. La contraseña sale de
      * `DEMO_PASSWORD` (se aplica siempre); si no está definida, `password` en local/testing y una
@@ -29,6 +38,11 @@ class DemoSeeder extends Seeder
         }
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        if (! Role::where('name', ClinicRoles::VETERINARIAN)->exists() || ! Department::exists()) {
+            $this->command?->warn('Faltan los roles o las regiones: se siembra primero la base del sistema.');
+            $this->call(ProductionSeeder::class);
+        }
 
         $central = Department::where('name', 'Central')->first();
 
@@ -79,18 +93,26 @@ class DemoSeeder extends Seeder
             $user = User::firstOrNew(['email' => $member['email']]);
             $user->fill($member);
 
-            if ($fixedPassword) {
-                $user->password = $fixedPassword;
-            } elseif (! $user->exists) {
-                $user->password = $generated = $this->defaultPassword();
+            $plain = null;
 
-                if ($generated !== 'password') {
-                    $this->command?->warn("Usuario demo {$member['email']} creado. Password generada: {$generated} — guárdala, no se vuelve a mostrar.");
+            if ($fixedPassword) {
+                $plain = $fixedPassword;
+            } elseif (! $user->exists) {
+                $plain = $this->defaultPassword();
+
+                if ($plain !== 'password') {
+                    $this->command?->warn("Usuario demo {$member['email']} creado. Password generada: {$plain} — guárdala, no se vuelve a mostrar.");
                 }
+            }
+
+            if ($plain !== null) {
+                $user->password = $plain;
             }
 
             $user->save();
             $user->syncRoles([$role]);
+
+            app(SeedReport::class)->user($user->email, $role, $plain);
         }
 
         $this->call([
@@ -101,6 +123,8 @@ class DemoSeeder extends Seeder
             SurgerySeeder::class,
             TestSeeder::class,
         ]);
+
+        $this->command?->info('Datos demo listos: personal, propietarios, mascotas e historial con fechas relativas a hoy. Puedes volver a ejecutarlo para refrescar las fechas.');
     }
 
     private function defaultPassword(): string
