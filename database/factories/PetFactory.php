@@ -18,10 +18,13 @@ class PetFactory extends Factory
 {
     protected $model = Pet::class;
 
+    /** @var array<int, string> */
+    private const NAMES = ['Toby', 'Luna', 'Rocky', 'Bella', 'Max', 'Thor', 'Simba', 'Nala', 'Milo', 'Canela', 'Kira', 'Coco', 'Lola', 'Duque', 'Negro', 'Chispa', 'Pochi', 'Pancho', 'Pytã', 'Morotĩ', 'Jaguá', 'Piru', 'Tigre', 'Princesa'];
+
     public function definition(): array
     {
         return [
-            'name' => fake()->firstName(),
+            'name' => fake()->randomElement(self::NAMES),
             'species' => fake()->randomElement(PetSpecies::cases()),
             'breed' => fake()->randomElement(['SRD', 'Labrador Retriever', 'Poodle', 'Siamés', 'Persa', 'Pastor Alemán']),
             'gender' => fake()->randomElement(PetGender::cases()),

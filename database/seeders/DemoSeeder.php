@@ -7,6 +7,7 @@ use App\Models\City;
 use App\Models\Department;
 use App\Models\Neighborhood;
 use App\Models\User;
+use App\Settings\ClinicSettings;
 use App\Support\SeedReport;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
@@ -115,6 +116,8 @@ class DemoSeeder extends Seeder
             app(SeedReport::class)->user($user->email, $role, $plain);
         }
 
+        $this->fillClinicSettings();
+
         $this->call([
             OwnerSeeder::class,
             PetSeeder::class,
@@ -125,6 +128,38 @@ class DemoSeeder extends Seeder
         ]);
 
         $this->command?->info('Datos demo listos: personal, propietarios, mascotas e historial con fechas relativas a hoy. Puedes volver a ejecutarlo para refrescar las fechas.');
+    }
+
+    /**
+     * Completa los datos de la clínica que estén vacíos (nunca pisa lo que ya cargaron), para que PDFs
+     * y avisos por WhatsApp del demo salgan con contacto, RUC y horario. Los valores son de ejemplo.
+     * No se carga el correo: sin él no se envían recordatorios, y los correos de los propietarios demo
+     * parecen reales (gmail, hotmail), así que no deben recibir nada desde un entorno de prueba.
+     */
+    private function fillClinicSettings(): void
+    {
+        $settings = ClinicSettings::tryGet();
+
+        if ($settings === null) {
+            return;
+        }
+
+        $demo = [
+            'address' => 'Calle Mariscal Estigarribia 123, Areguá',
+            'phone' => '(0291) 432 000',
+            'whatsapp' => '0981 000 000',
+            'business_hours' => 'Lunes a viernes de 8:00 a 18:00 · Sábados de 8:00 a 12:00',
+            'ruc' => '80099999-0',
+            'razon_social' => 'Clínica Veterinaria Mbopivet S.R.L.',
+        ];
+
+        foreach ($demo as $property => $value) {
+            if (blank($settings->{$property})) {
+                $settings->{$property} = $value;
+            }
+        }
+
+        $settings->save();
     }
 
     private function defaultPassword(): string

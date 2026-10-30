@@ -11,6 +11,7 @@ use App\Models\Surgery;
 use App\Models\Test;
 use App\Models\User;
 use App\Models\Vaccination;
+use App\Settings\ClinicSettings;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\DemoSeeder;
 use Database\Seeders\DemoVolumeSeeder;
@@ -75,6 +76,41 @@ describe('DemoSeeder', function () {
 
         // Ninguna ciudad quedó sin resolver: todos los propietarios tienen ubicación completa.
         expect(Owner::whereNull('city_id')->orWhereNull('neighborhood_id')->count())->toBe(0);
+    });
+
+    it('cada propietario tiene un barrio real de su ciudad', function () {
+        $this->seed(DemoSeeder::class);
+
+        foreach (OwnerSeeder::OWNERS as $data) {
+            $owner = Owner::where('ci', $data['ci'])->with(['city', 'neighborhood'])->firstOrFail();
+
+            expect($owner->city->name)->toBe($data['city'])
+                ->and($owner->neighborhood->name)->toBe($data['neighborhood'])
+                ->and($owner->neighborhood->city_id)->toBe($owner->city_id);
+        }
+    });
+
+    it('los cachorros y gatitos tienen edad coherente con su historial', function () {
+        $this->seed(DemoSeeder::class);
+
+        foreach (['Coco', 'Duque', 'Pancho', 'Princesa'] as $name) {
+            expect(Pet::where('name', $name)->firstOrFail()->birthdate->diffInMonths(now()))->toBeLessThan(6);
+        }
+    });
+
+    it('completa los datos de la clínica sin pisar los que ya existen ni cargar el correo', function () {
+        $settings = app(ClinicSettings::class);
+        $settings->address = 'Mi dirección real';
+        $settings->email = null;
+        $settings->save();
+
+        $this->seed(DemoSeeder::class);
+
+        $settings = app(ClinicSettings::class);
+        expect($settings->address)->toBe('Mi dirección real')
+            ->and($settings->ruc)->not->toBeEmpty()
+            ->and($settings->phone)->not->toBeEmpty()
+            ->and($settings->email)->toBeNull();
     });
 
     it('es idempotente: volver a sembrar no duplica registros', function () {

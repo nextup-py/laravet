@@ -12,7 +12,7 @@ class PetSeeder extends Seeder
     use UsesDemoData;
 
     /**
-     * Mascotas demo: [nombre, especie, raza, género, nacimiento, tamaño, peso, pelaje, reproducción, índice en OwnerSeeder::OWNERS].
+     * Mascotas demo: [nombre, especie, raza, género, nacimiento (fecha fija, o edad en meses para cachorros y gatitos: así concuerda con las notas del historial), tamaño, peso, pelaje, reproducción, índice en OwnerSeeder::OWNERS].
      * Los seeders de historial clínico las referencian por su posición en esta lista.
      *
      * @var array<int, array<int, float|int|string>>
@@ -21,17 +21,17 @@ class PetSeeder extends Seeder
         ['Toby',     'Canino', 'Labrador Retriever',  'Male',   '2021-03-15', 'Big',    28.5, 'Corto',   'Normal',     0],
         ['Luna',     'Canino', 'Golden Retriever',    'Female', '2020-07-22', 'Big',    26.0, 'Largo',   'Sterilized', 0],
         ['Rex',      'Canino', 'Pastor Alemán',       'Male',   '2019-11-05', 'Big',    32.0, 'Mediano', 'Castrated',  1],
-        ['Coco',     'Canino', 'Poodle',              'Female', '2022-01-10', 'Small',   4.5, 'Rizado',  'Normal',     1],
+        ['Coco',     'Canino', 'Poodle',              'Female', 4,            'Small',   2.8, 'Rizado',  'Normal',     1],
         ['Rocky',    'Canino', 'Rottweiler',          'Male',   '2020-05-18', 'Giant',  42.0, 'Corto',   'Normal',     2],
         ['Bella',    'Canino', 'Beagle',              'Female', '2021-09-30', 'Small',  10.0, 'Corto',   'Sterilized', 2],
-        ['Duque',    'Canino', 'Pitbull',             'Male',   '2022-04-12', 'Medium', 22.0, 'Corto',   'Normal',     3],
+        ['Duque',    'Canino', 'Pitbull',             'Male',   3,            'Medium',  8.0, 'Corto',   'Normal',     3],
         ['Max',      'Canino', 'SRD',                 'Male',   '2020-12-01', 'Medium', 18.5, 'Corto',   'Castrated',  3],
-        ['Pancho',   'Canino', 'Bulldog Francés',     'Male',   '2023-02-14', 'Small',   9.0, 'Corto',   'Normal',     4],
+        ['Pancho',   'Canino', 'Bulldog Francés',     'Male',   5,            'Small',   6.5, 'Corto',   'Normal',     4],
         ['Thor',     'Canino', 'Doberman',            'Male',   '2019-08-20', 'Big',    35.0, 'Corto',   'Normal',     4],
         ['Simba',    'Felino', 'SRD',                 'Male',   '2022-06-05', 'Small',   4.0, 'Corto',   'Castrated',  5],
         ['Nala',     'Felino', 'Siamés',              'Female', '2021-10-18', 'Small',   3.5, 'Corto',   'Sterilized', 6],
         ['Milo',     'Felino', 'Persa',               'Male',   '2020-03-25', 'Small',   4.2, 'Largo',   'Castrated',  7],
-        ['Princesa', 'Felino', 'SRD',                 'Female', '2023-01-08', 'Small',   3.8, 'Mediano', 'Normal',     8],
+        ['Princesa', 'Felino', 'SRD',                 'Female', 4,            'Small',   1.9, 'Mediano', 'Normal',     8],
         ['Canela',   'Felino', 'Angora',              'Female', '2021-05-15', 'Small',   3.2, 'Largo',   'Sterilized', 9],
     ];
 
@@ -49,7 +49,7 @@ class PetSeeder extends Seeder
                 'species' => $species,
                 'breed' => $breed,
                 'gender' => $gender,
-                'birthdate' => $birthdate,
+                'birthdate' => is_int($birthdate) ? now()->subMonths($birthdate)->toDateString() : $birthdate,
                 'size' => $size,
                 'weight' => $weight,
                 'fur' => $fur,

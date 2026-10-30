@@ -183,13 +183,21 @@ patrón `ProductionSeeder`/`DemoSeeder`:
 
 | Seeder | Contenido |
 |--------|-----------|
-| `OwnerSeeder` | 10 propietarios con CI, teléfono y dirección paraguayos (ciudades por nombre exacto: `Areguá`, `Itauguá`…) |
-| `PetSeeder` | 15 mascotas (10 caninos, 5 felinos) con razas y datos reales |
+| `OwnerSeeder` | 10 propietarios con CI, teléfono y dirección paraguayos, en Luque y San Lorenzo con un barrio real de su ciudad (por nombre exacto) |
+| `PetSeeder` | 15 mascotas (10 caninos, 5 felinos) con razas y datos reales; cachorros y gatitos con edad en meses relativa a hoy para que concuerden con las notas |
 | `ConsultationSeeder` | 12 consultas con casos clínicos veterinarios reales |
 | `VaccinationSeeder` | 24 registros (Séptuple, Antirrábica, Triple Felina, Leucemia Felina), con casos vencidos, por vencer, al día y renovada |
 | `SurgerySeeder` | 8 cirugías (castraciones, OVH, suturas, extracción dental), una de hoy y una programada |
 | `TestSeeder` | 9 exámenes (hemograma, bioquímica, ELISA, urinálisis, radiografía), 6 con resultado y 3 pendientes |
 
+- **Contexto Paraguay**: nombres y apellidos locales, CI de 7 dígitos, celulares 09XX y ciudades
+  de Central. El barrio es obligatorio en `owners` y en el JSON solo Luque y San Lorenzo tienen
+  barrios (11 de las 20 ciudades de Central no tienen, y `Fernando de la Mora` repite los de
+  Luque), por eso el demo no usa Areguá, Itauguá ni Fernando de la Mora. `OwnerFactory` y
+  `PetFactory` usan listas locales (Faker no tiene `es_PY`). `DemoSeeder` completa, solo si están
+  vacíos, los datos de ejemplo de la clínica (dirección, teléfono, WhatsApp, horario, RUC, razón
+  social) y **no** carga el correo de la clínica: sin él no se envían recordatorios, y los
+  correos de los propietarios demo parecen reales.
 - **`DemoVolumeSeeder`** (opcional, `php artisan db:seed --class=DemoVolumeSeeder`, después del
   demo): completa hasta `DEMO_VOLUME` mascotas (200 por defecto, `config('app.demo_volume')`) con
   propietarios e historial vía factories, para probar paginación, filtros y el tope de
