@@ -90,6 +90,15 @@ describe('DemoSeeder', function () {
         }
     });
 
+    it('los propietarios demo no tienen correos ni teléfonos que puedan ser de personas reales', function () {
+        $this->seed(DemoSeeder::class);
+
+        foreach (Owner::whereIn('ci', array_column(OwnerSeeder::OWNERS, 'ci'))->get() as $owner) {
+            expect($owner->email)->toEndWith('@mbopivet-demo.test')
+                ->and($owner->phone)->toMatch('/^09\d{2}0001\d{2}$/');
+        }
+    });
+
     it('los cachorros y gatitos tienen edad coherente con su historial', function () {
         $this->seed(DemoSeeder::class);
 

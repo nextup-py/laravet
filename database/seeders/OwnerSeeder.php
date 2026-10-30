@@ -11,22 +11,24 @@ use Illuminate\Database\Seeder;
 class OwnerSeeder extends Seeder
 {
     /**
-     * Propietarios demo; `city` y `neighborhood` son nombres exactos de una ciudad de Central y de un barrio
+     * Propietarios demo. Los correos son del dominio reservado `.test` y los teléfonos terminan en
+     * `0001NN` (prefijo de operadora + número ficticio): así ningún aviso del demo (correo o
+     * «Avisar por WhatsApp») puede llegar a una persona real. `city` y `neighborhood` son nombres exactos de una ciudad de Central y de un barrio
      * suyo (el barrio es obligatorio en la base y solo Luque y San Lorenzo tienen barrios cargados).
      *
      * @var array<int, array<string, int|string>>
      */
     public const OWNERS = [
-        ['ci' => 4512376, 'first_name' => 'José',     'last_name' => 'Rodríguez', 'gender' => 'Male',   'email' => 'jose.rodriguez@gmail.com',    'phone' => '0981412345', 'city' => 'Luque', 'neighborhood' => 'Primer Barrio', 'address' => 'Calle Independencia Nacional 234'],
-        ['ci' => 3218945, 'first_name' => 'Ana',      'last_name' => 'Martínez',  'gender' => 'Female', 'email' => 'ana.martinez@hotmail.com',    'phone' => '0991567890', 'city' => 'Luque', 'neighborhood' => 'Campo Grande', 'address' => 'Av. General Aquino 567'],
-        ['ci' => 5634821, 'first_name' => 'Carlos',   'last_name' => 'López',     'gender' => 'Male',   'email' => 'carlos.lopez@gmail.com',      'phone' => '0971234567', 'city' => 'San Lorenzo', 'neighborhood' => 'San Miguel', 'address' => 'Ruta 2 km 12, casa 45'],
-        ['ci' => 2987654, 'first_name' => 'Patricia', 'last_name' => 'Benítez',   'gender' => 'Female', 'email' => 'patricia.benitez@yahoo.com',  'phone' => '0981876543', 'city' => 'Luque', 'neighborhood' => 'Yukyry', 'address' => 'Calle San Roque 89'],
-        ['ci' => 6123456, 'first_name' => 'Miguel',   'last_name' => 'Fernández', 'gender' => 'Male',   'email' => 'miguel.fernandez@gmail.com',  'phone' => '0991345678', 'city' => 'Luque', 'neighborhood' => 'Tercer Barrio', 'address' => 'Av. Mcal. López 320'],
-        ['ci' => 4521789, 'first_name' => 'Sandra',   'last_name' => 'Giménez',   'gender' => 'Female', 'email' => 'sandra.gimenez@hotmail.com',  'phone' => '0971654321', 'city' => 'San Lorenzo', 'neighborhood' => 'Villa Universitaria', 'address' => 'Calle Cerro Corá 102'],
-        ['ci' => 3654987, 'first_name' => 'Luis',     'last_name' => 'Ávalos',    'gender' => 'Male',   'email' => 'luis.avalos@gmail.com',       'phone' => '0981765432', 'city' => 'San Lorenzo', 'neighborhood' => 'San Roque', 'address' => 'Ruta 2 km 14, lote 8'],
-        ['ci' => 5412369, 'first_name' => 'Rosa',     'last_name' => 'Cáceres',   'gender' => 'Female', 'email' => 'rosa.caceres@gmail.com',      'phone' => '0991234567', 'city' => 'Luque', 'neighborhood' => 'Ykuá Duré', 'address' => 'Calle Yegros 55'],
-        ['ci' => 4789123, 'first_name' => 'Pedro',    'last_name' => 'Villalba',  'gender' => 'Male',   'email' => 'pedro.villalba@hotmail.com',  'phone' => '0971567890', 'city' => 'San Lorenzo', 'neighborhood' => 'San Blas', 'address' => 'Av. San Blas 430'],
-        ['ci' => 3321456, 'first_name' => 'Claudia',  'last_name' => 'Bogado',    'gender' => 'Female', 'email' => 'claudia.bogado@gmail.com',    'phone' => '0981321456', 'city' => 'San Lorenzo', 'neighborhood' => 'Santa Ana', 'address' => 'Calle Paraguarí 210'],
+        ['ci' => 4512376, 'first_name' => 'José',     'last_name' => 'Rodríguez', 'gender' => 'Male',   'email' => 'jose.rodriguez@mbopivet-demo.test',    'phone' => '0981000101', 'city' => 'Luque', 'neighborhood' => 'Primer Barrio', 'address' => 'Calle Independencia Nacional 234'],
+        ['ci' => 3218945, 'first_name' => 'Ana',      'last_name' => 'Martínez',  'gender' => 'Female', 'email' => 'ana.martinez@mbopivet-demo.test',    'phone' => '0991000102', 'city' => 'Luque', 'neighborhood' => 'Campo Grande', 'address' => 'Av. General Aquino 567'],
+        ['ci' => 5634821, 'first_name' => 'Carlos',   'last_name' => 'López',     'gender' => 'Male',   'email' => 'carlos.lopez@mbopivet-demo.test',    'phone' => '0971000103', 'city' => 'San Lorenzo', 'neighborhood' => 'San Miguel', 'address' => 'Ruta 2 km 12, casa 45'],
+        ['ci' => 2987654, 'first_name' => 'Patricia', 'last_name' => 'Benítez',   'gender' => 'Female', 'email' => 'patricia.benitez@mbopivet-demo.test',    'phone' => '0981000104', 'city' => 'Luque', 'neighborhood' => 'Yukyry', 'address' => 'Calle San Roque 89'],
+        ['ci' => 6123456, 'first_name' => 'Miguel',   'last_name' => 'Fernández', 'gender' => 'Male',   'email' => 'miguel.fernandez@mbopivet-demo.test',    'phone' => '0991000105', 'city' => 'Luque', 'neighborhood' => 'Tercer Barrio', 'address' => 'Av. Mcal. López 320'],
+        ['ci' => 4521789, 'first_name' => 'Sandra',   'last_name' => 'Giménez',   'gender' => 'Female', 'email' => 'sandra.gimenez@mbopivet-demo.test',    'phone' => '0971000106', 'city' => 'San Lorenzo', 'neighborhood' => 'Villa Universitaria', 'address' => 'Calle Cerro Corá 102'],
+        ['ci' => 3654987, 'first_name' => 'Luis',     'last_name' => 'Ávalos',    'gender' => 'Male',   'email' => 'luis.avalos@mbopivet-demo.test',    'phone' => '0981000107', 'city' => 'San Lorenzo', 'neighborhood' => 'San Roque', 'address' => 'Ruta 2 km 14, lote 8'],
+        ['ci' => 5412369, 'first_name' => 'Rosa',     'last_name' => 'Cáceres',   'gender' => 'Female', 'email' => 'rosa.caceres@mbopivet-demo.test',    'phone' => '0991000108', 'city' => 'Luque', 'neighborhood' => 'Ykuá Duré', 'address' => 'Calle Yegros 55'],
+        ['ci' => 4789123, 'first_name' => 'Pedro',    'last_name' => 'Villalba',  'gender' => 'Male',   'email' => 'pedro.villalba@mbopivet-demo.test',    'phone' => '0971000109', 'city' => 'San Lorenzo', 'neighborhood' => 'San Blas', 'address' => 'Av. San Blas 430'],
+        ['ci' => 3321456, 'first_name' => 'Claudia',  'last_name' => 'Bogado',    'gender' => 'Female', 'email' => 'claudia.bogado@mbopivet-demo.test',    'phone' => '0981000110', 'city' => 'San Lorenzo', 'neighborhood' => 'Santa Ana', 'address' => 'Calle Paraguarí 210'],
     ];
 
     public function run(): void

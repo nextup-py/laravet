@@ -133,8 +133,8 @@ class DemoSeeder extends Seeder
     /**
      * Completa los datos de la clínica que estén vacíos (nunca pisa lo que ya cargaron), para que PDFs
      * y avisos por WhatsApp del demo salgan con contacto, RUC y horario. Los valores son de ejemplo.
-     * No se carga el correo: sin él no se envían recordatorios, y los correos de los propietarios demo
-     * parecen reales (gmail, hotmail), así que no deben recibir nada desde un entorno de prueba.
+     * No se carga el correo de la clínica: sin él no se envían recordatorios (los propietarios demo
+     * tienen correos `.test`, que no existen), así que ese dato lo carga quien quiera probarlos.
      */
     private function fillClinicSettings(): void
     {

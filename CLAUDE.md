@@ -196,8 +196,9 @@ patrón `ProductionSeeder`/`DemoSeeder`:
   Luque), por eso el demo no usa Areguá, Itauguá ni Fernando de la Mora. `OwnerFactory` y
   `PetFactory` usan listas locales (Faker no tiene `es_PY`). `DemoSeeder` completa, solo si están
   vacíos, los datos de ejemplo de la clínica (dirección, teléfono, WhatsApp, horario, RUC, razón
-  social) y **no** carga el correo de la clínica: sin él no se envían recordatorios, y los
-  correos de los propietarios demo parecen reales.
+  social) y **no** carga el correo de la clínica (sin él no se envían recordatorios). Los
+  propietarios demo usan correos `@mbopivet-demo.test` y teléfonos `09XX0001NN` ficticios, para que
+  ningún aviso del demo (correo o «Avisar por WhatsApp») llegue a una persona real.
 - **`DemoVolumeSeeder`** (opcional, `php artisan db:seed --class=DemoVolumeSeeder`, después del
   demo): completa hasta `DEMO_VOLUME` mascotas (200 por defecto, `config('app.demo_volume')`) con
   propietarios e historial vía factories, para probar paginación, filtros y el tope de
