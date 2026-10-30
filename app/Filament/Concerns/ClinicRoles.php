@@ -16,6 +16,31 @@ final class ClinicRoles
     public const ASSISTANT = 'assistant';
 
     /**
+     * Etiquetas en español de los roles base (el nombre guardado es el identificador en inglés).
+     *
+     * @var array<string, string>
+     */
+    private const LABELS = [
+        self::ADMIN => 'Administrador',
+        self::VETERINARIAN => 'Veterinario',
+        self::ASSISTANT => 'Asistente',
+    ];
+
+    /**
+     * Nombre que se muestra al personal: la etiqueta en español de un rol base o, en un rol
+     * creado por un admin, el nombre tal cual lo escribió.
+     */
+    public static function label(string $name): string
+    {
+        return self::LABELS[$name] ?? $name;
+    }
+
+    public static function isBase(string $name): bool
+    {
+        return in_array($name, self::all(), true);
+    }
+
+    /**
      * @return array<int, string>
      */
     public static function all(): array

@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Filament\Concerns\ClinicRoles;
 use Illuminate\Console\Command;
 
 /**
@@ -47,7 +48,7 @@ class SeedReport
             ['Correo', 'Rol', 'Contraseña'],
             array_map(fn (array $user): array => [
                 $user['email'],
-                $user['role'],
+                ClinicRoles::label($user['role']) === $user['role'] ? $user['role'] : ClinicRoles::label($user['role'])." ({$user['role']})",
                 $user['password'] ?? '(sin cambios)',
             ], $this->users()),
         );
