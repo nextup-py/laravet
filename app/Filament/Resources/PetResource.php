@@ -6,6 +6,7 @@ use App\Enums\PetGender;
 use App\Enums\PetReproductionStatus;
 use App\Enums\PetSize;
 use App\Enums\PetSpecies;
+use App\Filament\Concerns\OpensViewFirst;
 use App\Filament\Resources\PetResource\Pages;
 use App\Filament\Resources\PetResource\RelationManagers;
 use App\Models\Owner;
@@ -24,6 +25,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class PetResource extends Resource
 {
+    use OpensViewFirst;
+
     protected static ?string $model = Pet::class;
 
     protected static ?string $slug = 'mascotas';

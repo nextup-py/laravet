@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\PetSpecies;
 use App\Enums\TestStatus;
 use App\Filament\Concerns\FocusesOnOwnRecords;
+use App\Filament\Concerns\OpensViewFirst;
 use App\Filament\Resources\TestResource\Pages;
 use App\Http\Controllers\TestResultController;
 use App\Models\Pet;
@@ -29,7 +30,7 @@ use Illuminate\Support\HtmlString;
  */
 class TestResource extends Resource
 {
-    use FocusesOnOwnRecords;
+    use FocusesOnOwnRecords, OpensViewFirst;
 
     protected static ?string $model = Test::class;
 

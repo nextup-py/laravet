@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Enums\OwnerGender;
+use App\Filament\Concerns\OpensViewFirst;
 use App\Filament\Resources\OwnerResource\Pages;
 use App\Filament\Resources\OwnerResource\RelationManagers;
 use App\Models\City;
@@ -26,6 +27,8 @@ use Illuminate\Support\Collection;
  */
 class OwnerResource extends Resource
 {
+    use OpensViewFirst;
+
     protected static ?string $model = Owner::class;
 
     protected static ?string $slug = 'propietarios';

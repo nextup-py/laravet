@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\PetSpecies;
 use App\Enums\VaccinationStatus;
+use App\Filament\Concerns\OpensViewFirst;
 use App\Filament\Resources\VaccinationResource\Pages;
 use App\Models\Vaccination;
 use App\Settings\ClinicSettings;
@@ -25,6 +26,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class VaccinationResource extends Resource
 {
+    use OpensViewFirst;
+
     protected static ?string $model = Vaccination::class;
 
     protected static ?string $slug = 'vacunaciones';

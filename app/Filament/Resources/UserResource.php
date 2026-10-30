@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Concerns\ClinicRoles;
+use App\Filament\Concerns\OpensViewFirst;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\City;
@@ -32,6 +33,8 @@ use Spatie\Permission\Models\Role;
  */
 class UserResource extends Resource
 {
+    use OpensViewFirst;
+
     protected static ?string $model = User::class;
 
     protected static ?string $slug = 'usuarios';
