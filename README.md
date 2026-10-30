@@ -59,7 +59,7 @@ El `.env.example` está comentado y es suficiente para desarrollo con SQLite. Lo
 |----------|----------------|
 | `APP_ENV` | `local`, `staging` o `production`. Los datos demo solo se siembran en `local` y `staging`. |
 | `DB_CONNECTION` y `DB_*` | SQLite por defecto; para MySQL descomenta el bloque del archivo. |
-| `QUEUE_CONNECTION`, `CACHE_STORE`, `SESSION_DRIVER` | `database` (igual que producción). Con la cola en `database` hace falta un worker: `composer run dev` ya lo levanta. |
+| `QUEUE_CONNECTION`, `CACHE_STORE`, `SESSION_DRIVER` | Igual que producción: cola y caché en `database`, sesiones en archivos (`file`). Con la cola en `database` hace falta un worker: `composer run dev` ya lo levanta. |
 | `MAIL_MAILER` | `log` en desarrollo (los correos quedan en `storage/logs/laravel.log`); `resend` en producción con `RESEND_API_KEY`. |
 | `MAIL_FROM_ADDRESS`, `MAIL_ALLOWED_FROM_DOMAINS` | Remitente y dominios verificados en el proveedor de correo; un dominio sin verificar hace fallar los envíos. |
 | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` | IA del diagnóstico asistido (opcional). Se obtiene en [console.anthropic.com](https://console.anthropic.com). |
@@ -120,6 +120,19 @@ Además de las variables de la tabla anterior (`APP_ENV=production`, `APP_DEBUG=
 - **Un worker de la cola**: `php artisan queue:work`, normalmente bajo un supervisor, para que salgan los correos y avisos.
 
 El despliegue es el workflow manual `.github/workflows/deploy.yml` (corre los tests, ejecuta las migraciones por SSH, comprueba la salud y crea el tag `prod-AAAA-MM-DD_HHMM`). Las migraciones corren solas en cada despliegue; **el despliegue no ejecuta seeders**, por eso todo cambio de permisos o de datos de referencia va en una migración idempotente. Los detalles están en [CLAUDE.md](CLAUDE.md).
+
+### Cambiar el `.env` en el servidor
+
+En producción la configuración queda en caché (el despliegue la cachea), así que **editar el `.env` no cambia nada hasta regenerarla**. El procedimiento seguro:
+
+```bash
+cp -p .env ".env.bak-$(date +%F-%H%M)"      # copia de seguridad (contiene secretos: bórrala cuando termines)
+nano .env                                    # editar solo lo necesario
+php artisan config:cache                     # aplicar los cambios
+php artisan about --only=environment,cache,drivers   # comprobar entorno y controladores
+```
+
+Luego revisa **Ayuda → Estado del sistema** en el panel (cola, programador y correo). Los procesos de larga duración, como el worker de la cola, conservan la configuración anterior hasta que se reinician (`php artisan queue:restart`, si algo los vuelve a lanzar). Para revertir: restaurar la copia y ejecutar `php artisan config:cache`.
 
 ## 📁 Estructura del proyecto
 
