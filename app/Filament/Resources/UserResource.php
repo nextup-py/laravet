@@ -217,10 +217,14 @@ class UserResource extends Resource
                     ->copyMessage('Correo copiado')
                     ->sortable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('phone')
+                    ->label('Teléfono')
+                    ->placeholder('—')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('roles.name')
                     ->label('Rol')
                     ->badge()
-                    ->formatStateUsing(fn (?string $state): string => self::roleOptions()[$state] ?? $state ?? '—'),
+                    ->formatStateUsing(fn (?string $state): string => $state === null ? '—' : ClinicRoles::label($state)),
                 Tables\Columns\TextColumn::make('city.name')
                     ->label('Ciudad')
                     ->placeholder('—')
@@ -229,22 +233,26 @@ class UserResource extends Resource
                     ->label('Consultas')
                     ->counts('consultations')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('surgeries_count')
                     ->label('Cirugías')
                     ->counts('surgeries')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('vaccinations_count')
                     ->label('Vacunaciones')
                     ->counts('vaccinations')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('tests_count')
                     ->label('Pruebas')
                     ->counts('tests')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
                     ->searchable()

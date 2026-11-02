@@ -7,6 +7,9 @@ use Spatie\LaravelSettings\Settings;
 
 class ClinicSettings extends Settings
 {
+    /** Se vuelve true cuando ya se comprobó que existe la tabla `settings`. */
+    private static bool $settingsTableExists = false;
+
     /** Textos por defecto de los recordatorios; admiten los marcadores de `ReminderMessage::PLACEHOLDERS`. */
     public const DEFAULT_REMINDER_EMAIL = 'La vacuna {vacuna} de {mascota} {estado} el {fecha}. Mantenerla al día protege a {mascota} de enfermedades graves. Escríbenos por WhatsApp o responde este correo y te agendamos un turno.';
 
@@ -128,9 +131,12 @@ class ClinicSettings extends Settings
     public static function tryGet(): ?self
     {
         try {
-            if (! Schema::hasTable('settings')) {
+            // Una vez comprobado que la tabla existe no se vuelve a consultar information_schema en el proceso.
+            if (! self::$settingsTableExists && ! Schema::hasTable('settings')) {
                 return null;
             }
+
+            self::$settingsTableExists = true;
 
             // Spatie carga los valores de forma perezosa: se fuerza acá para que un
             // fallo (propiedades sin migrar) se capture y no explote al leer la primera.

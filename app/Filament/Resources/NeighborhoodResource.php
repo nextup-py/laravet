@@ -109,17 +109,27 @@ class NeighborhoodResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('city.department.name')
                     ->label('Departamento')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderBy(
+                        Department::query()
+                            ->select('departments.name')
+                            ->join('cities', 'cities.department_id', '=', 'departments.id')
+                            ->whereColumn('cities.id', 'neighborhoods.city_id')
+                            ->limit(1),
+                        $direction
+                    )),
                 Tables\Columns\TextColumn::make('owners_count')
                     ->label('Propietarios')
                     ->counts('owners')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('users_count')
                     ->label('Usuarios')
                     ->counts('users')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
                     ->numeric()
@@ -137,7 +147,9 @@ class NeighborhoodResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->defaultSort('name')
+            ->defaultSort(fn (Builder $query): Builder => $query
+                ->orderBy(City::query()->select('name')->whereColumn('cities.id', 'neighborhoods.city_id')->limit(1))
+                ->orderBy('name'))
             ->filters([
                 Tables\Filters\Filter::make('ubicacion')
                     ->form([

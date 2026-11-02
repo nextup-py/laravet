@@ -194,7 +194,9 @@ class VaccinationResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->withRenewedFlag())
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                ->withRenewedFlag()
+                ->when(OwnerResource::canViewAny(), fn (Builder $q) => $q->with('pet.owner')))
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')

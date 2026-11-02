@@ -11,11 +11,17 @@ permission: view_any_user
 
 En **Configuración → Usuarios** se crean las cuentas del personal y se les asigna un rol. Al crear un usuario se define su contraseña; el usuario puede cambiarla desde su perfil.
 
+La lista muestra nombre, correo, teléfono, rol y ciudad. Los contadores de consultas, cirugías, vacunaciones y pruebas de cada usuario vienen ocultos: actívalos desde el selector de columnas de la tabla.
+
 Protecciones:
 
 - No puedes cambiar **tu propio rol** ni eliminar tu propio usuario.
 - No se puede quitar ni eliminar al **único administrador**.
 - Un usuario con registros clínicos no se puede eliminar, porque se perderían sus consultas, vacunas, cirugías y pruebas.
+
+## Catálogos geográficos
+
+En **Catálogos** están los departamentos, las ciudades y los barrios que se usan en los domicilios. Los barrios salen ordenados por ciudad y luego por nombre, y también puedes ordenarlos por departamento. Las columnas *Propietarios* y *Usuarios* (cuántos usan cada elemento) vienen ocultas; el filtro **Uso** sigue disponible para encontrar lo que está en uso o sin uso.
 
 ## Roles y permisos
 
