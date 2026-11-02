@@ -17,6 +17,7 @@ class VaccinationSeeder extends Seeder
 
         // Fechas relativas a hoy, así el demo siempre muestra los cuatro estados:
         // vencida (próxima < 0), por vencer (0 a 7 días), al día (> 7) y renovada (hay una aplicación más reciente).
+        // Una con días_hasta_próxima en null es de dosis única (sin refuerzo): queda Al día y no genera avisos.
         // [pet_index, vacuna, días_desde_aplicación, días_hasta_próxima, lote, fabricante, observación]
         $vaccinations = [
             [0,  'Séptuple',        120, 245, 'L2401PY',   'Zoetis',               'Primera dosis del año. Paciente en buen estado general.'],
@@ -43,6 +44,7 @@ class VaccinationSeeder extends Seeder
             [13, 'Triple Felina',    15,   6, 'TF2404PY',  'Zoetis',               'Primera dosis (gatita de 3 meses). Segunda dosis próxima.'],
             [14, 'Triple Felina',   290,  75, 'TF2401PY',  'Boehringer Ingelheim', null],
             [14, 'Leucemia Felina', 290,  75, 'LF2401PY',  'MSD Animal Health',    'Se vacuna contra Leucemia por vivir con otros gatos.'],
+            [5,  'Antirrábica',      40, null, 'R2405PY',  'Zoetis',               'Dosis única, sin refuerzo.'],
         ];
 
         foreach ($vaccinations as $i => [$petIdx, $vaccine, $appDaysAgo, $nextInDays, $batch, $manufacturer, $observation]) {
@@ -50,7 +52,7 @@ class VaccinationSeeder extends Seeder
 
             Vaccination::updateOrCreate(['pet_id' => $pet->id, 'vaccine' => $vaccine, 'batch' => $batch], [
                 'application_date' => now()->subDays($appDaysAgo)->toDateString(),
-                'next_application' => now()->addDays($nextInDays)->toDateString(),
+                'next_application' => $nextInDays === null ? null : now()->addDays($nextInDays)->toDateString(),
                 'manufacturer' => $manufacturer,
                 'observation' => $observation,
                 'user_id' => $vets[$i % $vets->count()]->id,

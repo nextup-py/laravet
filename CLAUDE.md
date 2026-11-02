@@ -190,8 +190,8 @@ patrón `ProductionSeeder`/`DemoSeeder`:
 |--------|-----------|
 | `OwnerSeeder` | 10 propietarios con CI, teléfono y dirección paraguayos, en Luque y San Lorenzo con un barrio real de su ciudad (por nombre exacto) |
 | `PetSeeder` | 15 mascotas (10 caninos, 5 felinos) con razas y datos reales; cachorros y gatitos con edad en meses relativa a hoy para que concuerden con las notas |
-| `ConsultationSeeder` | 12 consultas con casos clínicos veterinarios reales |
-| `VaccinationSeeder` | 24 registros (Séptuple, Antirrábica, Triple Felina, Leucemia Felina), con casos vencidos, por vencer, al día y renovada |
+| `ConsultationSeeder` | 12 consultas con casos clínicos veterinarios reales (6 con peso y temperatura) |
+| `VaccinationSeeder` | 25 registros (Séptuple, Antirrábica, Triple Felina, Leucemia Felina), con casos vencidos, por vencer, al día, renovada y una de dosis única sin refuerzo |
 | `SurgerySeeder` | 8 cirugías (castraciones, OVH, suturas, extracción dental), una de hoy y una programada |
 | `TestSeeder` | 9 exámenes (hemograma, bioquímica, ELISA, urinálisis, radiografía), 6 con resultado y 3 pendientes |
 
