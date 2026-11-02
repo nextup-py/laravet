@@ -116,3 +116,69 @@ it('el repositorio trae una imagen para cada especie y raza de las mascotas demo
 
     expect($faltantes)->toBe([]);
 });
+
+it('con --all asigna foto a cualquier mascota sin foto cuya especie y raza tengan imagen', function () {
+    demoImage('canino-labrador-retriever');
+    $otherOwner = Owner::factory()->create();
+    $ajena = Pet::factory()->create(['owner_id' => $otherOwner->id, 'species' => 'Canino', 'breed' => 'Labrador Retriever', 'image' => null]);
+    $sinImagen = Pet::factory()->create(['owner_id' => $otherOwner->id, 'species' => 'Canino', 'breed' => 'Raza Inexistente', 'image' => null]);
+    $conFoto = Pet::factory()->create(['owner_id' => $otherOwner->id, 'species' => 'Canino', 'breed' => 'Labrador Retriever', 'image' => 'mia.jpg']);
+
+    expect(DemoPetPhotos::apply()['assigned'])->toBe(1)
+        ->and($ajena->fresh()->image)->toBeNull();
+
+    $result = DemoPetPhotos::apply(all: true);
+
+    expect($result['assigned'])->toBe(1)
+        ->and($result['missing_images'])->toContain(DemoPetPhotos::slug('Canino', 'Raza Inexistente'))
+        ->and($ajena->fresh()->image)->toBe('demo-pets/canino-labrador-retriever.jpg')
+        ->and($sinImagen->fresh()->image)->toBeNull()
+        ->and($conFoto->fresh()->image)->toBe('mia.jpg');
+});
+
+it('una raza con variantes reparte las fotos de forma estable según el id de la mascota', function () {
+    demoImage('canino-srd');
+    demoImage('canino-srd-2');
+    demoImage('canino-srd-3');
+    $owner = Owner::factory()->create();
+    $pets = Pet::factory()->count(6)->create(['owner_id' => $owner->id, 'species' => 'Canino', 'breed' => 'SRD', 'image' => null]);
+
+    DemoPetPhotos::apply(all: true);
+    $primera = $pets->map(fn (Pet $pet): string => $pet->fresh()->image)->all();
+
+    expect(array_unique($primera))->toHaveCount(3);
+
+    DemoPetPhotos::apply(overwrite: true, all: true);
+
+    expect($pets->map(fn (Pet $pet): string => $pet->fresh()->image)->all())->toBe($primera);
+});
+
+it('el comando con --all en simulación resume por raza y no escribe nada', function () {
+    demoImage('canino-labrador-retriever');
+    $this->toby->update(['image' => null]);
+
+    $this->artisan('laravet:demo-photos', ['--all' => true, '--dry-run' => true])
+        ->expectsOutputToContain('canino-labrador-retriever')
+        ->assertSuccessful();
+
+    expect($this->toby->fresh()->image)->toBeNull();
+});
+
+it('hay imagen para todas las razas que generan los scripts del demo', function () {
+    DemoPetPhotos::$sourcePath = null;
+
+    $razas = [
+        'Canino' => ['SRD', 'Labrador Retriever', 'Pastor Alemán', 'Poodle', 'Chihuahua', 'Salchicha', 'Bulldog Francés', 'Beagle', 'Rottweiler', 'Cocker Spaniel', 'Schnauzer', 'Pitbull', 'Boxer', 'Yorkshire Terrier', 'Shih Tzu', 'Golden Retriever', 'Pastor Belga', 'Doberman'],
+        'Felino' => ['SRD', 'Siamés', 'Persa', 'Angora', 'Maine Coon', 'Bengalí'],
+        'Roedor' => ['Conejo Mini Lop', 'Conejo Cabeza de León', 'Cobayo', 'Hámster Sirio'],
+        'Ave' => ['Loro Hablador (Amazona)', 'Cotorra', 'Canario'],
+    ];
+
+    $faltantes = collect($razas)
+        ->flatMap(fn (array $breeds, string $species): array => array_map(fn (string $breed): string => DemoPetPhotos::slug($species, $breed), $breeds))
+        ->reject(fn (string $slug): bool => glob(database_path("seeders/images/pets/{$slug}*.jpg")) !== [])
+        ->values()
+        ->all();
+
+    expect($faltantes)->toBe([]);
+});
