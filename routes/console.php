@@ -25,6 +25,12 @@ Schedule::command('send:vaccination-notifications')
     ->timezone($clinic?->timezone ?? 'America/Asuncion')
     ->withoutOverlapping();
 
+// Cirugías de castración o esterilización programadas que llegaron: pasan la mascota a «Castrado/Esterilizado».
+Schedule::command('pets:sync-reproduction')
+    ->dailyAt('00:30')
+    ->timezone($clinic?->timezone ?? 'America/Asuncion')
+    ->withoutOverlapping();
+
 // Avisos al personal (campanita y correo según las preferencias de cada usuario),
 // a primera hora en la zona horaria de la clínica.
 Schedule::command('send:staff-alerts')

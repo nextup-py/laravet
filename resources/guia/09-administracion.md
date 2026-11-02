@@ -34,7 +34,7 @@ En **Configuración → Datos de la clínica** (solo administradores) hay cuatro
 - **General**: nombre, nombre corto, zona horaria, color, logo, contacto y datos fiscales. El **nombre** aparece como remitente de los correos del sistema, y el **email** es la casilla a la que llegan las respuestas de los propietarios (es obligatorio mientras los recordatorios estén activos). La **dirección de envío** es obligatoria y se puede cambiar por otra del mismo dominio verificado, por ejemplo una de «no responder». El **logo**, el **color**, el teléfono, el WhatsApp, la dirección, el horario, las redes y la web también aparecen en los correos: el logo y el color en el encabezado y el botón, y el resto en el pie. El **correo de soporte del sistema** es obligatorio y es el que todo el personal ve en *Ayuda → Soporte*.
 - **Recordatorios**: si se envían, cuántos días antes y después del vencimiento, a qué hora y con qué texto.
 - **Documentos PDF**: pie de página, firma o sello y texto legal.
-- **Listas**: vacunas, fabricantes, tipos de cirugía y tipos de prueba que aparecen en los formularios.
+- **Listas**: vacunas, fabricantes, tipos de cirugía y tipos de prueba que aparecen en los formularios, y los **límites de peso por especie** con los que el sistema propone el tamaño de una mascota (hasta cuántos kg es Diminuto, Pequeño, Mediano y Grande; por encima es Gigante). Una especie que no figura no propone tamaño; por defecto solo vienen los caninos.
 
 ## Registro de exportaciones
 

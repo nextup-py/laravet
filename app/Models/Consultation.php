@@ -4,10 +4,13 @@ namespace App\Models;
 
 use App\Enums\AiUrgencyLevel;
 use App\Enums\AiUsageStatus;
+use App\Observers\ConsultationObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[ObservedBy(ConsultationObserver::class)]
 class Consultation extends Model
 {
     use HasFactory;

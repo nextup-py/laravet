@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PetResource\RelationManagers;
 
 use App\Filament\Resources\SurgeryResource;
 use App\Models\Surgery;
+use App\Support\PetReproductionSync;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -88,7 +89,8 @@ class SurgeriesRelationManager extends RelationManager
                         $data['user_id'] = Auth::id();
 
                         return $data;
-                    }),
+                    })
+                    ->after(fn (Surgery $record) => PetReproductionSync::notifyIfChanged($record)),
             ])
             ->recordAction('view')
             ->actions([
@@ -101,6 +103,7 @@ class SurgeriesRelationManager extends RelationManager
                         ->url(fn (Surgery $record): string => SurgeryResource::getUrl('view', ['record' => $record])),
                     Tables\Actions\EditAction::make()
                         ->modalWidth('2xl')
+                        ->after(fn (Surgery $record) => PetReproductionSync::notifyIfChanged($record))
                         ->extraModalFooterActions([
                             Tables\Actions\DeleteAction::make()
                                 ->cancelParentActions(),

@@ -6,12 +6,15 @@ use App\Enums\PetGender;
 use App\Enums\PetReproductionStatus;
 use App\Enums\PetSize;
 use App\Enums\PetSpecies;
+use App\Observers\PetObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[ObservedBy(PetObserver::class)]
 class Pet extends Model
 {
     use HasFactory;
@@ -87,6 +90,27 @@ class Pet extends Model
 
             return 'data:image/svg+xml;base64,'.base64_encode($svg);
         });
+    }
+
+    /**
+     * Historial de pesajes (el más reciente es el peso actual).
+     */
+    public function weights(): HasMany
+    {
+        return $this->hasMany(PetWeight::class);
+    }
+
+    /**
+     * Deja `weight` igual al pesaje más reciente (fecha y, a igual fecha, el último cargado). Sin
+     * eventos: no es una edición de la ficha. Sin pesajes, conserva el valor que tiene.
+     */
+    public function refreshCurrentWeight(): void
+    {
+        $latest = $this->weights()->orderByDesc('weighed_at')->orderByDesc('id')->first();
+
+        if ($latest && (float) $latest->weight !== (float) $this->weight) {
+            $this->forceFill(['weight' => $latest->weight])->saveQuietly();
+        }
     }
 
     /**

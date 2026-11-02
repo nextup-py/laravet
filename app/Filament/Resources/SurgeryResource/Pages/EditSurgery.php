@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SurgeryResource\Pages;
 
 use App\Filament\Resources\SurgeryResource;
+use App\Support\PetReproductionSync;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -16,6 +17,11 @@ class EditSurgery extends EditRecord
             Actions\ViewAction::make(),
             Actions\DeleteAction::make(),
         ];
+    }
+
+    protected function afterSave(): void
+    {
+        PetReproductionSync::notifyIfChanged($this->record);
     }
 
     protected function getRedirectUrl(): string

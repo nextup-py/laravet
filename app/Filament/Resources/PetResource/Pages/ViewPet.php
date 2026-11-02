@@ -2,9 +2,13 @@
 
 namespace App\Filament\Resources\PetResource\Pages;
 
+use App\Filament\Actions\RegisterWeight;
+use App\Filament\Resources\ConsultationResource;
 use App\Filament\Resources\OwnerResource;
 use App\Filament\Resources\PetResource;
+use App\Filament\Resources\VaccinationResource;
 use App\Models\Pet;
+use App\Models\PetWeight;
 use Filament\Actions;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section;
@@ -48,6 +52,7 @@ class ViewPet extends ViewRecord
                 ->icon('heroicon-o-document-arrow-down')
                 ->color('success')
                 ->button(),
+            RegisterWeight::forPage(),
             Actions\EditAction::make(),
         ];
     }
@@ -90,6 +95,31 @@ class ViewPet extends ViewRecord
                             ->label('Imagen')
                             ->defaultImageUrl(fn (Pet $record): string => $record->initials_avatar_url)
                             ->columnSpanFull(),
+                    ]),
+
+                Section::make('Seguimiento')
+                    ->columns(3)
+                    ->schema([
+                        TextEntry::make('last_consultation')
+                            ->label('Última consulta')
+                            ->state(fn (Pet $record): ?string => $record->consultations()->max('consultation_date'))
+                            ->date('d/m/Y')
+                            ->placeholder('Sin consultas')
+                            ->visible(fn (): bool => ConsultationResource::canViewAny()),
+                        TextEntry::make('next_vaccine')
+                            ->label('Próxima vacuna')
+                            ->state(fn (Pet $record): ?string => $record->vaccinations()->current()->whereNotNull('next_application')->min('next_application'))
+                            ->date('d/m/Y')
+                            ->placeholder('—')
+                            ->visible(fn (): bool => VaccinationResource::canViewAny()),
+                        TextEntry::make('weight_history')
+                            ->label('Últimos pesajes')
+                            ->state(fn (Pet $record): array => $record->weights()
+                                ->orderByDesc('weighed_at')->orderByDesc('id')->limit(5)->get()
+                                ->map(fn (PetWeight $weight): string => $weight->weighed_at->format('d/m/Y').' · '.rtrim(rtrim(number_format((float) $weight->weight, 2, ',', ''), '0'), ',').' kg')
+                                ->all())
+                            ->listWithLineBreaks()
+                            ->placeholder('—'),
                     ]),
             ]);
     }

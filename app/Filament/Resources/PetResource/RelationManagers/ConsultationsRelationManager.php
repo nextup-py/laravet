@@ -6,6 +6,7 @@ use App\Enums\AiUsageStatus;
 use App\Filament\Resources\ConsultationResource;
 use App\Models\Consultation;
 use App\Services\AIDiagnosticService;
+use App\Support\PetSizeSuggestion;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
@@ -293,7 +294,8 @@ class ConsultationsRelationManager extends RelationManager
                         $data['user_id'] = Auth::id();
 
                         return $data;
-                    }),
+                    })
+                    ->after(fn (Consultation $record) => filled($record->weight) ? PetSizeSuggestion::notifyIfDiffers($record->pet) : null),
             ])
             ->recordAction('view')
             ->actions([
@@ -306,6 +308,7 @@ class ConsultationsRelationManager extends RelationManager
                         ->url(fn (Consultation $record): string => ConsultationResource::getUrl('view', ['record' => $record])),
                     Tables\Actions\EditAction::make()
                         ->modalWidth('2xl')
+                        ->after(fn (Consultation $record) => filled($record->weight) ? PetSizeSuggestion::notifyIfDiffers($record->pet) : null)
                         ->extraModalFooterActions([
                             Tables\Actions\DeleteAction::make()
                                 ->cancelParentActions(),
