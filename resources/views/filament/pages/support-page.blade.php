@@ -25,7 +25,7 @@
             </ul>
         </div>
 
-        <div class="mt-6 flex flex-wrap gap-3" x-data="{ copied: false }">
+        <div class="mt-6 flex flex-wrap gap-3" x-data="{ copied: false, email: @js($this->getSupportEmail()) }">
             <x-filament::button tag="a" :href="$this->getMailtoUrl()" icon="heroicon-o-envelope" color="gray">
                 Escribir a soporte
             </x-filament::button>
@@ -33,7 +33,7 @@
                 type="button"
                 color="gray"
                 icon="heroicon-o-clipboard-document"
-                x-on:click="navigator.clipboard.writeText(@js($this->getSupportEmail())); copied = true; setTimeout(() => copied = false, 2000)"
+                x-on:click="navigator.clipboard.writeText(email); copied = true; setTimeout(() => copied = false, 2000)"
             >
                 <span x-show="! copied">Copiar correo</span>
                 <span x-show="copied" x-cloak>¡Copiado!</span>
