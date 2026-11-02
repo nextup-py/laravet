@@ -4,13 +4,18 @@ namespace App\Services;
 
 use App\Enums\AiUrgencyLevel;
 use App\Models\Pet;
+use App\Support\Measure;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class AIDiagnosticService
 {
-    public function suggest(Pet $pet, string $anamnesis): array
+    /**
+     * @param  float|string|null  $weight  Peso medido en esta consulta (kg); sin él se usa el peso actual de la mascota.
+     * @param  float|string|null  $temperature  Temperatura medida en esta consulta (°C).
+     */
+    public function suggest(Pet $pet, string $anamnesis, float|string|null $weight = null, float|string|null $temperature = null): array
     {
         if (blank(config('services.anthropic.key'))) {
             throw new RuntimeException('ANTHROPIC_API_KEY no configurada.');
@@ -19,7 +24,11 @@ class AIDiagnosticService
         $species = $pet->species->getLabel();
         $gender = $pet->gender->getLabel();
         $reproduction = $pet->reproduction->getLabel();
-        $userPrompt = "Paciente: {$species} | Raza: {$pet->breed} | Edad: {$pet->age} | Peso: {$pet->weight}kg\n"
+        $weightLine = is_numeric($weight)
+            ? 'Peso: '.Measure::number($weight).' kg (medido en esta consulta)'
+            : 'Peso: '.Measure::number($pet->weight).' kg';
+        $temperatureLine = is_numeric($temperature) ? ' | Temperatura: '.Measure::number($temperature, 1).' °C (medida en esta consulta)' : '';
+        $userPrompt = "Paciente: {$species} | Raza: {$pet->breed} | Edad: {$pet->age} | {$weightLine}{$temperatureLine}\n"
             ."Género: {$gender} | Reproducción: {$reproduction}\n\n"
             ."Anamnesis:\n{$anamnesis}";
 

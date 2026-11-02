@@ -7,6 +7,7 @@ use App\Models\Surgery;
 use App\Models\Test;
 use App\Models\User;
 use App\Models\Vaccination;
+use App\Settings\ClinicSettings;
 use Spatie\Permission\Models\Role;
 
 /**
@@ -61,4 +62,26 @@ it('las acciones de PDF abren una pestaña nueva y no piden confirmación', func
     Livewire\Livewire::test(ViewPet::class, ['record' => $pet->getRouteKey()])
         ->assertActionHasUrl('openPetIdCard', route('filament.admin.pdf.pet-id-card', $pet))
         ->assertActionShouldOpenUrlInNewTab('openPetIdCard');
+});
+
+it('la historia clínica muestra peso y temperatura de cada consulta, la fecha de la consulta y la evolución del peso', function () {
+    actingAsRole('admin');
+    $pet = Pet::factory()->create(['weight' => 10]);
+    $pet->weights()->update(['weighed_at' => today()->subMonths(2)->toDateString()]);
+    Consultation::factory()->create([
+        'pet_id' => $pet->id,
+        'consultation_date' => '2026-10-19',
+        'weight' => 12.4,
+        'temperature' => 39.1,
+    ]);
+
+    $pet->load(['consultations.user', 'weights' => fn ($query) => $query->orderByDesc('weighed_at')->orderByDesc('id')]);
+
+    $html = view('pdf.clinical-history', ['pet' => $pet, 'showOwnerData' => true, 'clinic' => app(ClinicSettings::class)])->render();
+
+    expect($html)->toContain('19/10/2026')
+        ->toContain('12,4 kg')
+        ->toContain('39,1 °C')
+        ->toContain('Evolución del peso')
+        ->toContain('Consulta');
 });

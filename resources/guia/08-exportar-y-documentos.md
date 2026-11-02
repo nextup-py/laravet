@@ -20,3 +20,5 @@ Se exportan hasta **5.000 filas**; si hay más, el sistema te pide filtrar antes
 ## Documentos PDF
 
 Los PDF (historia clínica, ficha de la mascota, carnet de vacunación, informe de consulta, certificado de cirugía y reporte de prueba) se abren en una **pestaña nueva** del navegador, desde donde puedes imprimirlos o guardarlos. Llevan el encabezado, el pie, la firma y el texto legal que configuró la clínica.
+
+La **historia clínica** incluye el peso actual, la evolución de los últimos pesajes y, en cada consulta, el peso y la temperatura que se anotaron.

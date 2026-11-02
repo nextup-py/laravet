@@ -10,6 +10,7 @@ use App\Filament\Resources\ConsultationResource\Pages;
 use App\Models\Consultation;
 use App\Models\Pet;
 use App\Services\AIDiagnosticService;
+use App\Support\Measure;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
@@ -263,7 +264,7 @@ class ConsultationResource extends Resource
                                             return;
                                         }
 
-                                        $result = app(AIDiagnosticService::class)->suggest($pet, $get('anamnesis'));
+                                        $result = app(AIDiagnosticService::class)->suggest($pet, $get('anamnesis'), $get('weight'), $get('temperature'));
                                         $set('diagnosis', $result['diagnosis']);
                                         $set('treatment', $result['treatment']);
                                         $set('ai_diagnosis_suggestion', $result['diagnosis']);
@@ -379,13 +380,13 @@ class ConsultationResource extends Resource
                     ->tooltip(fn (Tables\Columns\TextColumn $column): ?string => strlen((string) $column->getState()) > 60 ? $column->getState() : null),
                 Tables\Columns\TextColumn::make('weight')
                     ->label('Peso')
-                    ->suffix(' kg')
+                    ->formatStateUsing(fn (mixed $state): string => Measure::kg($state))
                     ->placeholder('—')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('temperature')
                     ->label('Temperatura')
-                    ->suffix(' °C')
+                    ->formatStateUsing(fn (mixed $state): string => Measure::celsius($state))
                     ->placeholder('—')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

@@ -21,11 +21,11 @@ Protecciones:
 
 ## Catálogos geográficos
 
-En **Catálogos** están los departamentos, las ciudades y los barrios que se usan en los domicilios. Los barrios salen ordenados por ciudad y luego por nombre, y también puedes ordenarlos por departamento. Las columnas *Propietarios* y *Usuarios* (cuántos usan cada elemento) vienen ocultas; el filtro **Uso** sigue disponible para encontrar lo que está en uso o sin uso.
+En **Catálogos** están los departamentos, las ciudades y los barrios que se usan en los domicilios. Asunción figura en el departamento **Capital** (el Distrito Capital), no en Central. Los barrios salen ordenados por ciudad y luego por nombre, y también puedes ordenarlos por departamento. Las columnas *Propietarios* y *Usuarios* (cuántos usan cada elemento) vienen ocultas; el filtro **Uso** sigue disponible para encontrar lo que está en uso o sin uso.
 
 ## Roles y permisos
 
-En **Configuración → Roles y permisos** el administrador crea roles y marca qué puede hacer cada uno (ver, crear, editar, eliminar cada tipo de registro, usar la IA, exportar). Los roles base (administrador, veterinario y asistente) no se pueden eliminar ni cambiar de nombre (sí puedes editar sus permisos), y tampoco se eliminan los roles que tienen usuarios asignados.
+En **Configuración → Roles y permisos** el administrador crea roles y marca qué puede hacer cada uno (ver, crear, editar, eliminar cada tipo de registro, usar la IA, exportar). En la ficha de un rol ves quién lo tiene; la del administrador no lista casillas porque tiene todos los permisos del sistema. Los roles base (administrador, veterinario y asistente) no se pueden eliminar ni cambiar de nombre (sí puedes editar sus permisos), y tampoco se eliminan los roles que tienen usuarios asignados.
 
 ## Datos de la clínica
 

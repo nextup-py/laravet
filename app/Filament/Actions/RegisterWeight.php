@@ -7,6 +7,7 @@ use App\Enums\PetWeightSource;
 use App\Filament\Resources\PetResource;
 use App\Models\Pet;
 use App\Models\PetWeight;
+use App\Support\Measure;
 use App\Support\PetSizeSuggestion;
 use Filament\Actions\Action as PageAction;
 use Filament\Forms;
@@ -58,13 +59,13 @@ final class RegisterWeight
                     ->inputMode('decimal')
                     ->minValue(0.1)
                     ->maxValue(150)
-                    ->helperText("Peso actual: {$record->weight} kg.")
+                    ->helperText('Peso actual: '.Measure::kg($record->weight).'.')
                     ->live(onBlur: true)
                     ->required(),
                 Forms\Components\Placeholder::make('sizeHint')
                     ->hiddenLabel()
                     ->visible(fn (Get $get): bool => self::suggestedSize($record, $get) !== null)
-                    ->content(fn (Get $get): string => 'Con '.$get('weight').' kg se propone el tamaño «'
+                    ->content(fn (Get $get): string => 'Con '.Measure::kg($get('weight')).' se propone el tamaño «'
                         .self::suggestedSize($record, $get)?->getLabel().'» (hoy: «'.$record->size->getLabel().'»).'),
                 Forms\Components\Toggle::make('update_size')
                     ->label(fn (Get $get): string => 'Cambiar el tamaño a «'.self::suggestedSize($record, $get)?->getLabel().'»')
@@ -88,7 +89,7 @@ final class RegisterWeight
 
                 Notification::make()
                     ->title('Peso registrado')
-                    ->body("{$record->name} pesa {$record->weight} kg.")
+                    ->body("{$record->name} pesa ".Measure::kg($record->weight).'.')
                     ->success()
                     ->send();
             });

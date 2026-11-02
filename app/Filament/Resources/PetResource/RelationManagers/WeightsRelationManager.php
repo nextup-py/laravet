@@ -6,6 +6,7 @@ use App\Enums\PetWeightSource;
 use App\Filament\Resources\ConsultationResource;
 use App\Filament\Resources\PetResource;
 use App\Models\PetWeight;
+use App\Support\Measure;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -75,8 +76,7 @@ class WeightsRelationManager extends RelationManager
                     ->sortable(),
                 Tables\Columns\TextColumn::make('weight')
                     ->label('Peso')
-                    ->suffix(' kg')
-                    ->numeric(decimalPlaces: 2, decimalSeparator: ',', thousandsSeparator: '.')
+                    ->formatStateUsing(fn (mixed $state): string => Measure::kg($state))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('source')
                     ->label('Origen')

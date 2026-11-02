@@ -143,7 +143,7 @@ class ConsultationsRelationManager extends RelationManager
                                         }
 
                                         $pet = $livewire->getOwnerRecord();
-                                        $result = app(AIDiagnosticService::class)->suggest($pet, $get('anamnesis'));
+                                        $result = app(AIDiagnosticService::class)->suggest($pet, $get('anamnesis'), $get('weight'), $get('temperature'));
                                         $set('diagnosis', $result['diagnosis']);
                                         $set('treatment', $result['treatment']);
                                         $set('ai_diagnosis_suggestion', $result['diagnosis']);

@@ -25,8 +25,8 @@ class UpcomingVaccinationsWidget extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
-            ->heading('Vacunas próximas a vencer')
-            ->emptyStateHeading('No hay vacunas próximas a vencer')
+            ->heading('Vacunas vencidas o por vencer')
+            ->emptyStateHeading('No hay vacunas vencidas ni por vencer')
             ->emptyStateIcon('heroicon-o-shield-check')
             ->query(
                 Vaccination::query()
@@ -47,7 +47,7 @@ class UpcomingVaccinationsWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('vaccine')
                     ->label('Vacuna'),
                 Tables\Columns\TextColumn::make('next_application')
-                    ->label('Próxima aplicación')
+                    ->label('Vence')
                     ->date('d/m/Y')
                     ->color(fn ($state) => match (true) {
                         Carbon::parse($state)->isPast() => 'danger',

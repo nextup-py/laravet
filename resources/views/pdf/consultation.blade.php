@@ -19,13 +19,13 @@
         @if(filled($consultation->weight))
             <tr>
                 <th>Peso</th>
-                <td>{{ $consultation->weight }} kg</td>
+                <td>{{ \App\Support\Measure::kg($consultation->weight) }}</td>
             </tr>
         @endif
         @if(filled($consultation->temperature))
             <tr>
                 <th>Temperatura</th>
-                <td>{{ $consultation->temperature }} °C</td>
+                <td>{{ \App\Support\Measure::celsius($consultation->temperature) }}</td>
             </tr>
         @endif
         <tr>

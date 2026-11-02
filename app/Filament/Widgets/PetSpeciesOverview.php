@@ -56,7 +56,7 @@ class PetSpeciesOverview extends ChartWidget
                 [
                     'label' => 'Mascotas',
                     'data' => $species->pluck('count')->all(),
-                    'backgroundColor' => '#3987e5',
+                    'backgroundColor' => '#f59e0b',
                     'borderRadius' => 4,
                 ],
             ],
@@ -68,6 +68,7 @@ class PetSpeciesOverview extends ChartWidget
     {
         return [
             'indexAxis' => 'y',
+            'aspectRatio' => 1.3,
             'plugins' => [
                 'legend' => ['display' => false],
             ],

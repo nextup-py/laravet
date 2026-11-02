@@ -28,7 +28,7 @@
         </tr>
         <tr>
             <th>Peso</th>
-            <td>{{ $pet->weight }} kg</td>
+            <td>{{ \App\Support\Measure::kg($pet->weight) }}</td>
             <th>Pelaje</th>
             <td>{{ $pet->fur }}</td>
         </tr>
