@@ -62,6 +62,7 @@ function permissionsByRole(): array
 describe('DemoSeeder', function () {
     beforeEach(function () {
         Storage::fake('test-results');
+        Storage::fake('public');
     });
 
     it('siembra los datos demo completos', function () {
@@ -182,6 +183,7 @@ describe('DemoSeeder', function () {
 
     it('usa DEMO_PASSWORD si está definida', function () {
         Storage::fake('test-results');
+        Storage::fake('public');
         config(['app.demo_password' => 'clave-demo-123']);
 
         $this->seed(DemoSeeder::class);
@@ -192,6 +194,7 @@ describe('DemoSeeder', function () {
 
     it('usa password en local y una aleatoria que no se repite en staging', function () {
         Storage::fake('test-results');
+        Storage::fake('public');
 
         $this->seed(DemoSeeder::class);
         $vet = User::where('email', 'maria.gonzalez@mbopivet.com.py')->firstOrFail();
@@ -229,6 +232,7 @@ describe('DemoSeeder', function () {
 describe('DemoVolumeSeeder', function () {
     it('crea la cantidad configurada de mascotas sobre el demo', function () {
         Storage::fake('test-results');
+        Storage::fake('public');
         $this->seed(DemoSeeder::class);
         $base = Pet::count();
         config(['app.demo_volume' => 6]);

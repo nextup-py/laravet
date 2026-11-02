@@ -13,6 +13,7 @@ use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
     Storage::fake('test-results');
+    Storage::fake('public');
 });
 
 it('--demo siembra el demo y muestra la tabla de usuarios', function () {
