@@ -32,7 +32,7 @@ El peso actual de la mascota es siempre el del **pesaje más reciente**. Se actu
 - Con **Registrar peso**, en el menú de la fila de Mascotas o arriba en la ficha, para cuando la mascota solo pasa por la balanza: eliges la fecha y los kilos.
 - Si cambias el peso al editar la mascota, también queda en su historial.
 
-Un pesaje con fecha anterior al último no cambia el peso actual, y si borras la consulta más reciente la mascota vuelve al peso anterior. La ficha muestra los **últimos pesajes**.
+En la pestaña **Pesos** de la ficha ves todo el historial, con el **origen** de cada peso (*Registro* es el que se anotó al registrar la mascota; *Consulta*, *Pesaje* y *Edición* son los medidos o corregidos después). Ahí también puedes **registrar un peso**, y **corregir o eliminar** uno cargado por error (los de una consulta se corrigen en la consulta, y no se puede eliminar el último que queda). Un pesaje con fecha anterior al último no cambia el peso actual, y si borras la consulta más reciente la mascota vuelve al peso anterior. La ficha muestra los **últimos pesajes**.
 
 Si el peso sugiere otro **tamaño**, al registrar el peso aparece un interruptor «Cambiar el tamaño a…» (no cambia solo); al guardar una consulta con peso se muestra un aviso para que lo revises desde Editar mascota. Los límites de cada especie los define el administrador en *Datos de la clínica → Listas*.
 

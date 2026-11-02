@@ -115,8 +115,9 @@ class ConsultationSeeder extends Seeder
             ],
         ];
 
-        // Peso (kg) y temperatura (°C) tomados en la consulta; las que no figuran quedan sin signos vitales (son opcionales).
-        $vitals = [0 => [28.4, 39.1], 1 => [12.7, 38.6], 2 => [31.0, 38.4], 3 => [4.2, 39.8], 4 => [22.5, 38.7], 6 => [3.9, 38.5]];
+        // Peso (proporción del peso actual de la mascota, para que el historial sea coherente) y temperatura (°C)
+        // tomados en la consulta; las que no figuran quedan sin signos vitales (son opcionales).
+        $vitals = [0 => [0.997, 39.1], 1 => [0.99, 38.6], 2 => [0.97, 38.4], 3 => [0.97, 39.8], 4 => [0.98, 38.7], 6 => [0.96, 38.5]];
 
         foreach ($consultations as $i => [$petIdx, $anamnesis, $diagnosis, $treatment, $observation, $daysAgo]) {
             $pet = $pets[$petIdx % $pets->count()];
@@ -127,7 +128,7 @@ class ConsultationSeeder extends Seeder
                 'treatment' => $treatment,
                 'observation' => $observation,
                 'consultation_date' => $date->toDateString(),
-                'weight' => $vitals[$i][0] ?? null,
+                'weight' => isset($vitals[$i]) ? round($pet->weight * $vitals[$i][0], 1) : null,
                 'temperature' => $vitals[$i][1] ?? null,
                 'user_id' => $vets[$i % $vets->count()]->id,
                 'created_at' => $date,

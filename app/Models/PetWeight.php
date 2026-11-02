@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PetWeightSource;
 use App\Observers\PetWeightObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,6 +23,7 @@ class PetWeight extends Model
         'weighed_at', // Fecha del pesaje
         'user_id', // Quién lo registró
         'consultation_id', // Consulta en la que se anotó (null: pesaje suelto)
+        'source', // Origen del pesaje (PetWeightSource)
     ];
 
     protected function casts(): array
@@ -29,6 +31,7 @@ class PetWeight extends Model
         return [
             'weight' => 'decimal:2',
             'weighed_at' => 'date',
+            'source' => PetWeightSource::class,
         ];
     }
 

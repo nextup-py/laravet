@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Enums\PetWeightSource;
 use App\Models\Consultation;
 use App\Models\PetWeight;
 
@@ -26,6 +27,7 @@ class ConsultationObserver
                 'weight' => $consultation->weight,
                 'weighed_at' => ($consultation->consultation_date ?? $consultation->created_at ?? today())->toDateString(),
                 'user_id' => $consultation->user_id,
+                'source' => PetWeightSource::Consultation,
             ],
         );
     }

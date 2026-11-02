@@ -364,6 +364,7 @@ class PetResource extends Resource
             RelationManagers\ConsultationsRelationManager::class,
             RelationManagers\SurgeriesRelationManager::class,
             RelationManagers\TestsRelationManager::class,
+            RelationManagers\WeightsRelationManager::class,
         ];
     }
 

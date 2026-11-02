@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\PetWeightSource;
 use App\Models\Pet;
 use App\Models\PetWeight;
 use App\Models\User;
@@ -22,6 +23,7 @@ class PetWeightFactory extends Factory
             'weighed_at' => today(),
             'user_id' => User::factory(),
             'consultation_id' => null,
+            'source' => PetWeightSource::Weighing,
         ];
     }
 }

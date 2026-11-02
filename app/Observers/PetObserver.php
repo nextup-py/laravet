@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Enums\PetWeightSource;
 use App\Models\Pet;
 use App\Models\PetWeight;
 use Illuminate\Support\Facades\Auth;
@@ -13,23 +14,24 @@ class PetObserver
 {
     public function created(Pet $pet): void
     {
-        $this->recordWeight($pet);
+        $this->recordWeight($pet, PetWeightSource::Registration);
     }
 
     public function updated(Pet $pet): void
     {
         if ($pet->wasChanged('weight')) {
-            $this->recordWeight($pet);
+            $this->recordWeight($pet, PetWeightSource::Edit);
         }
     }
 
-    private function recordWeight(Pet $pet): void
+    private function recordWeight(Pet $pet, PetWeightSource $source): void
     {
         PetWeight::create([
             'pet_id' => $pet->id,
             'weight' => $pet->weight,
             'weighed_at' => today(),
             'user_id' => Auth::id() ?? $pet->user_id,
+            'source' => $source,
         ]);
     }
 }

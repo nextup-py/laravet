@@ -3,6 +3,7 @@
 namespace App\Filament\Actions;
 
 use App\Enums\PetSize;
+use App\Enums\PetWeightSource;
 use App\Filament\Resources\PetResource;
 use App\Models\Pet;
 use App\Models\PetWeight;
@@ -76,6 +77,7 @@ final class RegisterWeight
                     'weight' => $data['weight'],
                     'weighed_at' => $data['weighed_at'],
                     'user_id' => Auth::id(),
+                    'source' => PetWeightSource::Weighing,
                 ]);
 
                 $record->refresh();
