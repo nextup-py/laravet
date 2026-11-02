@@ -257,7 +257,8 @@ class TestResource extends Resource
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Veterinario')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('observation')
                     ->label('Observación')
                     ->limit(50)

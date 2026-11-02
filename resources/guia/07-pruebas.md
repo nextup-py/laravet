@@ -7,6 +7,8 @@ permission: view_any_test
 
 # Pruebas laboratoriales
 
+La lista tiene pestañas **Todos, Pendiente y Con resultado**, con la cantidad de cada una; la columna *Veterinario* viene oculta y se activa desde el selector de columnas.
+
 Puedes registrar una prueba ahora y **cargar el resultado después**:
 
 1. Crea la prueba con su fecha y tipo desde **Pruebas → Nueva prueba**.

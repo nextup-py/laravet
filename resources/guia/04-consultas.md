@@ -13,6 +13,8 @@ permission: view_any_consultation
 2. Completa la fecha, la **anamnesis**, el **diagnóstico** y el **tratamiento**. Si quieres, anota también el **peso** del paciente (entre 0,1 y 150 kg) y su **temperatura** (entre 30 y 45 °C, con un decimal, por ejemplo 38,5): son opcionales.
 3. Guarda. La consulta queda a tu nombre.
 
+En la lista de consultas, el peso y la temperatura vienen ocultos: puedes mostrarlos desde el selector de columnas de la tabla.
+
 ## Asistir con IA
 
 Si tu rol tiene el permiso, el formulario muestra el botón **Asistir con IA**. A partir de los datos de la mascota (especie, raza, edad, peso, género y reproducción) y de la anamnesis que escribiste, propone un diagnóstico y un tratamiento.

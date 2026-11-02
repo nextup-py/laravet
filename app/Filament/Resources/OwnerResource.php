@@ -153,6 +153,7 @@ class OwnerResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort(fn (Builder $query): Builder => $query->orderBy('last_name')->orderBy('first_name'))
             ->columns([
                 Tables\Columns\TextColumn::make('full_name')
                     ->label('Propietario')
@@ -167,7 +168,8 @@ class OwnerResource extends Resource
                 Tables\Columns\TextColumn::make('gender')
                     ->label('Género')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('email')
                     ->label('Correo electrónico')
                     ->icon('heroicon-m-envelope')
@@ -196,7 +198,7 @@ class OwnerResource extends Resource
                     ->label('Ciudad')
                     ->sortable()
                     ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('neighborhood.name')
                     ->label('Barrio')
                     ->sortable()

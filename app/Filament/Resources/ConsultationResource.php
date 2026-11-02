@@ -376,6 +376,18 @@ class ConsultationResource extends Resource
                     ->sortable()
                     ->limit(60)
                     ->tooltip(fn (Tables\Columns\TextColumn $column): ?string => strlen((string) $column->getState()) > 60 ? $column->getState() : null),
+                Tables\Columns\TextColumn::make('weight')
+                    ->label('Peso')
+                    ->suffix(' kg')
+                    ->placeholder('—')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('temperature')
+                    ->label('Temperatura')
+                    ->suffix(' °C')
+                    ->placeholder('—')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\IconColumn::make('ai_suggested_at')
                     ->label('IA')
                     ->boolean()

@@ -20,6 +20,8 @@ Estados:
 
 Si una vacuna es de **dosis única**, deja vacía la **próxima aplicación**: figura como «Sin refuerzo», queda siempre *Al día* y nunca genera avisos.
 
+La lista tiene una pestaña por estado (**Todos, Vencida, Por vencer, Al día y Renovada**), cada una con su cantidad. En la columna *Veterinario*, que viene oculta, puedes ver quién aplicó cada vacuna: actívala desde el selector de columnas de la tabla.
+
 ## La ficha de la vacunación
 
 Al hacer clic en una vacunación ves su ficha con la mascota, la vacuna, las fechas, el estado, el lote, el fabricante y el **veterinario** que la aplicó (con un enlace a su ficha si tu rol puede ver usuarios).

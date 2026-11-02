@@ -28,6 +28,8 @@ En **Documentos PDF** de la ficha generas la historia clínica, la ficha de la m
 
 El menú de cada fila de **Mascotas** ofrece *Nueva consulta*, *Nueva vacunación*, *Nueva cirugía* y *Nueva prueba* con la mascota ya elegida. Solo están para mascotas activas.
 
+Las listas de **Mascotas** y **Propietarios** salen ordenadas por nombre (los propietarios, por apellido). En Propietarios el género viene oculto y se ve la ciudad; puedes cambiar las columnas visibles desde el selector de la tabla.
+
 ## Mascotas activas e inactivas
 
 La lista tiene pestañas **Todos, Activos e Inactivos**. Una mascota con historial clínico no se puede eliminar: se **desactiva** (interruptor *Activo* en la edición) y deja de aparecer en los formularios nuevos, pero su historial se conserva.

@@ -18,3 +18,10 @@ También reordenamos algunos formularios:
 - **Usuarios**: el rol y la contraseña están en una sección «Acceso», separada de los datos personales.
 - **Perfil**: las etiquetas van arriba de cada campo, como en el resto del panel, y el correo se llama «Correo electrónico».
 - **Roles y permisos**: la pantalla muestra solo los permisos que el sistema usa (ver, listar, crear, actualizar y eliminar), sin el campo «Guard», y los nombres de los recursos se escriben con mayúscula solo al inicio.
+
+Y en las listas:
+
+- **Mascotas y Propietarios** salen ordenados por nombre (los propietarios, por apellido), no por orden de registro.
+- **Vacunaciones, Cirugías y Pruebas** tienen pestañas por estado, con la cantidad de cada una. «Todos» sigue mostrando todo.
+- La columna **Veterinario** viene oculta en las listas clínicas; la activas desde el selector de columnas. En Cirugías también viene oculta la observación.
+- **Consultas** tiene columnas opcionales de peso y temperatura, y **Propietarios** muestra la ciudad en lugar del género.
