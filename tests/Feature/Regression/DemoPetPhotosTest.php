@@ -182,3 +182,21 @@ it('hay imagen para todas las razas que generan los scripts del demo', function 
 
     expect($faltantes)->toBe([]);
 });
+
+it('si se reemplaza una imagen del repositorio, actualiza el archivo ya copiado sin cambiar a qué foto apunta la mascota', function () {
+    demoImage('canino-labrador-retriever', 'foto-vieja');
+    DemoPetPhotos::apply();
+
+    expect($this->toby->fresh()->image)->toBe('demo-pets/canino-labrador-retriever.jpg');
+    expect(Storage::disk('public')->get('demo-pets/canino-labrador-retriever.jpg'))->toBe('foto-vieja');
+
+    demoImage('canino-labrador-retriever', 'foto-nueva');
+    $result = DemoPetPhotos::apply();
+
+    expect($result['refreshed'])->toBe(1)
+        ->and($result['assigned'])->toBe(0)
+        ->and($this->toby->fresh()->image)->toBe('demo-pets/canino-labrador-retriever.jpg')
+        ->and(Storage::disk('public')->get('demo-pets/canino-labrador-retriever.jpg'))->toBe('foto-nueva');
+
+    expect(DemoPetPhotos::apply()['refreshed'])->toBe(0);
+});

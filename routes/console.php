@@ -4,7 +4,6 @@ use App\Settings\ClinicSettings;
 use App\Support\SystemInfo;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
@@ -12,7 +11,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote')->hourly();
 
 // Marca de vida del programador: «Ayuda → Estado del sistema» la lee para avisar si el cron dejó de correr.
-Schedule::call(fn () => Cache::forever(SystemInfo::SCHEDULER_HEARTBEAT, now()->toIso8601String()))
+Schedule::call(fn () => SystemInfo::recordSchedulerHeartbeat())
     ->everyMinute()
     ->name('scheduler-heartbeat');
 

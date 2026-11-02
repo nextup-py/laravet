@@ -6,6 +6,7 @@ use App\Models\Owner;
 use App\Models\Pet;
 use Database\Seeders\OwnerSeeder;
 use Database\Seeders\PetSeeder;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -60,11 +61,12 @@ final class DemoPetPhotos
     /**
      * Copia las fotos al disco público y las asigna.
      *
-     * @return array{assigned: int, skipped: int, missing_images: array<int, string>}
+     * @return array{assigned: int, skipped: int, refreshed: int, missing_images: array<int, string>}
      */
     public static function apply(bool $overwrite = false, bool $all = false): array
     {
         $disk = Storage::disk(config('filament.default_filesystem_disk', 'public'));
+        $refreshed = self::refreshCopiedFiles($disk);
         $assigned = 0;
         $skipped = 0;
         $missing = [];
@@ -90,7 +92,28 @@ final class DemoPetPhotos
             $assigned++;
         }
 
-        return ['assigned' => $assigned, 'skipped' => $skipped, 'missing_images' => array_values($missing)];
+        return ['assigned' => $assigned, 'skipped' => $skipped, 'refreshed' => $refreshed, 'missing_images' => array_values($missing)];
+    }
+
+    /**
+     * Si una imagen del repositorio cambió (por ejemplo, se reemplazó una foto), actualiza la copia
+     * que ya está en el disco. Las mascotas siguen apuntando al mismo archivo, así que la ven nueva
+     * sin tocar `pets.image`.
+     */
+    private static function refreshCopiedFiles(Filesystem $disk): int
+    {
+        $refreshed = 0;
+
+        foreach (glob(self::sourcePath().'/*.{jpg,jpeg,png,webp}', GLOB_BRACE) ?: [] as $file) {
+            $path = self::DIRECTORY.'/'.basename($file);
+
+            if ($disk->exists($path) && md5((string) $disk->get($path)) !== md5_file($file)) {
+                $disk->put($path, (string) file_get_contents($file));
+                $refreshed++;
+            }
+        }
+
+        return $refreshed;
     }
 
     /**
