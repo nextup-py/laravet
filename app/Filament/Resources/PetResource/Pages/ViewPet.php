@@ -9,6 +9,7 @@ use App\Filament\Resources\PetResource;
 use App\Filament\Resources\VaccinationResource;
 use App\Models\Pet;
 use App\Models\PetWeight;
+use App\Support\Measure;
 use Filament\Actions;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section;
@@ -89,7 +90,7 @@ class ViewPet extends ViewRecord
                     ->columns(3)
                     ->schema([
                         TextEntry::make('size')->label('Tamaño')->badge(),
-                        TextEntry::make('weight')->label('Peso')->suffix(' kg'),
+                        TextEntry::make('weight')->label('Peso')->formatStateUsing(fn (mixed $state): string => Measure::kg($state)),
                         TextEntry::make('fur')->label('Pelaje'),
                         ImageEntry::make('image')
                             ->label('Imagen')
@@ -116,7 +117,7 @@ class ViewPet extends ViewRecord
                             ->label('Últimos pesajes')
                             ->state(fn (Pet $record): array => $record->weights()
                                 ->orderByDesc('weighed_at')->orderByDesc('id')->limit(5)->get()
-                                ->map(fn (PetWeight $weight): string => $weight->weighed_at->format('d/m/Y').' · '.rtrim(rtrim(number_format((float) $weight->weight, 2, ',', ''), '0'), ',').' kg')
+                                ->map(fn (PetWeight $weight): string => $weight->weighed_at->format('d/m/Y').' · '.Measure::kg($weight->weight))
                                 ->all())
                             ->listWithLineBreaks()
                             ->placeholder('—'),

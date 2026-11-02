@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
+use App\Support\WhatsappLink;
 use Filament\Actions;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -31,10 +32,14 @@ class ViewUser extends ViewRecord
         return $infolist
             ->schema([
                 Section::make('Datos personales')
-                    ->columns(3)
+                    ->columns(2)
                     ->schema([
                         TextEntry::make('name')->label('Nombre'),
                         TextEntry::make('email')->label('Correo electrónico')->icon('heroicon-m-envelope')->copyable(),
+                        TextEntry::make('phone')->label('Teléfono')
+                            ->placeholder('—')
+                            ->icon(fn ($record): ?string => filled($record->phone) ? 'heroicon-m-chat-bubble-left-ellipsis' : null)
+                            ->url(fn ($record): ?string => filled($record->phone) ? WhatsappLink::url($record->phone) : null, shouldOpenInNewTab: true),
                         TextEntry::make('roles.name')->label('Rol')->badge()
                             ->formatStateUsing(fn (?string $state): string => UserResource::roleOptions()[$state] ?? $state ?? '—'),
                     ]),

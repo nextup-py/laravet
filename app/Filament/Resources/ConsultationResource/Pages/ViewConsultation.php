@@ -6,6 +6,7 @@ use App\Filament\Resources\ConsultationResource;
 use App\Filament\Resources\PetResource;
 use App\Filament\Resources\UserResource;
 use App\Models\Consultation;
+use App\Support\Measure;
 use Filament\Actions;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -53,11 +54,9 @@ class ViewConsultation extends ViewRecord
                             ->url(fn (Consultation $record) => auth()->user()?->can('view_user')
                                 ? UserResource::getUrl('view', ['record' => $record->user_id])
                                 : null),
-                        TextEntry::make('consultation_date')->label('Fecha de consulta')->date(),
-                        TextEntry::make('weight')->label('Peso')->suffix(' kg')->placeholder('—'),
-                        TextEntry::make('temperature')->label('Temperatura')->suffix(' °C')->placeholder('—'),
-                        TextEntry::make('created_at')->label('Registrado el')->dateTime(),
-                        TextEntry::make('updated_at')->label('Última edición')->dateTime(),
+                        TextEntry::make('consultation_date')->label('Fecha de consulta')->date('d/m/Y'),
+                        TextEntry::make('weight')->label('Peso')->formatStateUsing(fn (mixed $state): string => Measure::kg($state))->placeholder('—'),
+                        TextEntry::make('temperature')->label('Temperatura')->formatStateUsing(fn (mixed $state): string => Measure::celsius($state))->placeholder('—'),
                     ]),
 
                 Section::make('Consulta')
@@ -102,6 +101,13 @@ class ViewConsultation extends ViewRecord
                         TextEntry::make('ai_output_tokens')
                             ->label('Tokens (salida)')
                             ->placeholder('—'),
+                    ]),
+
+                Section::make('Registro')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('created_at')->label('Registrado el')->dateTime('d/m/Y H:i'),
+                        TextEntry::make('updated_at')->label('Última edición')->dateTime('d/m/Y H:i'),
                     ]),
             ]);
     }

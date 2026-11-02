@@ -7,6 +7,7 @@ use App\Enums\PetReproductionStatus;
 use App\Enums\PetSize;
 use App\Enums\PetSpecies;
 use App\Observers\PetObserver;
+use App\Support\Measure;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -75,7 +76,7 @@ class Pet extends Model
      */
     public function summaryLine(): string
     {
-        return "{$this->species->getLabel()} · {$this->breed} · {$this->age} · {$this->weight} kg · {$this->gender->getLabel()}";
+        return "{$this->species->getLabel()} · {$this->breed} · {$this->age} · ".Measure::kg($this->weight)." · {$this->gender->getLabel()}";
     }
 
     /**

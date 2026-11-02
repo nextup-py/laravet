@@ -25,6 +25,10 @@ class PdfDocumentController extends Controller
         Gate::authorize('view', $pet);
         Gate::authorize('viewAny', Consultation::class);
 
+        $pet->load(['consultations' => fn ($query) => $query->with('user')->orderByDesc('consultation_date')->orderByDesc('id')]);
+        // Consulta simple y no `limit` en la carga previa: esa usa funciones de ventana (MySQL 8+).
+        $pet->setRelation('weights', $pet->weights()->orderByDesc('weighed_at')->orderByDesc('id')->limit(10)->get());
+
         return $this->pdf->inline('pdf.clinical-history', ['pet' => $pet], 'Historia-Clinica-'.Str::slug($pet->name).'.pdf');
     }
 

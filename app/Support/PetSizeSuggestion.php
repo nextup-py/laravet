@@ -43,7 +43,7 @@ class PetSizeSuggestion
         if ($suggested = self::differingFor($pet)) {
             Notification::make()
                 ->title("Revisa el tamaño de {$pet->name}")
-                ->body("Con {$pet->weight} kg se propone «{$suggested->getLabel()}» y hoy figura «{$pet->size->getLabel()}». Puedes cambiarlo desde Editar mascota.")
+                ->body('Con '.Measure::kg($pet->weight)." se propone «{$suggested->getLabel()}» y hoy figura «{$pet->size->getLabel()}». Puedes cambiarlo desde Editar mascota.")
                 ->warning()
                 ->send();
         }

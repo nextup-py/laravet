@@ -138,7 +138,20 @@ class RoleResource extends Resource implements HasShieldPermissions
                                     ->offIcon('heroicon-s-shield-exclamation')
                                     ->label(__('filament-shield::filament-shield.field.select_all.name'))
                                     ->helperText(fn (): HtmlString => new HtmlString(__('filament-shield::filament-shield.field.select_all.message')))
-                                    ->dehydrated(fn (bool $state): bool => $state),
+                                    ->dehydrated(fn (bool $state): bool => $state)
+                                    ->hidden(fn (?Model $record): bool => $record?->name === ClinicRoles::ADMIN),
+
+                                Forms\Components\Placeholder::make('allPermissions')
+                                    ->hiddenLabel()
+                                    ->visible(fn (?Model $record): bool => $record?->name === ClinicRoles::ADMIN)
+                                    ->content('El administrador tiene todos los permisos del sistema; no hace falta marcarlos uno por uno.')
+                                    ->columnSpanFull(),
+
+                                Forms\Components\Placeholder::make('roleUsers')
+                                    ->label('Usuarios con este rol')
+                                    ->visible(fn (?Model $record, string $operation): bool => $record !== null && $operation === 'view')
+                                    ->content(fn (?Model $record): string => $record?->users()->orderBy('name')->pluck('name')->join(', ') ?: 'Ninguno')
+                                    ->columnSpanFull(),
 
                             ])
                             ->columns([
@@ -146,7 +159,8 @@ class RoleResource extends Resource implements HasShieldPermissions
                                 'lg' => 3,
                             ]),
                     ]),
-                static::getShieldFormComponents(),
+                static::getShieldFormComponents()
+                    ->hidden(fn (?Model $record): bool => $record?->name === ClinicRoles::ADMIN),
             ]);
     }
 

@@ -41,7 +41,7 @@ class ViewVaccination extends ViewRecord
     {
         return $infolist
             ->schema([
-                Section::make('Información general')
+                Section::make('Vacuna')
                     ->columns(2)
                     ->schema([
                         TextEntry::make('pet.name')->label('Mascota')
@@ -49,9 +49,21 @@ class ViewVaccination extends ViewRecord
                                 ? PetResource::getUrl('view', ['record' => $record->pet_id])
                                 : null),
                         TextEntry::make('vaccine')->label('Vacuna'),
+                        TextEntry::make('manufacturer')->label('Fabricante'),
+                        TextEntry::make('batch')->label('Lote'),
+                    ]),
+
+                Section::make('Fechas y estado')
+                    ->columns(3)
+                    ->schema([
                         TextEntry::make('application_date')->label('Fecha de aplicación')->date('d/m/Y'),
                         TextEntry::make('next_application')->label('Próxima aplicación')->date('d/m/Y')->placeholder('Sin refuerzo'),
                         TextEntry::make('status')->label('Estado')->badge(),
+                    ]),
+
+                Section::make('Seguimiento')
+                    ->columns(3)
+                    ->schema([
                         TextEntry::make('user.name')->label('Veterinario')
                             ->url(fn ($record): ?string => auth()->user()?->can('view_user')
                                 ? UserResource::getUrl('view', ['record' => $record->user_id])
@@ -60,8 +72,7 @@ class ViewVaccination extends ViewRecord
                             ->state(fn ($record): string => filled($record->reminder_sent_at)
                                 ? 'Enviado el '.Carbon::parse($record->reminder_sent_at)->format('d/m/Y H:i')
                                 : 'Aún no enviado'),
-                        TextEntry::make('batch')->label('Lote'),
-                        TextEntry::make('manufacturer')->label('Fabricante'),
+                        TextEntry::make('created_at')->label('Registrada el')->dateTime('d/m/Y H:i'),
                         TextEntry::make('observation')->label('Observación')->placeholder('—')->columnSpanFull(),
                     ]),
             ]);
