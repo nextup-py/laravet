@@ -47,6 +47,7 @@ class SystemStatusPage extends Page
             // El cron corre cada minuto: más de 5 sin marca es señal de que dejó de funcionar.
             'schedulerStale' => ! $schedulerLastRun || $schedulerLastRun->diffInMinutes(now()) > 5,
             'mail' => SystemInfo::mail(),
+            'runtime' => SystemInfo::runtime(),
             'environment' => SystemInfo::environment(),
         ];
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Filament\Actions\DownloadExport;
 use App\Filament\Pages\ReportsPage;
 use App\Models\Consultation;
 use App\Models\ExportLog;
@@ -268,4 +269,61 @@ it('la actividad por veterinario solo trae las columnas de los registros que el 
 it('las descargas de reportes neutralizan las celdas que parecen fórmulas', function () {
     expect(TabularDownload::protectFormulas([['=HYPERLINK("x")', '+1', '-2', '@SUM', 'Normal', 5, null]]))
         ->toBe([["'=HYPERLINK(\"x\")", "'+1", "'-2", "'@SUM", 'Normal', 5, null]]);
+});
+
+it('un reporte fijo que supera el tope de filas avisa en lugar de cortarse', function () {
+    actingAsRole('admin');
+    $anterior = DownloadExport::$maxRows;
+    DownloadExport::$maxRows = 2;
+
+    try {
+        Vaccination::factory()->count(3)->create(['next_application' => today()->subDays(3)]);
+
+        Livewire::test(ReportsPage::class)
+            ->fillForm(['report' => FixedReport::VaccinationsDue->value])
+            ->call('generate')
+            ->assertNotified('No se pudo generar el reporte')
+            ->assertSet('total', 0)
+            ->assertSet('headers', []);
+    } finally {
+        DownloadExport::$maxRows = $anterior;
+    }
+});
+
+it('el reporte personalizado sin tipo de registro no falla: pide elegirlo', function () {
+    actingAsRole('admin');
+
+    Livewire::test(ReportsPage::class)
+        ->fillForm(['report' => 'custom', 'entity' => null, 'columns' => ['pet'], ...reportRange()])
+        ->call('generate')
+        ->assertHasFormErrors(['entity' => 'required']);
+});
+
+it('al descargar, la vista previa muestra lo mismo que el archivo', function () {
+    actingAsRole('admin');
+    Surgery::factory()->create(['date' => today(), 'type' => 'Castración']);
+
+    Livewire::test(ReportsPage::class)
+        ->fillForm(['report' => FixedReport::SurgeriesByType->value, ...reportRange()])
+        ->call('generate')
+        ->fillForm(['from' => today()->subYear()->toDateString(), 'to' => today()->subYear()->toDateString()])
+        ->callAction('downloadCsv')
+        ->assertSet('total', 0)
+        ->assertSet('resultTitle', 'Cirugías por tipo');
+});
+
+it('pruebas por tipo cuenta con resultado y pendientes por tipo', function () {
+    $admin = actingAsRole('admin');
+    Test::factory()->create(['date' => today(), 'type' => 'Hemograma', 'result' => ['a.pdf']]);
+    Test::factory()->create(['date' => today(), 'type' => 'Hemograma', 'result' => null]);
+    Test::factory()->create(['date' => today(), 'type' => 'ELISA', 'result' => null]);
+
+    $result = FixedReport::TestsByType->generate(today()->subDay(), today(), $admin);
+
+    expect($result->rows)->toBe([['Hemograma', 2, 1, 1], ['ELISA', 1, 0, 1]]);
+});
+
+it('la etiqueta de fecha del personalizado coincide con el campo usado', function () {
+    expect(ReportEntity::Vaccinations->dateLabel())->toBe('fecha de aplicación')
+        ->and(ReportEntity::Pets->dateLabel())->toBe('fecha de registro');
 });

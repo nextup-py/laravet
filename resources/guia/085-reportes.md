@@ -11,6 +11,8 @@ En **Reportes** eliges un reporte, el rango de fechas y pulsas **Generar reporte
 
 Solo ves los reportes de los registros a los que tu rol tiene acceso. Si eres veterinario, en consultas, cirugías y pruebas los números son **los tuyos**.
 
+Todos los reportes admiten hasta **5.000 filas**: si hay más, te avisa que acotes las fechas o los filtros. Al descargar, la tabla de la pantalla se actualiza con lo mismo que trae el archivo.
+
 ## Reportes fijos
 
 - **Actividad de la clínica**: consultas, vacunas, cirugías y pruebas realizadas, y mascotas y propietarios registrados en el período.

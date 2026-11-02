@@ -218,3 +218,33 @@ it('el programador deja su marca de vida cada minuto', function () {
 
     expect($events)->toHaveCount(1);
 });
+
+it('la cola no marca como atrasados los trabajos con retraso ni los reservados', function () {
+    $viejo = now()->subMinutes(30)->timestamp;
+    DB::table('jobs')->insert([
+        ['queue' => 'default', 'payload' => '{}', 'attempts' => 0, 'reserved_at' => null, 'available_at' => now()->addHour()->timestamp, 'created_at' => $viejo],
+        ['queue' => 'default', 'payload' => '{}', 'attempts' => 1, 'reserved_at' => $viejo, 'available_at' => $viejo, 'created_at' => $viejo],
+    ]);
+
+    expect(SystemInfo::queue())->toMatchArray(['pending' => 2, 'oldest_minutes' => null]);
+
+    DB::table('jobs')->insert(['queue' => 'default', 'payload' => '{}', 'attempts' => 0, 'reserved_at' => null, 'available_at' => $viejo, 'created_at' => $viejo]);
+
+    expect(SystemInfo::queue()['oldest_minutes'])->toBe(30);
+});
+
+it('el estado del sistema avisa del modo debug en producción y no muestra la clave de IA', function () {
+    config(['services.anthropic.key' => 'sk-secreta-123']);
+
+    expect(SystemInfo::runtime()['items']['Asistente de IA'])->toBe('Configurado');
+
+    config(['app.debug' => true]);
+    app()->detectEnvironment(fn () => 'production');
+
+    expect(SystemInfo::runtime()['warnings'])->toContain('El modo debug está activo: ante un error se mostrarían detalles internos. Pon APP_DEBUG=false en el .env y vuelve a ejecutar php artisan config:cache.');
+
+    actingAsRole('admin');
+    $this->get(SystemStatusPage::getUrl())
+        ->assertSee('Configuración del servidor')
+        ->assertDontSee('sk-secreta-123');
+});

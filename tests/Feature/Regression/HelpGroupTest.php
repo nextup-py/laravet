@@ -17,7 +17,10 @@ it('cualquier usuario del panel abre Soporte y ve el correo de soporte configura
     $this->get(SupportPage::getUrl())
         ->assertOk()
         ->assertSee('ayuda@example.com')
-        ->assertSee('mailto:ayuda@example.com?subject=', false);
+        ->assertSee('mailto:ayuda@example.com?subject=', false)
+        ->assertSee('Reportar un problema')
+        ->assertSee('Copiar correo')
+        ->assertSee(rawurlencode('Versión del sistema'), false);
 });
 
 it('el correo de soporte arranca con el valor inicial y es obligatorio en Datos de la clínica', function () {

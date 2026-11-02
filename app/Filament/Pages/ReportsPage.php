@@ -242,10 +242,19 @@ class ReportsPage extends Page implements HasForms
 
             abort_unless($report && $report->isAvailableTo($user), 403);
 
-            return $report->generate($from, $to, $user);
+            $result = $report->generate($from, $to, $user);
+
+            return $this->withinRowLimit($result);
         }
 
-        $entity = ReportEntity::from($state['entity']);
+        $entity = ReportEntity::tryFrom((string) ($state['entity'] ?? ''));
+
+        if (! $entity) {
+            $this->warn('Elige qué registros incluir en el reporte.');
+
+            return null;
+        }
+
         abort_unless($user->can($entity->permission()), 403);
 
         $columns = collect($entity->columns())
@@ -279,6 +288,23 @@ class ReportsPage extends Page implements HasForms
         );
     }
 
+    /**
+     * Los reportes fijos también respetan el tope de filas de las exportaciones: así una
+     * descarga (sobre todo el PDF) no se corta ni agota la memoria sin que el usuario lo sepa.
+     */
+    private function withinRowLimit(ReportResult $result): ?ReportResult
+    {
+        $rows = count($result->rows);
+
+        if ($rows > DownloadExport::$maxRows) {
+            $this->warn('El reporte tiene más de '.Number::format(DownloadExport::$maxRows).' filas y ese es el máximo. Acota las fechas o usa un reporte personalizado con filtros.');
+
+            return null;
+        }
+
+        return $result;
+    }
+
     private function warn(string $message): void
     {
         Notification::make()->title('No se pudo generar el reporte')->body($message)->warning()->send();
@@ -294,6 +320,11 @@ class ReportsPage extends Page implements HasForms
             return;
         }
 
+        $this->showResult($result);
+    }
+
+    private function showResult(ReportResult $result): void
+    {
         $this->headers = $result->headers;
         $this->preview = array_slice($result->rows, 0, self::PREVIEW_ROWS);
         $this->total = count($result->rows);
@@ -310,6 +341,9 @@ class ReportsPage extends Page implements HasForms
         if (! $result) {
             return null;
         }
+
+        // La pantalla muestra siempre lo mismo que trae el archivo, aunque se hayan cambiado filtros sin generar.
+        $this->showResult($result);
 
         ExportLog::create([
             'user_id' => $this->user()->getKey(),

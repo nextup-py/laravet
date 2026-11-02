@@ -3,6 +3,7 @@
 namespace App\Reports;
 
 use App\Enums\VaccinationStatus;
+use App\Filament\Actions\DownloadExport;
 use App\Models\Consultation;
 use App\Models\Owner;
 use App\Models\Pet;
@@ -185,7 +186,7 @@ enum FixedReport: string
             ->with(['pet.owner'])
             ->actionable()
             ->orderBy('next_application')
-            ->limit(5000)
+            ->limit(DownloadExport::$maxRows + 1)
             ->get()
             ->map(fn (Vaccination $vaccination): array => [
                 $vaccination->pet->name,
@@ -226,15 +227,15 @@ enum FixedReport: string
      */
     private function testsByType(CarbonInterface $from, CarbonInterface $to, User $user): array
     {
-        return $this->ownRecords(Test::query(), $user)
-            ->whereDate('date', '>=', $from->toDateString())->whereDate('date', '<=', $to->toDateString())
-            ->get()
-            ->groupBy('type')
-            ->map(function ($tests, string $type): array {
-                $pending = $tests->filter(fn (Test $test): bool => empty($test->result))->count();
+        $inPeriod = fn (): Builder => $this->ownRecords(Test::query(), $user)
+            ->whereDate('date', '>=', $from->toDateString())
+            ->whereDate('date', '<=', $to->toDateString());
 
-                return [$type, $tests->count(), $tests->count() - $pending, $pending];
-            })
+        $totals = $inPeriod()->selectRaw('type, count(*) as total')->groupBy('type')->pluck('total', 'type');
+        $withResult = $inPeriod()->withResult()->selectRaw('type, count(*) as total')->groupBy('type')->pluck('total', 'type');
+
+        return $totals
+            ->map(fn ($total, string $type): array => [$type, (int) $total, (int) ($withResult[$type] ?? 0), (int) $total - (int) ($withResult[$type] ?? 0)])
             ->sortByDesc(fn (array $row): int => $row[1])
             ->values()
             ->all();

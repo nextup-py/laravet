@@ -72,6 +72,20 @@
         @endforeach
     </x-filament::section>
 
+    <x-filament::section heading="Configuración del servidor">
+        <dl class="grid gap-3 text-sm sm:grid-cols-3">
+            @foreach ($runtime['items'] as $label => $value)
+                <div>
+                    <dt class="text-gray-500 dark:text-gray-400">{{ $label }}</dt>
+                    <dd class="font-medium">{{ $value }}</dd>
+                </div>
+            @endforeach
+        </dl>
+        @foreach ($runtime['warnings'] as $warning)
+            <p class="mt-3 text-sm text-warning-600 dark:text-warning-400">{{ $warning }}</p>
+        @endforeach
+    </x-filament::section>
+
     <x-filament::section heading="Entorno">
         <dl class="grid gap-3 text-sm sm:grid-cols-3">
             @foreach ($environment as $label => $value)
