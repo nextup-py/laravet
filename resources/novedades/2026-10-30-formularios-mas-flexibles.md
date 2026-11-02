@@ -25,3 +25,4 @@ Y en las listas:
 - **Vacunaciones, Cirugías y Pruebas** tienen pestañas por estado, con la cantidad de cada una. «Todos» sigue mostrando todo.
 - La columna **Veterinario** viene oculta en las listas clínicas; la activas desde el selector de columnas. En Cirugías también viene oculta la observación.
 - **Consultas** tiene columnas opcionales de peso y temperatura, y **Propietarios** muestra la ciudad en lugar del género.
+- **Datos de la clínica**: el campo «Email» se llama ahora «Correo electrónico», igual que en el resto del sistema.
