@@ -7,11 +7,13 @@ use App\Filament\Resources\PetResource\Pages\ListPets;
 use App\Filament\Resources\SurgeryResource\Pages\ListSurgeries;
 use App\Filament\Resources\TestResource\Pages\ListTests;
 use App\Filament\Resources\VaccinationResource\Pages\ListVaccinations;
+use App\Models\Consultation;
 use App\Models\Owner;
 use App\Models\Pet;
 use App\Models\Surgery;
 use App\Models\Test;
 use App\Models\Vaccination;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
 it('mascotas y propietarios se ordenan por nombre por defecto', function () {
@@ -90,4 +92,27 @@ it('la columna del veterinario está oculta por defecto en las cuatro listas cl�
     ListTests::class,
     ListVaccinations::class,
     ListConsultations::class,
+]);
+
+it('las listas clínicas no consultan el propietario una vez por fila', function (string $list, Closure $make) {
+    actingAsRole('admin');
+    foreach (range(1, 6) as $_) {
+        $make();
+    }
+
+    $ownerQueries = 0;
+    DB::listen(function ($query) use (&$ownerQueries): void {
+        if (str_starts_with($query->sql, 'select * from `owners`') || str_starts_with($query->sql, 'select * from "owners"')) {
+            $ownerQueries++;
+        }
+    });
+
+    Livewire::test($list)->assertSuccessful();
+
+    expect($ownerQueries)->toBeLessThanOrEqual(2);
+})->with([
+    'consultas' => [ListConsultations::class, fn () => Consultation::factory()->create()],
+    'vacunaciones' => [ListVaccinations::class, fn () => Vaccination::factory()->create()],
+    'cirugías' => [ListSurgeries::class, fn () => Surgery::factory()->create()],
+    'pruebas' => [ListTests::class, fn () => Test::factory()->create()],
 ]);

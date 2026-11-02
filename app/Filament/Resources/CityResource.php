@@ -110,12 +110,14 @@ class CityResource extends Resource
                     ->label('Propietarios')
                     ->counts('owners')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('users_count')
                     ->label('Usuarios')
                     ->counts('users')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
                     ->numeric()
