@@ -1,8 +1,10 @@
 <?php
 
 use App\Enums\VaccinationStatus;
+use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Resources\ConsultationResource\Pages\CreateConsultation;
 use App\Filament\Resources\PetResource\Pages\CreatePet;
+use App\Filament\Resources\RoleResource\Pages\CreateRole;
 use App\Filament\Resources\SurgeryResource\Pages\CreateSurgery;
 use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Filament\Resources\VaccinationResource\Pages\CreateVaccination;
@@ -128,4 +130,21 @@ it('valida el teléfono del personal con el formato paraguayo', function () {
         ->fillForm(['phone' => '12345'])
         ->call('create')
         ->assertHasFormErrors(['phone' => 'regex']);
+});
+
+it('el formulario de roles solo ofrece los permisos que el sistema usa y no muestra el guard', function () {
+    actingAsRole('admin');
+
+    Livewire::test(CreateRole::class)
+        ->assertDontSee(__('filament-shield::filament-shield.field.guard_name'))
+        ->assertSee('Reporte de problema')
+        ->assertDontSee('Reporte De Problema')
+        ->assertDontSee('force_delete_pet')
+        ->assertDontSee('replicate_pet');
+});
+
+it('el perfil usa etiquetas apiladas y «Correo electrónico»', function () {
+    actingAsRole('admin');
+
+    Livewire::test(EditProfile::class)->assertSee('Correo electrónico')->assertDontSee('Dirección Email');
 });

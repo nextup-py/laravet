@@ -108,6 +108,14 @@ class PetResource extends Resource
                         ->live()
                         ->options(PetReproductionStatus::class)
                         ->required(),
+                    Forms\Components\TextInput::make('weight')
+                        ->label('Peso')
+                        ->suffix('kg')
+                        ->required()
+                        ->numeric()
+                        ->inputMode('decimal')
+                        ->minValue(0.1)
+                        ->maxValue(150),
                     Forms\Components\TextInput::make('id')
                         ->label('ID')
                         ->hiddenOn('create')
@@ -121,7 +129,7 @@ class PetResource extends Resource
                 ]),
 
             Section::make('Más información')
-                ->columns(3)
+                ->columns(2)
                 ->schema([
                     Forms\Components\Select::make('size')
                         ->label('Tamaño')
@@ -130,14 +138,6 @@ class PetResource extends Resource
                         ->live()
                         ->options(PetSize::class)
                         ->required(),
-                    Forms\Components\TextInput::make('weight')
-                        ->label('Peso')
-                        ->suffix('kg')
-                        ->required()
-                        ->numeric()
-                        ->inputMode('decimal')
-                        ->minValue(0.1)
-                        ->maxValue(150),
                     Forms\Components\TextInput::make('fur')
                         ->label('Pelaje')
                         ->string()

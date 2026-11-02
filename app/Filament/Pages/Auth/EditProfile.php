@@ -99,6 +99,7 @@ class EditProfile extends BaseEditProfile
                     ->columns(2)
                     ->schema([
                         $this->getEmailFormComponent()
+                            ->label('Correo electrónico')
                             ->live(onBlur: true),
                         Forms\Components\TextInput::make('current_password')
                             ->label('Contraseña actual')
@@ -115,6 +116,6 @@ class EditProfile extends BaseEditProfile
             ->operation('edit')
             ->model($this->getUser())
             ->statePath('data')
-            ->inlineLabel(! static::isSimple());
+            ->inlineLabel(false);
     }
 }

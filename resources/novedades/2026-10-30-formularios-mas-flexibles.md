@@ -13,6 +13,8 @@ Revisamos los formularios y cambiamos varias cosas:
 También reordenamos algunos formularios:
 
 - **Vacunaciones**: ahora tiene dos secciones, «Información general» y «Fechas».
-- **Mascotas**: el propietario aparece primero; el ID y «Activo» quedaron al final.
+- **Mascotas**: el propietario aparece primero, el peso pasó a la primera sección y el ID y «Activo» quedaron al final.
 - **Consultas**: el peso y la temperatura van en su propia sección, «Signos vitales».
 - **Usuarios**: el rol y la contraseña están en una sección «Acceso», separada de los datos personales.
+- **Perfil**: las etiquetas van arriba de cada campo, como en el resto del panel, y el correo se llama «Correo electrónico».
+- **Roles y permisos**: la pantalla muestra solo los permisos que el sistema usa (ver, listar, crear, actualizar y eliminar), sin el campo «Guard», y los nombres de los recursos se escriben con mayúscula solo al inicio.
