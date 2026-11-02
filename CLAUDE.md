@@ -199,6 +199,7 @@ patrón `ProductionSeeder`/`DemoSeeder`:
 | `SurgerySeeder` | 8 cirugías (castraciones, OVH, suturas, extracción dental), una de hoy y una programada |
 | `TestSeeder` | 9 exámenes (hemograma, bioquímica, ELISA, urinálisis, radiografía), 6 con resultado y 3 pendientes |
 
+- **Fotos referenciales del demo**: `App\Support\DemoPetPhotos` asigna una foto por especie y raza (`canino-labrador-retriever.jpg`, `felino-srd.jpg`…, en `database/seeders/images/pets`; formatos jpg/png/webp, solo imágenes sin atribución obligatoria —CC0, Pexels o Unsplash— con un archivo de créditos) a las 15 mascotas de `PetSeeder::PETS`, identificadas por la CI del propietario demo y el nombre. Copia la imagen al disco público (`demo-pets/`) y llena `pets.image` solo si está vacío; una raza sin imagen queda con el avatar de inicial. `PetSeeder` la invoca al final (y ya no pone `image` en `null` al refrescar). `php artisan laravet:demo-photos` (`--dry-run`, `--overwrite`, `--force`) hace solo eso y **sí corre con `APP_ENV=production`** (pide confirmación, o `--force`): sirve para una instancia usada como demo donde el `DemoSeeder` se niega. Nunca crea ni borra mascotas ni toca otras que no sean las demo.
 - **Contexto Paraguay**: nombres y apellidos locales, CI de 7 dígitos, celulares 09XX y ciudades
   de Central. El barrio es obligatorio en `owners` y en el JSON solo Areguá, Luque, San Lorenzo y
   Fernando de la Mora tienen barrios (10 de las 20 ciudades de Central no tienen, entre ellas

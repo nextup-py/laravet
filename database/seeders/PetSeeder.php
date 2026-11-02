@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Owner;
 use App\Models\Pet;
+use App\Support\DemoPetPhotos;
 use Database\Seeders\Concerns\UsesDemoData;
 use Illuminate\Database\Seeder;
 
@@ -55,9 +56,10 @@ class PetSeeder extends Seeder
                 'fur' => $fur,
                 'reproduction' => $reproduction,
                 'active' => true,
-                'image' => null,
                 'user_id' => $vets[$i % $vets->count()]->id,
             ]);
         }
+
+        DemoPetPhotos::apply();
     }
 }
