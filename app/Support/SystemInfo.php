@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Number;
 
 /**
  * Datos de solo lectura para «Ayuda → Estado del sistema» (solo administradores) y para
@@ -43,7 +44,12 @@ final class SystemInfo
             return null;
         }
 
-        $oldest = DB::table('jobs')->min('created_at');
+        // Solo cuenta lo que ya debería estar procesándose: ni los trabajos con retraso programado
+        // ni los que el worker tiene reservados en este momento.
+        $oldest = DB::table('jobs')
+            ->whereNull('reserved_at')
+            ->where('available_at', '<=', now()->timestamp)
+            ->min('available_at');
 
         return [
             'pending' => DB::table('jobs')->count(),
@@ -87,6 +93,41 @@ final class SystemInfo
             'from' => ClinicMail::fromAddress($clinic),
             'reply_to' => filled($clinic?->email) ? $clinic->email : null,
             'support' => $clinic?->support_email ?: ClinicSettings::DEFAULT_SUPPORT_EMAIL,
+            'warnings' => $warnings,
+        ];
+    }
+
+    /**
+     * Cómo está configurado el servidor (solo etiquetas de estado, nunca valores del .env) y
+     * qué conviene revisar: configuración en caché, modo debug, clave de IA y espacio en disco.
+     *
+     * @return array{items: array<string, string>, warnings: array<int, string>}
+     */
+    public static function runtime(): array
+    {
+        $warnings = [];
+        $debug = (bool) config('app.debug');
+        $free = @disk_free_space(base_path());
+        $total = @disk_total_space(base_path());
+
+        if ($debug && ! app()->environment(['local', 'testing'])) {
+            $warnings[] = 'El modo debug está activo: ante un error se mostrarían detalles internos. Pon APP_DEBUG=false en el .env y vuelve a ejecutar php artisan config:cache.';
+        }
+
+        if ($free !== false && $total && ($free / $total < 0.1 || $free < 1024 ** 3)) {
+            $warnings[] = 'Queda poco espacio libre en el disco del servidor.';
+        }
+
+        return [
+            'items' => [
+                'Cola' => (string) config('queue.default'),
+                'Caché' => (string) config('cache.default'),
+                'Sesiones' => (string) config('session.driver'),
+                'Configuración en caché' => app()->configurationIsCached() ? 'Sí' : 'No',
+                'Modo debug' => $debug ? 'Activo' : 'Desactivado',
+                'Asistente de IA' => filled(config('services.anthropic.key')) ? 'Configurado' : 'Sin configurar',
+                'Espacio libre en disco' => $free !== false && $total ? Number::fileSize($free).' de '.Number::fileSize($total) : 'No disponible',
+            ],
             'warnings' => $warnings,
         ];
     }

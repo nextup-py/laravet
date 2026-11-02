@@ -40,7 +40,11 @@ enum ReportEntity: string
 
     public function dateLabel(): string
     {
-        return $this === self::Pets ? 'fecha de registro' : 'fecha';
+        return match ($this) {
+            self::Pets => 'fecha de registro',
+            self::Vaccinations => 'fecha de aplicación',
+            default => 'fecha',
+        };
     }
 
     public function permission(): string

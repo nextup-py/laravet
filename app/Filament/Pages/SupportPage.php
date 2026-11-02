@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Settings\ClinicSettings;
+use App\Support\SystemInfo;
 use Filament\Pages\Page;
 
 /**
@@ -30,11 +31,16 @@ class SupportPage extends Page
         return ClinicSettings::tryGet()?->support_email ?: ClinicSettings::DEFAULT_SUPPORT_EMAIL;
     }
 
+    public function getReportUrl(): string
+    {
+        return ReportProblemPage::getUrl();
+    }
+
     public function getMailtoUrl(): string
     {
         $user = auth()->user();
         $subject = 'Consulta sobre el sistema de la clínica';
-        $body = "Hola, soy {$user?->name}.\n\nPantalla donde ocurre: \nQué estaba haciendo: \nQué esperaba que pasara: \n";
+        $body = "Hola, soy {$user?->name}.\n\nPantalla donde ocurre: \nQué estaba haciendo: \nQué esperaba que pasara: \n\nVersión del sistema: ".(SystemInfo::version() ?? 'no disponible')."\n";
 
         return 'mailto:'.$this->getSupportEmail().'?subject='.rawurlencode($subject).'&body='.rawurlencode($body);
     }

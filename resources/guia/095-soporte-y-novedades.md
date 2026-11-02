@@ -10,7 +10,7 @@ Todo el personal ve el grupo **Ayuda** al final del menú.
 
 ## Soporte
 
-En **Ayuda → Soporte** está el correo al que escribir cuando algo del sistema falla o tienes una duda. El botón *Escribir a soporte* abre tu programa de correo con el mensaje armado; completa la pantalla donde ocurrió, qué estabas haciendo y qué esperabas que pasara.
+En **Ayuda → Soporte** el botón principal es *Reportar un problema* (ver más abajo). Como alternativa está el correo de soporte: *Escribir a soporte* abre tu programa de correo con el mensaje armado (completa la pantalla donde ocurrió, qué estabas haciendo y qué esperabas que pasara) y *Copiar correo* copia la dirección por si prefieres escribir desde otro correo.
 
 El administrador puede cambiar ese correo en *Configuración → Datos de la clínica → General* («Correo de soporte del sistema»).
 
@@ -32,4 +32,4 @@ El reporte llega al equipo de soporte, que te responde por correo. Puedes enviar
 ## Para el administrador
 
 - **Ayuda → Reportes de problemas** lista lo que envió el personal, con su estado: *Nuevo*, *Visto* o *Resuelto*. Haz clic en una fila para leerlo completo y abrir la captura, y usa el menú de la fila para cambiar el estado. El número junto al nombre cuenta los reportes nuevos.
-- **Ayuda → Estado del sistema** muestra la versión instalada, si los correos están saliendo (cola de trabajos), si las tareas programadas siguen corriendo y cómo está configurado el correo. Si algo se ve en naranja, avisa a soporte.
+- **Ayuda → Estado del sistema** muestra la versión instalada, si los correos están saliendo (cola de trabajos), si las tareas programadas siguen corriendo y cómo está configurado el correo y el servidor (modo debug, espacio en disco, asistente de IA). Si algo se ve en naranja, avisa a soporte.
