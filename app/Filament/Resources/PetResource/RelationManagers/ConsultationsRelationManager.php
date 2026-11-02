@@ -288,6 +288,7 @@ class ConsultationsRelationManager extends RelationManager
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
+                    ->modalWidth('2xl')
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = Auth::id();
 
@@ -296,7 +297,7 @@ class ConsultationsRelationManager extends RelationManager
             ])
             ->recordAction('view')
             ->actions([
-                Tables\Actions\ViewAction::make()->extraAttributes(['class' => 'hidden']),
+                Tables\Actions\ViewAction::make()->modalWidth('2xl')->extraAttributes(['class' => 'hidden']),
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('openRecord')
                         ->label('Abrir ficha')
@@ -304,6 +305,7 @@ class ConsultationsRelationManager extends RelationManager
                         ->visible(fn (Consultation $record): bool => ConsultationResource::canView($record))
                         ->url(fn (Consultation $record): string => ConsultationResource::getUrl('view', ['record' => $record])),
                     Tables\Actions\EditAction::make()
+                        ->modalWidth('2xl')
                         ->extraModalFooterActions([
                             Tables\Actions\DeleteAction::make()
                                 ->cancelParentActions(),

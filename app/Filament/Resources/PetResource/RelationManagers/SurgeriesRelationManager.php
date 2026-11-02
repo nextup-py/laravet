@@ -22,7 +22,7 @@ class SurgeriesRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        return $form->schema(SurgeryResource::formFields());
+        return $form->schema(SurgeryResource::formFields())->columns(2);
     }
 
     public function table(Table $table): Table
@@ -83,6 +83,7 @@ class SurgeriesRelationManager extends RelationManager
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
+                    ->modalWidth('2xl')
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = Auth::id();
 
@@ -91,7 +92,7 @@ class SurgeriesRelationManager extends RelationManager
             ])
             ->recordAction('view')
             ->actions([
-                Tables\Actions\ViewAction::make()->extraAttributes(['class' => 'hidden']),
+                Tables\Actions\ViewAction::make()->modalWidth('2xl')->extraAttributes(['class' => 'hidden']),
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('openRecord')
                         ->label('Abrir ficha')
@@ -99,6 +100,7 @@ class SurgeriesRelationManager extends RelationManager
                         ->visible(fn (Surgery $record): bool => SurgeryResource::canView($record))
                         ->url(fn (Surgery $record): string => SurgeryResource::getUrl('view', ['record' => $record])),
                     Tables\Actions\EditAction::make()
+                        ->modalWidth('2xl')
                         ->extraModalFooterActions([
                             Tables\Actions\DeleteAction::make()
                                 ->cancelParentActions(),
