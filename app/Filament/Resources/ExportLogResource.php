@@ -59,6 +59,9 @@ class ExportLogResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->emptyStateHeading('Todavía no hay exportaciones registradas')
+            ->emptyStateDescription('Cada vez que alguien exporte una lista o descargue un reporte quedará anotado aquí.')
+            ->emptyStateIcon('heroicon-o-arrow-down-tray')
             ->columns([
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Fecha')

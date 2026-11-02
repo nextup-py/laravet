@@ -8,4 +8,9 @@ use Filament\Resources\Pages\ListRecords;
 class ListExportLogs extends ListRecords
 {
     protected static string $resource = ExportLogResource::class;
+
+    public function getTitle(): string
+    {
+        return 'Registro de exportaciones';
+    }
 }

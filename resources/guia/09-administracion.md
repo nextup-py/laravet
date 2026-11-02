@@ -21,7 +21,7 @@ Protecciones:
 
 ## Catálogos geográficos
 
-En **Catálogos** están los departamentos, las ciudades y los barrios que se usan en los domicilios. Los barrios salen ordenados por ciudad y luego por nombre, y también puedes ordenarlos por departamento. Las columnas *Propietarios* y *Usuarios* (cuántos usan cada elemento) vienen ocultas; el filtro **Uso** sigue disponible para encontrar lo que está en uso o sin uso.
+En **Catálogos** están los departamentos, las ciudades y los barrios que se usan en los domicilios. Asunción figura en el departamento **Capital** (el Distrito Capital), no en Central. Los barrios salen ordenados por ciudad y luego por nombre, y también puedes ordenarlos por departamento. Las columnas *Propietarios* y *Usuarios* (cuántos usan cada elemento) vienen ocultas; el filtro **Uso** sigue disponible para encontrar lo que está en uso o sin uso.
 
 ## Roles y permisos
 

@@ -41,7 +41,8 @@ class RecentConsultationsWidget extends BaseWidget
                     ->label('Diagnóstico')
                     ->limit(60),
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('Veterinario'),
+                    ->label('Veterinario')
+                    ->visible(! static::focusesOnOwnRecords()),
                 Tables\Columns\TextColumn::make('consultation_date')
                     ->label('Fecha')
                     ->date('d/m/Y')

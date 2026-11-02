@@ -118,7 +118,8 @@ class ProblemReportResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('description')
                     ->label('Descripción')
-                    ->limit(80)
+                    ->limit(50)
+                    ->tooltip(fn (Tables\Columns\TextColumn $column): ?string => strlen((string) $column->getState()) > 50 ? $column->getState() : null)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('screen')
                     ->label('Pantalla')
@@ -126,6 +127,9 @@ class ProblemReportResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('created_at', 'desc')
+            ->emptyStateHeading('Todavía no hay reportes')
+            ->emptyStateDescription('Cuando alguien del personal use «Reportar un problema», aparecerá aquí.')
+            ->emptyStateIcon('heroicon-o-inbox')
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Estado')
