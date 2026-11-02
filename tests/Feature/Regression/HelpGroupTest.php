@@ -20,6 +20,9 @@ it('cualquier usuario del panel abre Soporte y ve el correo de soporte configura
         ->assertSee('mailto:ayuda@example.com?subject=', false)
         ->assertSee('Reportar un problema')
         ->assertSee('Copiar correo')
+        ->assertSee("copied: false, email: 'ayuda@example.com'", false)
+        ->assertSee('navigator.clipboard.writeText(email)', false)
+        ->assertDontSee('@js(', false)
         ->assertSee(rawurlencode('Versión del sistema'), false);
 });
 
