@@ -18,7 +18,7 @@ Fotos de [Pexels](https://www.pexels.com), con la [licencia de Pexels](https://w
 | `felino-siames.jpg` | https://www.pexels.com/photo/siamese-cat-with-blue-eyes-18160469/ | Jovan Vasiljević |
 | `felino-persa.jpg` | https://www.pexels.com/photo/grey-persian-cat-3423805/ | Orlando Allo |
 | `felino-angora.jpg` | https://www.pexels.com/photo/close-up-photo-of-a-turkish-angora-cat-12100910/ | Oleg Melevych |
-| `canino-srd-2.jpg` | https://www.pexels.com/photo/closeup-photo-of-brown-and-black-dog-face-406014/ | (ver la página) |
+| `canino-srd-2.jpg` | https://www.pexels.com/photo/short-coated-white-and-black-dog-1404727/ | Krystian |
 | `canino-srd-3.jpg` | https://www.pexels.com/photo/close-up-portrait-of-a-brown-street-dog-outdoors-30935680/ | (ver la página) |
 | `canino-chihuahua.jpg` | https://www.pexels.com/photo/close-up-portrait-of-cute-chihuahua-dog-30669120/ | (ver la página) |
 | `canino-salchicha.jpg` | https://www.pexels.com/photo/brown-short-coat-dog-3148115/ | (ver la página) |
@@ -35,7 +35,7 @@ Fotos de [Pexels](https://www.pexels.com), con la [licencia de Pexels](https://w
 | `roedor-cobayo.jpg` | https://www.pexels.com/photo/guinea-pig-on-towel-20330605/ | (ver la página) |
 | `roedor-hamster-sirio.jpg` | https://www.pexels.com/photo/adorable-golden-syrian-hamster-portrait-close-up-33914110/ | Wisodo Hadi |
 | `ave-loro-hablador-amazona.jpg` | https://www.pexels.com/photo/yellow-headed-amazon-parrot-in-close-up-photography-11150686/ | Jeffry Surianto |
-| `ave-cotorra.jpg` | https://www.pexels.com/photo/close-up-photo-of-a-green-ring-neck-parakeet-1972531/ | (ver la página) |
+| `ave-cotorra.jpg` | https://www.pexels.com/photo/monk-paraket-bird-17892870/ | Manuel Torres Garcia |
 | `ave-canario.jpg` | https://www.pexels.com/photo/close-up-shot-of-a-yellow-canary-6398822/ | Rodrigo Chaves |
 | `canino-labrador-retriever-2.jpg` | https://www.pexels.com/photo/adorable-labrador-retriever-sitting-indoors-36206773/ | Brendan Rühli |
 | `canino-pastor-aleman-2.jpg` | https://www.pexels.com/photo/black-and-brown-german-shepherd-dog-face-8520729/ | Ave Calvar Martinez |

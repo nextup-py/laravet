@@ -7,6 +7,7 @@ use Composer\InstalledVersions;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Number;
@@ -18,8 +19,8 @@ use Illuminate\Support\Number;
  */
 final class SystemInfo
 {
-    /** Clave de caché donde el programador deja la hora de su última corrida (ver routes/console.php). */
-    public const SCHEDULER_HEARTBEAT = 'scheduler:last_run';
+    /** Archivo del programador; se puede cambiar (por ejemplo en los tests). */
+    public static ?string $heartbeatPath = null;
 
     /** Versión desplegada: etiqueta o commit de git; null si el servidor no tiene git. */
     public static function version(): ?string
@@ -32,7 +33,7 @@ final class SystemInfo
     {
         $date = self::git(['log', '-1', '--format=%cI']);
 
-        return $date ? Carbon::parse($date) : null;
+        return $date ? Carbon::parse($date)->setTimezone(config('app.timezone')) : null;
     }
 
     /**
@@ -58,12 +59,27 @@ final class SystemInfo
         ];
     }
 
+    /**
+     * Archivo donde el programador deja la hora de su última corrida (ver routes/console.php).
+     * Es un archivo y no la caché a propósito: un `cache:clear` no debe borrar la marca ni
+     * dar una falsa alarma de que el cron dejó de correr.
+     */
+    public static function heartbeatPath(): string
+    {
+        return self::$heartbeatPath ?? storage_path('framework/scheduler-heartbeat');
+    }
+
+    public static function recordSchedulerHeartbeat(): void
+    {
+        File::put(self::heartbeatPath(), now()->toIso8601String(), true);
+    }
+
     /** Última vez que corrió el programador de tareas (cron); null si nunca dejó marca. */
     public static function schedulerLastRun(): ?Carbon
     {
-        $value = Cache::get(self::SCHEDULER_HEARTBEAT);
+        $value = is_file(self::heartbeatPath()) ? trim((string) file_get_contents(self::heartbeatPath())) : '';
 
-        return $value ? Carbon::parse($value) : null;
+        return $value !== '' ? Carbon::parse($value)->setTimezone(config('app.timezone')) : null;
     }
 
     /**
@@ -152,7 +168,7 @@ final class SystemInfo
      */
     private static function git(array $arguments): ?string
     {
-        return Cache::remember('system-info:git:'.md5(implode(' ', $arguments)), 600, function () use ($arguments): ?string {
+        return Cache::remember('system-info:git:'.md5(implode(' ', $arguments)), 60, function () use ($arguments): ?string {
             try {
                 $result = Process::path(base_path())->timeout(5)->run(['git', ...$arguments]);
             } catch (\Throwable) {

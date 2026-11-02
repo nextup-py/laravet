@@ -46,6 +46,10 @@ class DemoPhotosCommand extends Command
 
         $this->info("Fotos asignadas: {$result['assigned']}. Sin cambios: {$result['skipped']}.");
 
+        if ($result['refreshed'] > 0) {
+            $this->info("Archivos de foto actualizados: {$result['refreshed']}.");
+        }
+
         if ($result['missing_images'] !== []) {
             $this->warn('Faltan imágenes en database/seeders/images/pets para: '.implode(', ', $result['missing_images']).'.');
         }

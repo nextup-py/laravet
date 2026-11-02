@@ -13,6 +13,7 @@ use App\Support\SystemInfo;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
@@ -20,6 +21,7 @@ use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 
 beforeEach(function () {
+    SystemInfo::$heartbeatPath = sys_get_temp_dir().'/scheduler-heartbeat-'.uniqid();
     Storage::fake('problem-reports');
     RateLimiter::clear('problem-report:1');
 });
@@ -187,7 +189,7 @@ it('el estado del sistema es solo para administradores', function () {
 
 it('el estado del sistema avisa si falta el email de la clínica o el programador no corre', function () {
     clinicEmail(null);
-    Cache::forget(SystemInfo::SCHEDULER_HEARTBEAT);
+    File::delete(SystemInfo::heartbeatPath());
 
     expect(SystemInfo::mail()['warnings'])->toContain('Falta el email de la clínica: no se envían recordatorios a propietarios y las respuestas no tienen a dónde llegar.')
         ->and(SystemInfo::schedulerLastRun())->toBeNull();
@@ -195,7 +197,7 @@ it('el estado del sistema avisa si falta el email de la clínica o el programado
     actingAsRole('admin');
     $this->get(SystemStatusPage::getUrl())->assertSee('No hay una corrida reciente');
 
-    Cache::forever(SystemInfo::SCHEDULER_HEARTBEAT, now()->toIso8601String());
+    SystemInfo::recordSchedulerHeartbeat();
     clinicEmail('clinica@example.com');
 
     $this->get(SystemStatusPage::getUrl())->assertDontSee('No hay una corrida reciente');
@@ -247,4 +249,34 @@ it('el estado del sistema avisa del modo debug en producción y no muestra la cl
     $this->get(SystemStatusPage::getUrl())
         ->assertSee('Configuración del servidor')
         ->assertDontSee('sk-secreta-123');
+});
+
+afterEach(function () {
+    File::delete(SystemInfo::heartbeatPath());
+    SystemInfo::$heartbeatPath = null;
+});
+
+it('la marca del programador sobrevive a una limpieza de la caché', function () {
+    SystemInfo::recordSchedulerHeartbeat();
+
+    Cache::flush();
+
+    expect(SystemInfo::schedulerLastRun())->not->toBeNull()
+        ->and(SystemInfo::schedulerLastRun()->diffInMinutes(now()))->toBeLessThan(1);
+
+    actingAsRole('admin');
+    $this->get(SystemStatusPage::getUrl())->assertDontSee('No hay una corrida reciente');
+});
+
+it('el estado del sistema avisa si la última marca del programador tiene más de cinco minutos', function () {
+    File::put(SystemInfo::heartbeatPath(), now()->subMinutes(6)->toIso8601String());
+
+    actingAsRole('admin');
+    $this->get(SystemStatusPage::getUrl())->assertSee('No hay una corrida reciente');
+});
+
+it('las fechas del estado del sistema se muestran en la zona horaria de la clínica', function () {
+    File::put(SystemInfo::heartbeatPath(), '2026-11-02T17:00:00+00:00');
+
+    expect(SystemInfo::schedulerLastRun()->timezoneName)->toBe(config('app.timezone'));
 });
