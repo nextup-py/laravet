@@ -54,6 +54,8 @@ class ViewConsultation extends ViewRecord
                                 ? UserResource::getUrl('view', ['record' => $record->user_id])
                                 : null),
                         TextEntry::make('consultation_date')->label('Fecha de consulta')->date(),
+                        TextEntry::make('weight')->label('Peso')->suffix(' kg')->placeholder('—'),
+                        TextEntry::make('temperature')->label('Temperatura')->suffix(' °C')->placeholder('—'),
                         TextEntry::make('created_at')->label('Registrado el')->dateTime(),
                         TextEntry::make('updated_at')->label('Última edición')->dateTime(),
                     ]),

@@ -83,11 +83,13 @@ class OwnerResource extends Resource
                         Forms\Components\TextInput::make('first_name')
                             ->label('Nombre(s)')
                             ->required()
-                            ->string(),
+                            ->string()
+                            ->maxLength(255),
                         Forms\Components\TextInput::make('last_name')
                             ->label('Apellido(s)')
                             ->required()
-                            ->string(),
+                            ->string()
+                            ->maxLength(255),
                         Forms\Components\Radio::make('gender')
                             ->label('Género')
                             ->required()
@@ -97,6 +99,7 @@ class OwnerResource extends Resource
                         Forms\Components\TextInput::make('email')
                             ->label('Correo electrónico')
                             ->email()
+                            ->maxLength(255)
                             ->unique(ignoreRecord: true)
                             ->required(),
                         Forms\Components\TextInput::make('phone')
@@ -140,6 +143,7 @@ class OwnerResource extends Resource
                             ->required(),
                         Forms\Components\TextInput::make('address')
                             ->label('Dirección')
+                            ->maxLength(255)
                             ->required(),
                     ]),
 
@@ -149,6 +153,7 @@ class OwnerResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort(fn (Builder $query): Builder => $query->orderBy('last_name')->orderBy('first_name'))
             ->columns([
                 Tables\Columns\TextColumn::make('full_name')
                     ->label('Propietario')
@@ -163,7 +168,8 @@ class OwnerResource extends Resource
                 Tables\Columns\TextColumn::make('gender')
                     ->label('Género')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('email')
                     ->label('Correo electrónico')
                     ->icon('heroicon-m-envelope')
@@ -192,7 +198,7 @@ class OwnerResource extends Resource
                     ->label('Ciudad')
                     ->sortable()
                     ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('neighborhood.name')
                     ->label('Barrio')
                     ->sortable()

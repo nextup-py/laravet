@@ -19,7 +19,7 @@ Bienvenido al sistema de gestión clínica. Esta guía te explica cómo moverte 
 
 Desde el menú de tu usuario (arriba a la derecha) puedes:
 
-- Abrir **Perfil**: cambiar tu foto, nombre, teléfono y domicilio, y elegir qué avisos recibes. Para cambiar tu correo o tu contraseña tienes que escribir tu contraseña actual.
+- Abrir **Perfil**: cambiar tu foto, nombre, teléfono (formato paraguayo, por ejemplo 0981123456) y domicilio, y elegir qué avisos recibes. Para cambiar tu correo o tu contraseña tienes que escribir tu contraseña actual.
 - Cambiar entre modo **claro, oscuro o automático**.
 - **Cerrar sesión**.
 

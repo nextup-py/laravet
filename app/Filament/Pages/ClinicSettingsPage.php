@@ -134,7 +134,7 @@ class ClinicSettingsPage extends Page implements HasForms
                         ->helperText('Aparece en el encabezado de los PDFs generados, junto al teléfono.')
                         ->tel(),
                     Forms\Components\TextInput::make('email')
-                        ->label('Email')
+                        ->label('Correo electrónico')
                         ->helperText('Los propietarios que respondan a un correo del sistema escriben a esta casilla. Es obligatorio para enviar recordatorios.')
                         ->email()
                         ->required(fn (Get $get): bool => (bool) $get('reminders_enabled')),

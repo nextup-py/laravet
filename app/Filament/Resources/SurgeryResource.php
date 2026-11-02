@@ -150,6 +150,8 @@ class SurgeryResource extends Resource
             Forms\Components\Textarea::make('observation')
                 ->label('Observación')
                 ->autosize()
+                ->maxLength(5000)
+                ->helperText('Máximo 5000 caracteres.')
                 ->columnSpanFull(),
         ];
     }
@@ -210,12 +212,14 @@ class SurgeryResource extends Resource
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Veterinario')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('observation')
                     ->label('Observación')
                     ->limit(50)
                     ->tooltip(fn (Tables\Columns\TextColumn $column): ?string => strlen((string) $column->getState()) > 50 ? $column->getState() : null)
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Registrada el')
                     ->dateTime('d/m/Y H:i')

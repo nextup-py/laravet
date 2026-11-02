@@ -73,6 +73,11 @@ class EditProfile extends BaseEditProfile
                         Forms\Components\TextInput::make('phone')
                             ->label('Teléfono')
                             ->tel()
+                            ->regex('/^(\+595|0)\d{8,9}$/')
+                            ->helperText('Sin espacios ni guiones. Ej.: 0981123456 o +595981123456.')
+                            ->validationMessages([
+                                'regex' => 'Ingrese un teléfono paraguayo válido, ej.: 0981123456 o +595981123456.',
+                            ])
                             ->maxLength(30),
                     ]),
 
@@ -94,6 +99,7 @@ class EditProfile extends BaseEditProfile
                     ->columns(2)
                     ->schema([
                         $this->getEmailFormComponent()
+                            ->label('Correo electrónico')
                             ->live(onBlur: true),
                         Forms\Components\TextInput::make('current_password')
                             ->label('Contraseña actual')
@@ -110,6 +116,6 @@ class EditProfile extends BaseEditProfile
             ->operation('edit')
             ->model($this->getUser())
             ->statePath('data')
-            ->inlineLabel(! static::isSimple());
+            ->inlineLabel(false);
     }
 }

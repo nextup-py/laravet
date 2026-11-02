@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PetResource\Pages;
 
 use App\Filament\Resources\OwnerResource;
 use App\Filament\Resources\PetResource;
+use App\Models\Pet;
 use Filament\Actions;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section;
@@ -85,7 +86,10 @@ class ViewPet extends ViewRecord
                         TextEntry::make('size')->label('Tamaño')->badge(),
                         TextEntry::make('weight')->label('Peso')->suffix(' kg'),
                         TextEntry::make('fur')->label('Pelaje'),
-                        ImageEntry::make('image')->label('Imagen')->columnSpanFull(),
+                        ImageEntry::make('image')
+                            ->label('Imagen')
+                            ->defaultImageUrl(fn (Pet $record): string => $record->initials_avatar_url)
+                            ->columnSpanFull(),
                     ]),
             ]);
     }

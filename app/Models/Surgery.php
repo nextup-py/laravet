@@ -62,6 +62,24 @@ class Surgery extends Model
         });
     }
 
+    /** Cirugías con fecha posterior a hoy (estado «Programada»). */
+    public function scopeScheduled(Builder $query): Builder
+    {
+        return $query->whereDate('date', '>', today()->toDateString());
+    }
+
+    /** Cirugías de hoy (estado «Hoy»). */
+    public function scopeToday(Builder $query): Builder
+    {
+        return $query->whereDate('date', today()->toDateString());
+    }
+
+    /** Cirugías con fecha anterior a hoy (estado «Realizada»). */
+    public function scopeDone(Builder $query): Builder
+    {
+        return $query->whereDate('date', '<', today()->toDateString());
+    }
+
     /**
      * Cirugías programadas dentro de los próximos $days días (no incluye pasadas).
      */

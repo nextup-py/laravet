@@ -21,7 +21,7 @@
                 <tr>
                     <td>{{ $vaccination->vaccine }}</td>
                     <td>{{ \Carbon\Carbon::parse($vaccination->application_date)->format('d/m/Y') }}</td>
-                    <td>{{ \Carbon\Carbon::parse($vaccination->next_application)->format('d/m/Y') }}</td>
+                    <td>{{ filled($vaccination->next_application) ? \Carbon\Carbon::parse($vaccination->next_application)->format('d/m/Y') : 'Sin refuerzo' }}</td>
                     <td>{{ $vaccination->batch }}</td>
                     <td>{{ $vaccination->manufacturer }}</td>
                     <td>{{ $vaccination->user->name }}</td>

@@ -70,13 +70,10 @@ class PetResource extends Resource
             Section::make('Datos identificatorios')
                 ->columns(3)
                 ->schema([
-                    Forms\Components\TextInput::make('id')
-                        ->label('ID')
-                        ->hiddenOn('create')
-                        ->readOnly(),
                     Forms\Components\TextInput::make('name')
                         ->label('Nombre')
                         ->string()
+                        ->maxLength(255)
                         ->required(),
                     Forms\Components\Select::make('species')
                         ->label('Especie')
@@ -88,6 +85,7 @@ class PetResource extends Resource
                     Forms\Components\TextInput::make('breed')
                         ->label('Raza')
                         ->string()
+                        ->maxLength(255)
                         ->required(),
                     Forms\Components\DatePicker::make('birthdate')
                         ->label('Fecha de nacimiento')
@@ -110,6 +108,18 @@ class PetResource extends Resource
                         ->live()
                         ->options(PetReproductionStatus::class)
                         ->required(),
+                    Forms\Components\TextInput::make('weight')
+                        ->label('Peso')
+                        ->suffix('kg')
+                        ->required()
+                        ->numeric()
+                        ->inputMode('decimal')
+                        ->minValue(0.1)
+                        ->maxValue(150),
+                    Forms\Components\TextInput::make('id')
+                        ->label('ID')
+                        ->hiddenOn('create')
+                        ->readOnly(),
                     Forms\Components\Toggle::make('active')
                         ->label('Activo')
                         ->hiddenOn('create')
@@ -119,7 +129,7 @@ class PetResource extends Resource
                 ]),
 
             Section::make('Más información')
-                ->columns(3)
+                ->columns(2)
                 ->schema([
                     Forms\Components\Select::make('size')
                         ->label('Tamaño')
@@ -128,17 +138,10 @@ class PetResource extends Resource
                         ->live()
                         ->options(PetSize::class)
                         ->required(),
-                    Forms\Components\TextInput::make('weight')
-                        ->label('Peso')
-                        ->suffix('kg')
-                        ->required()
-                        ->numeric()
-                        ->inputMode('decimal')
-                        ->minValue(0.1)
-                        ->maxValue(150),
                     Forms\Components\TextInput::make('fur')
                         ->label('Pelaje')
                         ->string()
+                        ->maxLength(255)
                         ->required(),
                     Forms\Components\FileUpload::make('image')
                         ->label('Imagen')
@@ -146,8 +149,7 @@ class PetResource extends Resource
                         ->imageEditor()
                         ->downloadable()
                         ->columnSpanFull()
-                        ->uploadingMessage('Subiendo archivo adjunto...')
-                        ->required(),
+                        ->uploadingMessage('Subiendo archivo adjunto...'),
                 ]),
         ];
     }
@@ -157,7 +159,6 @@ class PetResource extends Resource
         $schema = self::formSchema();
 
         $schema[0] = $schema[0]->schema([
-            ...$schema[0]->getChildComponents(),
             Forms\Components\Select::make('owner_id')
                 ->label('Propietario')
                 ->relationship('owner', 'first_name')
@@ -166,6 +167,7 @@ class PetResource extends Resource
                 ->preload()
                 ->live()
                 ->required(),
+            ...$schema[0]->getChildComponents(),
         ]);
 
         return $form->schema($schema);
@@ -174,6 +176,7 @@ class PetResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('name')
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
                     ->label('Imagen')

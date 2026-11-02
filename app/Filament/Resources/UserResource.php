@@ -94,10 +94,12 @@ class UserResource extends Resource
                         Forms\Components\TextInput::make('name')
                             ->label('Nombre')
                             ->string()
+                            ->maxLength(255)
                             ->required(),
                         Forms\Components\TextInput::make('email')
                             ->label('Correo electrónico')
                             ->email()
+                            ->maxLength(255)
                             ->unique(ignoreRecord: true)
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn (?string $state, Set $set) => $set('email', Str::lower(trim((string) $state))))
@@ -106,7 +108,17 @@ class UserResource extends Resource
                         Forms\Components\TextInput::make('phone')
                             ->label('Teléfono')
                             ->tel()
+                            ->regex('/^(\+595|0)\d{8,9}$/')
+                            ->helperText('Sin espacios ni guiones. Ej.: 0981123456 o +595981123456.')
+                            ->validationMessages([
+                                'regex' => 'Ingrese un teléfono paraguayo válido, ej.: 0981123456 o +595981123456.',
+                            ])
                             ->maxLength(30),
+                    ]),
+
+                Section::make('Acceso')
+                    ->columns(3)
+                    ->schema([
                         Forms\Components\Select::make('role')
                             ->label('Rol')
                             ->options(self::roleOptions())
@@ -184,6 +196,7 @@ class UserResource extends Resource
 
                 Forms\Components\TextInput::make('address')
                     ->label('Dirección')
+                    ->maxLength(255)
                     ->columnSpanFull()
                     ->required(),
             ]);

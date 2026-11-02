@@ -85,6 +85,7 @@ class NeighborhoodResource extends Resource
                     ->required(),
                 Forms\Components\TextInput::make('name')
                     ->label('Nombre')
+                    ->maxLength(255)
                     ->unique(
                         ignoreRecord: true,
                         modifyRuleUsing: fn (Unique $rule, Get $get): Unique => $rule->where('city_id', $get('city_id')),

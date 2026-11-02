@@ -11,6 +11,7 @@ use App\Settings\ClinicSettings;
 use App\Support\ReminderMessage;
 use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -84,7 +85,7 @@ class VaccinationResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Próxima aplicación' => Carbon::parse($record->next_application)->format('d/m/Y'),
+            'Próxima aplicación' => filled($record->next_application) ? Carbon::parse($record->next_application)->format('d/m/Y') : 'Sin refuerzo',
             'Estado' => $record->status->getLabel(),
         ];
     }
@@ -135,8 +136,7 @@ class VaccinationResource extends Resource
                 }),
             Forms\Components\DatePicker::make('next_application')
                 ->label('Próxima aplicación')
-                ->helperText('Se sugiere un año después de la aplicación; puede modificarla.')
-                ->required()
+                ->helperText('Se sugiere un año después de la aplicación; puede modificarla. Déjela vacía si es una dosis única, sin refuerzo.')
                 ->native(false)
                 ->displayFormat('d/m/Y')
                 ->closeOnDateSelection()
@@ -145,6 +145,7 @@ class VaccinationResource extends Resource
             Forms\Components\TextInput::make('batch')
                 ->label('Lote')
                 ->string()
+                ->maxLength(255)
                 ->required(),
             Forms\Components\Select::make('manufacturer')
                 ->label('Fabricante')
@@ -155,25 +156,38 @@ class VaccinationResource extends Resource
             Forms\Components\Textarea::make('observation')
                 ->label('Observación')
                 ->autosize()
+                ->maxLength(5000)
+                ->helperText('Máximo 5000 caracteres.')
                 ->columnSpanFull(),
         ];
     }
 
     public static function form(Form $form): Form
     {
+        $fields = collect(self::formFields())->keyBy(fn ($field) => $field->getName());
+
         return $form
             ->schema([
-                Forms\Components\Select::make('pet_id')
-                    ->label('Mascota')
-                    ->relationship('pet', 'name', modifyQueryUsing: fn (Builder $query, ?Vaccination $record) => $query->where(
-                        fn (Builder $q) => $q->where('active', true)
-                            ->when($record?->pet_id, fn (Builder $q, $petId) => $q->orWhere('id', $petId))
-                    ))
-                    ->default(fn () => request()->query('pet_id'))
-                    ->searchable(['name', 'id'])
-                    ->preload()
-                    ->required(),
-                ...self::formFields(),
+                Section::make('Información general')
+                    ->columns(2)
+                    ->schema([
+                        Forms\Components\Select::make('pet_id')
+                            ->label('Mascota')
+                            ->relationship('pet', 'name', modifyQueryUsing: fn (Builder $query, ?Vaccination $record) => $query->where(
+                                fn (Builder $q) => $q->where('active', true)
+                                    ->when($record?->pet_id, fn (Builder $q, $petId) => $q->orWhere('id', $petId))
+                            ))
+                            ->default(fn () => request()->query('pet_id'))
+                            ->searchable(['name', 'id'])
+                            ->preload()
+                            ->required(),
+                        ...$fields->only(['vaccine', 'manufacturer', 'batch'])->values()->all(),
+                    ]),
+                Section::make('Fechas')
+                    ->columns(2)
+                    ->schema([
+                        ...$fields->only(['application_date', 'next_application', 'observation'])->values()->all(),
+                    ]),
             ]);
     }
 
@@ -204,6 +218,7 @@ class VaccinationResource extends Resource
                 Tables\Columns\TextColumn::make('next_application')
                     ->label('Próxima aplicación')
                     ->date('d/m/Y')
+                    ->placeholder('Sin refuerzo')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label('Estado')

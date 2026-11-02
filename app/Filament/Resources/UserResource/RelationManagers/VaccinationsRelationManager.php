@@ -49,6 +49,7 @@ class VaccinationsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('next_application')
                     ->label('Próxima aplicación')
                     ->date('d/m/Y')
+                    ->placeholder('Sin refuerzo')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label('Estado')

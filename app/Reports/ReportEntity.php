@@ -108,6 +108,8 @@ enum ReportEntity: string
             self::Consultations => [
                 'date' => ['label' => 'Fecha', 'owner' => false, 'value' => $date('consultation_date')],
                 ...$common,
+                'weight' => ['label' => 'Peso (kg)', 'owner' => false, 'value' => fn (Model $r): ?string => $r->weight],
+                'temperature' => ['label' => 'Temperatura (°C)', 'owner' => false, 'value' => fn (Model $r): ?string => $r->temperature],
                 'diagnosis' => ['label' => 'Diagnóstico', 'owner' => false, 'value' => fn (Model $r): ?string => $r->diagnosis],
                 'treatment' => ['label' => 'Tratamiento', 'owner' => false, 'value' => fn (Model $r): ?string => $r->treatment],
             ],

@@ -49,11 +49,43 @@ class RoleResource extends Resource implements HasShieldPermissions
     public static function getCustomPermissionOptions(): ?array
     {
         return FilamentShield::getCustomPermissions()
+            ->reject(fn (string $permission): bool => static::isUnusedResourcePermission($permission))
             ->mapWithKeys(fn (string $permission): array => [
                 $permission => Lang::has("permissions.custom.{$permission}")
                     ? __("permissions.custom.{$permission}")
                     : str($permission)->headline()->toString(),
             ])
+            ->toArray();
+    }
+
+    /**
+     * Permisos de recurso que el sistema no usa (no hay papelera, replicar ni reordenar): siguen en la
+     * base de datos, pero Shield los mostraría como «personalizados» al quitarlos de los prefijos.
+     */
+    protected static function isUnusedResourcePermission(string $permission): bool
+    {
+        return (bool) preg_match('/^(restore|restore_any|replicate|reorder|force_delete|force_delete_any)_/', $permission);
+    }
+
+    /**
+     * Igual que el de Shield, pero con el título del recurso en minúscula salvo la primera letra
+     * («Reporte de problema» y no «Reporte De Problema»).
+     *
+     * @return array<int, Forms\Components\Section>|null
+     */
+    public static function getResourceEntitiesSchema(): ?array
+    {
+        return collect(FilamentShield::getResources())
+            ->sortKeys()
+            ->map(fn (array $entity): Forms\Components\Section => Forms\Components\Section::make(
+                str($entity['fqcn']::getModelLabel())->ucfirst()->toString()
+            )
+                ->description(fn () => new HtmlString('<span style="word-break: break-word;">'.Utils::showModelPath($entity['fqcn']).'</span>'))
+                ->compact()
+                ->schema([static::getCheckBoxListComponentForResource($entity)])
+                ->columnSpan(static::shield()->getSectionColumnSpan())
+                ->collapsible())
+            ->values()
             ->toArray();
     }
 
@@ -90,11 +122,8 @@ class RoleResource extends Resource implements HasShieldPermissions
                                         ? 'El nombre de un rol base no se puede cambiar: el sistema lo usa para dar acceso. Sí puedes editar sus permisos.'
                                         : null),
 
-                                Forms\Components\TextInput::make('guard_name')
-                                    ->label(__('filament-shield::filament-shield.field.guard_name'))
-                                    ->default(Utils::getFilamentAuthGuard())
-                                    ->nullable()
-                                    ->maxLength(255),
+                                Forms\Components\Hidden::make('guard_name')
+                                    ->default(Utils::getFilamentAuthGuard()),
 
                                 Forms\Components\Select::make(config('permission.column_names.team_foreign_key'))
                                     ->label(__('filament-shield::filament-shield.field.team'))

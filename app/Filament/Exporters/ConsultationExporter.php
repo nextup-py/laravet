@@ -29,6 +29,8 @@ class ConsultationExporter extends Exporter
             ...(static::canExportOwnerData() ? [
                 static::text('pet.owner.full_name', 'Propietario'),
             ] : []),
+            ExportColumn::make('weight')->label('Peso (kg)'),
+            ExportColumn::make('temperature')->label('Temperatura (°C)'),
             static::text('anamnesis', 'Anamnesis'),
             static::text('diagnosis', 'Diagnóstico'),
             static::text('treatment', 'Tratamiento'),

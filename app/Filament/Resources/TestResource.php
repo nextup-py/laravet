@@ -170,6 +170,8 @@ class TestResource extends Resource
             Forms\Components\Textarea::make('observation')
                 ->label('Observación')
                 ->autosize()
+                ->maxLength(5000)
+                ->helperText('Máximo 5000 caracteres.')
                 ->columnSpanFull(),
         ];
     }
@@ -255,7 +257,8 @@ class TestResource extends Resource
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Veterinario')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('observation')
                     ->label('Observación')
                     ->limit(50)

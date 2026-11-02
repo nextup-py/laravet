@@ -9,6 +9,8 @@ permission: view_any_surgery
 
 Registra la fecha, el tipo y las observaciones de cada cirugía desde **Cirugías → Nueva cirugía** o desde la fila de la mascota.
 
+La lista tiene pestañas por estado (**Todos, Programada, Hoy y Realizada**), con la cantidad de cada una. Las columnas *Veterinario* y *Observación* vienen ocultas: actívalas desde el selector de columnas de la tabla.
+
 El estado se calcula por la fecha:
 
 - **Programada**: fecha futura.

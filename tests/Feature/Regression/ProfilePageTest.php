@@ -33,13 +33,13 @@ it('el usuario edita sus datos, teléfono y domicilio desde el perfil', function
     $user = actingAsRole('veterinarian');
 
     Livewire::test(EditProfile::class)
-        ->fillForm(['name' => 'Nuevo Nombre', 'phone' => '0981 123 456', ...profileLocation()])
+        ->fillForm(['name' => 'Nuevo Nombre', 'phone' => '0981123456', ...profileLocation()])
         ->call('save')
         ->assertHasNoFormErrors();
 
     expect($user->refresh())
         ->name->toBe('Nuevo Nombre')
-        ->phone->toBe('0981 123 456');
+        ->phone->toBe('0981123456');
 });
 
 it('sube la foto de perfil al disco público y la expone como avatar', function () {

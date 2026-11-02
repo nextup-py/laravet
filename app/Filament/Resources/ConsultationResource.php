@@ -162,6 +162,32 @@ class ConsultationResource extends Resource
         return 'No se pudo generar la sugerencia. Intenta nuevamente en unos minutos.';
     }
 
+    /**
+     * Peso y temperatura del paciente en la consulta (opcionales); los comparte el RelationManager de la mascota.
+     *
+     * @return array<int, Forms\Components\Component>
+     */
+    public static function vitalsFields(): array
+    {
+        return [
+            Forms\Components\TextInput::make('weight')
+                ->label('Peso')
+                ->suffix('kg')
+                ->numeric()
+                ->inputMode('decimal')
+                ->minValue(0.1)
+                ->maxValue(150),
+            Forms\Components\TextInput::make('temperature')
+                ->label('Temperatura')
+                ->suffix('°C')
+                ->numeric()
+                ->inputMode('decimal')
+                ->step(0.1)
+                ->minValue(30)
+                ->maxValue(45),
+        ];
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -192,6 +218,10 @@ class ConsultationResource extends Resource
                             ->maxDate(now())
                             ->default(now()),
                     ]),
+                Section::make('Signos vitales')
+                    ->description('Opcional: peso y temperatura del paciente durante la consulta.')
+                    ->columns(2)
+                    ->schema(self::vitalsFields()),
                 Section::make('Consulta')
                     ->schema([
                         Forms\Components\Textarea::make('anamnesis')
@@ -346,6 +376,18 @@ class ConsultationResource extends Resource
                     ->sortable()
                     ->limit(60)
                     ->tooltip(fn (Tables\Columns\TextColumn $column): ?string => strlen((string) $column->getState()) > 60 ? $column->getState() : null),
+                Tables\Columns\TextColumn::make('weight')
+                    ->label('Peso')
+                    ->suffix(' kg')
+                    ->placeholder('—')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('temperature')
+                    ->label('Temperatura')
+                    ->suffix(' °C')
+                    ->placeholder('—')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\IconColumn::make('ai_suggested_at')
                     ->label('IA')
                     ->boolean()

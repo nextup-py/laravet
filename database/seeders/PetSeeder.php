@@ -55,7 +55,7 @@ class PetSeeder extends Seeder
                 'fur' => $fur,
                 'reproduction' => $reproduction,
                 'active' => true,
-                'image' => '',
+                'image' => null,
                 'user_id' => $vets[$i % $vets->count()]->id,
             ]);
         }

@@ -50,7 +50,7 @@ class ViewVaccination extends ViewRecord
                                 : null),
                         TextEntry::make('vaccine')->label('Vacuna'),
                         TextEntry::make('application_date')->label('Fecha de aplicación')->date('d/m/Y'),
-                        TextEntry::make('next_application')->label('Próxima aplicación')->date('d/m/Y'),
+                        TextEntry::make('next_application')->label('Próxima aplicación')->date('d/m/Y')->placeholder('Sin refuerzo'),
                         TextEntry::make('status')->label('Estado')->badge(),
                         TextEntry::make('user.name')->label('Veterinario')
                             ->url(fn ($record): ?string => auth()->user()?->can('view_user')
