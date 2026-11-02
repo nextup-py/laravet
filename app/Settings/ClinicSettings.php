@@ -10,6 +10,11 @@ class ClinicSettings extends Settings
     /** Se vuelve true cuando ya se comprobó que existe la tabla `settings`. */
     private static bool $settingsTableExists = false;
 
+    /** Umbrales de tamaño iniciales: solo caninos (en las demás especies el peso no determina el tamaño de forma fiable). */
+    public const DEFAULT_SIZE_THRESHOLDS = [
+        ['species' => 'Canino', 'tiny' => 5, 'small' => 10, 'medium' => 25, 'big' => 45],
+    ];
+
     /** Textos por defecto de los recordatorios; admiten los marcadores de `ReminderMessage::PLACEHOLDERS`. */
     public const DEFAULT_REMINDER_EMAIL = 'La vacuna {vacuna} de {mascota} {estado} el {fecha}. Mantenerla al día protege a {mascota} de enfermedades graves. Escríbenos por WhatsApp o responde este correo y te agendamos un turno.';
 
@@ -117,6 +122,13 @@ class ClinicSettings extends Settings
 
     /** @var array<int, string> */
     public array $test_types;
+
+    /**
+     * Peso máximo (kg) de cada tamaño, por especie: hasta `tiny` es Diminuto, hasta `small` Pequeño, hasta `medium`
+     * Mediano, hasta `big` Grande y por encima Gigante. Las especies que no figuran no proponen tamaño. Cada fila
+     * tiene las claves `species`, `tiny`, `small`, `medium` y `big`.
+     */
+    public array $size_thresholds;
 
     public static function group(): string
     {

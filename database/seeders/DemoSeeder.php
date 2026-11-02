@@ -122,6 +122,7 @@ class DemoSeeder extends Seeder
             OwnerSeeder::class,
             PetSeeder::class,
             ConsultationSeeder::class,
+            PetWeightSeeder::class,
             VaccinationSeeder::class,
             SurgerySeeder::class,
             TestSeeder::class,

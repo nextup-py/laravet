@@ -21,7 +21,18 @@ class VaccinationsRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        return $form->schema(VaccinationResource::formFields());
+        $fields = collect(VaccinationResource::formFields())->keyBy(fn ($field): string => $field->getName());
+
+        return $form
+            ->schema([
+                $fields['vaccine'],
+                $fields['manufacturer'],
+                $fields['batch'],
+                $fields['application_date'],
+                $fields['next_application']->columnSpanFull(),
+                $fields['observation'],
+            ])
+            ->columns(2);
     }
 
     public function table(Table $table): Table
@@ -87,6 +98,7 @@ class VaccinationsRelationManager extends RelationManager
             ->defaultSort('application_date', 'desc')
             ->headerActions([
                 Tables\Actions\CreateAction::make()
+                    ->modalWidth('2xl')
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = Auth::id();
 
@@ -101,7 +113,7 @@ class VaccinationsRelationManager extends RelationManager
             ])
             ->recordAction('view')
             ->actions([
-                Tables\Actions\ViewAction::make()->extraAttributes(['class' => 'hidden']),
+                Tables\Actions\ViewAction::make()->modalWidth('2xl')->extraAttributes(['class' => 'hidden']),
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('openRecord')
                         ->label('Abrir ficha')
@@ -109,6 +121,7 @@ class VaccinationsRelationManager extends RelationManager
                         ->visible(fn (Vaccination $record): bool => VaccinationResource::canView($record))
                         ->url(fn (Vaccination $record): string => VaccinationResource::getUrl('view', ['record' => $record])),
                     Tables\Actions\EditAction::make()
+                        ->modalWidth('2xl')
                         ->extraModalFooterActions([
                             Tables\Actions\DeleteAction::make()
                                 ->cancelParentActions(),

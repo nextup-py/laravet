@@ -10,8 +10,10 @@ permission: view_any_consultation
 ## Registrar una consulta
 
 1. Entra a **Consultas → Nueva consulta**, o usa *Nueva consulta* desde la fila de la mascota (la mascota queda elegida).
-2. Completa la fecha, la **anamnesis**, el **diagnóstico** y el **tratamiento**. Si quieres, anota también el **peso** del paciente (entre 0,1 y 150 kg) y su **temperatura** (entre 30 y 45 °C, con un decimal, por ejemplo 38,5): son opcionales.
+2. Completa la fecha, la **anamnesis**, el **diagnóstico** y el **tratamiento**. Si quieres, anota también el **peso** del paciente (entre 0,1 y 150 kg) y su **temperatura** (entre 30 y 45 °C, con un decimal, por ejemplo 38,5): son opcionales. El **peso** también se guarda en el historial de pesos de la mascota y, si es el más reciente, pasa a ser su peso actual.
 3. Guarda. La consulta queda a tu nombre.
+
+Las ventanas para crear o editar registros dentro de la ficha de la mascota (vacunaciones, cirugías, pruebas y consultas) son más anchas y ordenan los campos de a dos.
 
 En la lista de consultas, el peso y la temperatura vienen ocultos: puedes mostrarlos desde el selector de columnas de la tabla.
 

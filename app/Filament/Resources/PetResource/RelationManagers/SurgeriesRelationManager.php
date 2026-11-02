@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PetResource\RelationManagers;
 
 use App\Filament\Resources\SurgeryResource;
 use App\Models\Surgery;
+use App\Support\PetReproductionSync;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -22,7 +23,7 @@ class SurgeriesRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        return $form->schema(SurgeryResource::formFields());
+        return $form->schema(SurgeryResource::formFields())->columns(2);
     }
 
     public function table(Table $table): Table
@@ -83,15 +84,17 @@ class SurgeriesRelationManager extends RelationManager
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
+                    ->modalWidth('2xl')
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = Auth::id();
 
                         return $data;
-                    }),
+                    })
+                    ->after(fn (Surgery $record) => PetReproductionSync::notifyIfChanged($record)),
             ])
             ->recordAction('view')
             ->actions([
-                Tables\Actions\ViewAction::make()->extraAttributes(['class' => 'hidden']),
+                Tables\Actions\ViewAction::make()->modalWidth('2xl')->extraAttributes(['class' => 'hidden']),
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('openRecord')
                         ->label('Abrir ficha')
@@ -99,6 +102,8 @@ class SurgeriesRelationManager extends RelationManager
                         ->visible(fn (Surgery $record): bool => SurgeryResource::canView($record))
                         ->url(fn (Surgery $record): string => SurgeryResource::getUrl('view', ['record' => $record])),
                     Tables\Actions\EditAction::make()
+                        ->modalWidth('2xl')
+                        ->after(fn (Surgery $record) => PetReproductionSync::notifyIfChanged($record))
                         ->extraModalFooterActions([
                             Tables\Actions\DeleteAction::make()
                                 ->cancelParentActions(),

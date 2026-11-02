@@ -24,6 +24,22 @@ Al abrir una mascota ves sus datos y, debajo, sus registros médicos en pestaña
 
 En **Documentos PDF** de la ficha generas la historia clínica, la ficha de la mascota y el carnet de vacunación; se abren en una pestaña nueva para imprimir o guardar.
 
+## Peso de la mascota
+
+El peso actual de la mascota es siempre el del **pesaje más reciente**. Se actualiza solo de estas formas:
+
+- Al anotar el **peso en una consulta** (queda registrado con la fecha de la consulta).
+- Con **Registrar peso**, en el menú de la fila de Mascotas o arriba en la ficha, para cuando la mascota solo pasa por la balanza: eliges la fecha y los kilos.
+- Si cambias el peso al editar la mascota, también queda en su historial.
+
+En la pestaña **Pesos** de la ficha ves todo el historial, con el **origen** de cada peso (*Registro* es el que se anotó al registrar la mascota; *Consulta*, *Pesaje* y *Edición* son los medidos o corregidos después). Ahí también puedes **registrar un peso**, y **corregir o eliminar** uno cargado por error (los de una consulta se corrigen en la consulta, y no se puede eliminar el último que queda). Un pesaje con fecha anterior al último no cambia el peso actual, y si borras la consulta más reciente la mascota vuelve al peso anterior. La ficha muestra los **últimos pesajes**.
+
+Si el peso sugiere otro **tamaño**, al registrar el peso aparece un interruptor «Cambiar el tamaño a…» (no cambia solo); al guardar una consulta con peso se muestra un aviso para que lo revises desde Editar mascota. Los límites de cada especie los define el administrador en *Datos de la clínica → Listas*.
+
+## Seguimiento en la lista y en la ficha
+
+La lista de Mascotas muestra la **última consulta** y la **próxima vacuna** (la fecha más cercana entre las vacunas vigentes con refuerzo; en rojo si ya venció). La ficha tiene una sección *Seguimiento* con lo mismo y los últimos pesajes. Cada columna solo aparece si tu rol puede ver consultas o vacunaciones.
+
 ## Atajos desde la lista
 
 El menú de cada fila de **Mascotas** ofrece *Nueva consulta*, *Nueva vacunación*, *Nueva cirugía* y *Nueva prueba* con la mascota ya elegida. Solo están para mascotas activas.

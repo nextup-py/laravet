@@ -7,6 +7,7 @@ use App\Filament\Concerns\ClinicRoles;
 use App\Models\Consultation;
 use App\Models\Owner;
 use App\Models\Pet;
+use App\Models\PetWeight;
 use App\Models\Surgery;
 use App\Models\Test;
 use App\Models\User;
@@ -40,6 +41,7 @@ function demoRowCounts(): array
         'vaccinations' => Vaccination::count(),
         'surgeries' => Surgery::count(),
         'tests' => Test::count(),
+        'pet_weights' => PetWeight::count(),
     ];
 }
 
@@ -76,6 +78,20 @@ describe('DemoSeeder', function () {
 
         // Ninguna ciudad quedó sin resolver: todos los propietarios tienen ubicación completa.
         expect(Owner::whereNull('city_id')->orWhereNull('neighborhood_id')->count())->toBe(0);
+    });
+
+    it('cada mascota demo tiene un historial de pesos que termina en su peso actual', function () {
+        $this->seed(DemoSeeder::class);
+
+        foreach (PetSeeder::PETS as $data) {
+            $pet = Pet::where('name', $data[0])->firstOrFail();
+            $weights = $pet->weights()->orderBy('weighed_at')->orderBy('id')->get();
+
+            expect($weights->count())->toBeGreaterThanOrEqual(4)
+                ->and($weights->first()->source->value)->toBe('registration')
+                ->and((float) $pet->weight)->toBe((float) $data[6])
+                ->and((float) $weights->last()->weight)->toBe((float) $data[6]);
+        }
     });
 
     it('cada propietario tiene un barrio real de su ciudad', function () {

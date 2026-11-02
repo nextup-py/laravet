@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\PetSpecies;
 use App\Filament\Concerns\ClinicRoles;
 use App\Settings\ClinicSettings;
 use App\Support\ClinicMail;
@@ -283,6 +284,48 @@ class ClinicSettingsPage extends Page implements HasForms
                     $list('manufacturers', 'Fabricantes de vacunas', 'Opciones del campo «Fabricante».'),
                     $list('surgery_types', 'Tipos de cirugía', 'Se muestran en orden alfabético.'),
                     $list('test_types', 'Tipos de prueba laboratorial', 'Opciones del campo «Tipo» de las pruebas.'),
+                ]),
+
+            Forms\Components\Section::make('Tamaño según el peso')
+                ->description('Al registrar un peso, el sistema propone el tamaño de la mascota con estos límites (en kg). Siempre pide confirmación antes de cambiarlo. Las especies que no figuran no proponen tamaño.')
+                ->schema([
+                    Forms\Components\Repeater::make('size_thresholds')
+                        ->label('Límites por especie')
+                        ->addActionLabel('Agregar especie')
+                        ->columns(5)
+                        ->defaultItems(0)
+                        ->schema([
+                            Forms\Components\Select::make('species')
+                                ->label('Especie')
+                                ->options(PetSpecies::class)
+                                ->distinct()
+                                ->required(),
+                            Forms\Components\TextInput::make('tiny')
+                                ->label('Diminuto hasta')
+                                ->suffix('kg')
+                                ->numeric()
+                                ->minValue(0.1)
+                                ->required(),
+                            Forms\Components\TextInput::make('small')
+                                ->label('Pequeño hasta')
+                                ->suffix('kg')
+                                ->numeric()
+                                ->gt('tiny')
+                                ->required(),
+                            Forms\Components\TextInput::make('medium')
+                                ->label('Mediano hasta')
+                                ->suffix('kg')
+                                ->numeric()
+                                ->gt('small')
+                                ->required(),
+                            Forms\Components\TextInput::make('big')
+                                ->label('Grande hasta')
+                                ->suffix('kg')
+                                ->numeric()
+                                ->gt('medium')
+                                ->helperText('Por encima es Gigante.')
+                                ->required(),
+                        ]),
                 ]),
         ];
     }

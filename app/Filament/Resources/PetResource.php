@@ -6,11 +6,13 @@ use App\Enums\PetGender;
 use App\Enums\PetReproductionStatus;
 use App\Enums\PetSize;
 use App\Enums\PetSpecies;
+use App\Filament\Actions\RegisterWeight;
 use App\Filament\Concerns\OpensViewFirst;
 use App\Filament\Resources\PetResource\Pages;
 use App\Filament\Resources\PetResource\RelationManagers;
 use App\Models\Owner;
 use App\Models\Pet;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
@@ -115,7 +117,10 @@ class PetResource extends Resource
                         ->numeric()
                         ->inputMode('decimal')
                         ->minValue(0.1)
-                        ->maxValue(150),
+                        ->maxValue(150)
+                        ->helperText(fn (string $operation): ?string => $operation === 'edit'
+                            ? 'Si lo cambias aquí, queda registrado en el historial de pesos. También puedes usar «Registrar peso».'
+                            : null),
                     Forms\Components\TextInput::make('id')
                         ->label('ID')
                         ->hiddenOn('create')
@@ -176,6 +181,12 @@ class PetResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                ->when(ConsultationResource::canViewAny(), fn (Builder $q) => $q->withMax('consultations', 'consultation_date'))
+                ->when(VaccinationResource::canViewAny(), fn (Builder $q) => $q->withMin(
+                    ['vaccinations as next_vaccine_due' => fn (Builder $v) => $v->current()->whereNotNull('next_application')],
+                    'next_application'
+                )))
             ->defaultSort('name')
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
@@ -206,6 +217,20 @@ class PetResource extends Resource
                     ->getStateUsing(fn (Pet $record) => $record->age)
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query
                         ->orderBy('birthdate', $direction === 'asc' ? 'desc' : 'asc')),
+                Tables\Columns\TextColumn::make('consultations_max_consultation_date')
+                    ->label('Última consulta')
+                    ->date('d/m/Y')
+                    ->placeholder('Sin consultas')
+                    ->visible(fn (): bool => ConsultationResource::canViewAny())
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('next_vaccine_due')
+                    ->label('Próxima vacuna')
+                    ->date('d/m/Y')
+                    ->placeholder('—')
+                    ->color(fn (mixed $state): ?string => filled($state) && Carbon::parse($state)->lt(today()) ? 'danger' : null)
+                    ->tooltip('Fecha más próxima entre las vacunas vigentes con refuerzo; en rojo si ya venció.')
+                    ->visible(fn (): bool => VaccinationResource::canViewAny())
+                    ->sortable(),
                 Tables\Columns\IconColumn::make('active')
                     ->label('Activo')
                     ->boolean()
@@ -283,6 +308,7 @@ class PetResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make(),
                     ...self::registerActions(),
+                    RegisterWeight::forTable(),
                     Tables\Actions\Action::make('openClinicalHistory')
                         ->label('Historia clínica PDF')
                         ->icon('heroicon-o-document-text')
@@ -338,6 +364,7 @@ class PetResource extends Resource
             RelationManagers\ConsultationsRelationManager::class,
             RelationManagers\SurgeriesRelationManager::class,
             RelationManagers\TestsRelationManager::class,
+            RelationManagers\WeightsRelationManager::class,
         ];
     }
 

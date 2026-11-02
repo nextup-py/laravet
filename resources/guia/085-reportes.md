@@ -7,7 +7,7 @@ permission: view_reports
 
 # Reportes
 
-En **Reportes** eliges un reporte, el rango de fechas y pulsas **Generar reporte**: el resultado aparece en pantalla (las primeras 100 filas) y puedes descargarlo completo en **Excel, CSV o PDF** con los botones de arriba. La descarga solo aparece si tu rol puede exportar, y queda anotada en el registro de exportaciones.
+En **Reportes** eliges un reporte, el rango de fechas y pulsas **Generar reporte**: el resultado aparece en pantalla (las primeras 100 filas; arriba de la tabla se indica cuántas son en total, y los textos largos se muestran cortados: pasa el mouse sobre la celda para leerlos completos) y puedes descargarlo completo en **Excel, CSV o PDF** con los botones de arriba. La descarga solo aparece si tu rol puede exportar, y queda anotada en el registro de exportaciones.
 
 Solo ves los reportes de los registros a los que tu rol tiene acceso. Si eres veterinario, en consultas, cirugías y pruebas los números son **los tuyos**.
 

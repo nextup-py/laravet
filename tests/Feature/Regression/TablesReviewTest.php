@@ -14,6 +14,7 @@ use App\Models\Surgery;
 use App\Models\Test;
 use App\Models\Vaccination;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
 
 it('mascotas y propietarios se ordenan por nombre por defecto', function () {
@@ -116,3 +117,7 @@ it('las listas clínicas no consultan el propietario una vez por fila', function
     'cirugías' => [ListSurgeries::class, fn () => Surgery::factory()->create()],
     'pruebas' => [ListTests::class, fn () => Test::factory()->create()],
 ]);
+
+it('vacunaciones tiene el índice compuesto que acelera «vigente / renovada»', function () {
+    expect(Schema::hasIndex('vaccinations', 'vaccinations_pet_vaccine_application_index'))->toBeTrue();
+});

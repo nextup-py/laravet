@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SurgeryResource\Pages;
 
 use App\Filament\Resources\SurgeryResource;
+use App\Support\PetReproductionSync;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,5 +16,10 @@ class CreateSurgery extends CreateRecord
         $data['user_id'] = Auth::id();
 
         return $data;
+    }
+
+    protected function afterCreate(): void
+    {
+        PetReproductionSync::notifyIfChanged($this->record);
     }
 }

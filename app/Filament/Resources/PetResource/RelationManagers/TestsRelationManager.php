@@ -22,7 +22,7 @@ class TestsRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        return $form->schema(TestResource::formFields());
+        return $form->schema(TestResource::formFields())->columns(2);
     }
 
     public function table(Table $table): Table
@@ -80,6 +80,7 @@ class TestsRelationManager extends RelationManager
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
+                    ->modalWidth('2xl')
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['user_id'] = Auth::id();
 
@@ -88,7 +89,7 @@ class TestsRelationManager extends RelationManager
             ])
             ->recordAction('view')
             ->actions([
-                Tables\Actions\ViewAction::make()->extraAttributes(['class' => 'hidden']),
+                Tables\Actions\ViewAction::make()->modalWidth('2xl')->extraAttributes(['class' => 'hidden']),
                 TestResource::uploadResultAction(),
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('openRecord')
@@ -97,6 +98,7 @@ class TestsRelationManager extends RelationManager
                         ->visible(fn (Test $record): bool => TestResource::canView($record))
                         ->url(fn (Test $record): string => TestResource::getUrl('view', ['record' => $record])),
                     Tables\Actions\EditAction::make()
+                        ->modalWidth('2xl')
                         ->extraModalFooterActions([
                             Tables\Actions\DeleteAction::make()
                                 ->cancelParentActions(),
