@@ -103,3 +103,16 @@ it('volver a correr el PetSeeder no borra las fotos asignadas', function () {
 
     expect(Pet::where('name', 'Toby')->first()->image)->toBe('demo-pets/canino-labrador-retriever.jpg');
 });
+
+it('el repositorio trae una imagen para cada especie y raza de las mascotas demo', function () {
+    DemoPetPhotos::$sourcePath = null;
+
+    $faltantes = collect(PetSeeder::PETS)
+        ->map(fn (array $pet): string => DemoPetPhotos::slug($pet[1], $pet[2]))
+        ->unique()
+        ->reject(fn (string $slug): bool => collect(['jpg', 'jpeg', 'png', 'webp'])->contains(fn (string $extension): bool => is_file(database_path("seeders/images/pets/{$slug}.{$extension}"))))
+        ->values()
+        ->all();
+
+    expect($faltantes)->toBe([]);
+});
