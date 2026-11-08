@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\AiUrgencyLevel;
 use App\Enums\AiUsageStatus;
+use App\Models\Concerns\BelongsToBranch;
 use App\Observers\ConsultationObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[ObservedBy(ConsultationObserver::class)]
 class Consultation extends Model
 {
-    use HasFactory;
+    use BelongsToBranch, HasFactory;
 
     /**
      * Los atributos que se pueden asignar masivamente.
@@ -22,6 +23,7 @@ class Consultation extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'branch_id', // Sucursal donde se registró (se completa sola al crear)
         'anamnesis', // Historia clínica del paciente
         'diagnosis', // Diagnóstico del paciente
         'treatment', // Tratamiento prescrito

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\TestStatus;
+use App\Models\Concerns\BelongsToBranch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Test extends Model
 {
-    use HasFactory;
+    use BelongsToBranch, HasFactory;
 
     /**
      * Los atributos que se pueden asignar masivamente.
@@ -20,6 +21,7 @@ class Test extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'branch_id', // Sucursal donde se registró (se completa sola al crear)
         'date', // Fecha del examen
         'type', // Tipo de examen realizado
         'result', // Resultado del examen

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\OwnerGender;
+use App\Models\Concerns\BelongsToBranch;
 use App\Support\WhatsappLink;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Illuminate\Notifications\Notifiable;
 
 class Owner extends Model
 {
-    use HasFactory, Notifiable;
+    use BelongsToBranch, HasFactory, Notifiable;
 
     /**
      * Los atributos que se pueden asignar masivamente.
@@ -21,6 +22,7 @@ class Owner extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'branch_id', // Sucursal donde se registró (se completa sola al crear)
         'ci', // Cédula de identidad del dueño
         'first_name', // Nombre del dueño
         'last_name', // Apellido del dueño

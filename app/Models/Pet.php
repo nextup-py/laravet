@@ -6,6 +6,7 @@ use App\Enums\PetGender;
 use App\Enums\PetReproductionStatus;
 use App\Enums\PetSize;
 use App\Enums\PetSpecies;
+use App\Models\Concerns\BelongsToBranch;
 use App\Observers\PetObserver;
 use App\Support\Measure;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[ObservedBy(PetObserver::class)]
 class Pet extends Model
 {
-    use HasFactory;
+    use BelongsToBranch, HasFactory;
 
     /**
      * Los atributos que se pueden asignar masivamente.
@@ -27,6 +28,7 @@ class Pet extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'branch_id', // Sucursal donde se registró (se completa sola al crear)
         'name', // Nombre de la mascota
         'species', // Especie de la mascota
         'breed', // Raza de la mascota

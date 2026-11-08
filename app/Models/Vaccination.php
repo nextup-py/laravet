@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\VaccinationStatus;
+use App\Models\Concerns\BelongsToBranch;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 
 class Vaccination extends Model
 {
-    use HasFactory;
+    use BelongsToBranch, HasFactory;
 
     /**
      * Los atributos que se pueden asignar masivamente.
@@ -23,6 +24,7 @@ class Vaccination extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'branch_id', // Sucursal donde se registró (se completa sola al crear)
         'vaccine', // Nombre de la vacuna aplicada
         'application_date', // Fecha de aplicación de la vacuna
         'next_application', // Fecha de la próxima aplicación (null: dosis única, sin refuerzo)
