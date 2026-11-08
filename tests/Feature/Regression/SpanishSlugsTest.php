@@ -1,6 +1,7 @@
 <?php
 
 use App\Filament\Pages\ClinicSettingsPage;
+use App\Filament\Resources\BranchResource;
 use App\Filament\Resources\CityResource;
 use App\Filament\Resources\ConsultationResource;
 use App\Filament\Resources\DepartmentResource;
@@ -27,6 +28,7 @@ it('las URLs de los recursos y páginas del panel están en español', function 
     [DepartmentResource::class, 'departamentos'],
     [CityResource::class, 'ciudades'],
     [NeighborhoodResource::class, 'barrios'],
+    [BranchResource::class, 'sucursales'],
     [RoleResource::class, 'roles'],
     [ExportLogResource::class, 'exportaciones'],
     [ClinicSettingsPage::class, 'datos-de-la-clinica'],

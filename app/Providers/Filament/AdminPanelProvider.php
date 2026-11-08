@@ -16,12 +16,14 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -65,6 +67,7 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotificationsPolling('60s')
             ->profile(EditProfile::class, isSimple: false)
             ->sidebarCollapsibleOnDesktop()
+            ->renderHook(PanelsRenderHook::USER_MENU_BEFORE, fn (): string => Blade::render('@livewire(\App\Livewire\BranchSwitcher::class)'))
             ->readOnlyRelationManagersOnResourceViewPagesByDefault(false)
             ->brandName($brandName)
             ->brandLogo($brandLogo)

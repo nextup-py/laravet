@@ -27,7 +27,7 @@ class RolesAndPermissionsSeeder extends Seeder
      * Shield) solo soporta 6: no tiene soft deletes ni replicate/reorder/restore.
      */
     private const RESOURCE_MODELS = [
-        'city', 'consultation', 'department', 'neighborhood', 'owner',
+        'branch', 'city', 'consultation', 'department', 'neighborhood', 'owner',
         'pet', 'surgery', 'test', 'user', 'vaccination',
     ];
 

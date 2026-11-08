@@ -42,6 +42,7 @@ class ViewUser extends ViewRecord
                             ->url(fn ($record): ?string => filled($record->phone) ? WhatsappLink::url($record->phone) : null, shouldOpenInNewTab: true),
                         TextEntry::make('roles.name')->label('Rol')->badge()
                             ->formatStateUsing(fn (?string $state): string => UserResource::roleOptions()[$state] ?? $state ?? '—'),
+                        TextEntry::make('branch.name')->label('Sucursal')->placeholder('Sin sucursal propia'),
                     ]),
 
                 Section::make('Actividad clínica')

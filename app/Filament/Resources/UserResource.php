@@ -6,6 +6,7 @@ use App\Filament\Concerns\ClinicRoles;
 use App\Filament\Concerns\OpensViewFirst;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
+use App\Models\Branch;
 use App\Models\City;
 use App\Models\Department;
 use App\Models\Neighborhood;
@@ -133,7 +134,20 @@ class UserResource extends Resource
                                     $fail('No se puede quitar el rol al único administrador.');
                                 }
                             })
+                            ->live()
                             ->required(),
+                        Forms\Components\Select::make('branch_id')
+                            ->label('Sucursal')
+                            ->relationship(name: 'branch', titleAttribute: 'name', modifyQueryUsing: fn (Builder $query) => $query->active()->orderBy('code'))
+                            ->getOptionLabelFromRecordUsing(fn (Branch $record): string => "{$record->code} · {$record->name}")
+                            ->placeholder('Sin sucursal propia')
+                            ->searchable()
+                            ->preload()
+                            // El admin no tiene sucursal propia: elige una activa en la barra superior.
+                            ->required(fn (Get $get): bool => $get('role') !== ClinicRoles::ADMIN)
+                            ->visible(fn (Get $get): bool => $get('role') !== ClinicRoles::ADMIN)
+                            ->dehydratedWhenHidden()
+                            ->helperText('Donde trabaja el usuario. Lo que registre quedará anotado en esta sucursal.'),
                         Forms\Components\TextInput::make('password')
                             ->password()
                             ->revealable()
@@ -225,6 +239,10 @@ class UserResource extends Resource
                     ->label('Rol')
                     ->badge()
                     ->formatStateUsing(fn (?string $state): string => $state === null ? '—' : ClinicRoles::label($state)),
+                Tables\Columns\TextColumn::make('branch.name')
+                    ->label('Sucursal')
+                    ->placeholder('—')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('city.name')
                     ->label('Ciudad')
                     ->placeholder('—')

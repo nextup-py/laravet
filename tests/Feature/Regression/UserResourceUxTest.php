@@ -5,6 +5,7 @@ use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Filament\Resources\UserResource\Pages\ViewUser;
+use App\Models\Branch;
 use App\Models\City;
 use App\Models\Consultation;
 use App\Models\Neighborhood;
@@ -22,6 +23,7 @@ function veterinarioConUbicacion(array $atributos = []): User
         'city_id' => $city->id,
         'neighborhood_id' => $neighborhood->id,
         'address' => 'Calle 1',
+        'branch_id' => Branch::main()->id,
     ]);
     $user->assignRole('veterinarian');
 
@@ -131,6 +133,7 @@ it('el correo se guarda en minúsculas', function () {
             'password' => 'clave-segura-1',
             'password_confirmation' => 'clave-segura-1',
             'role' => 'assistant',
+            'branch_id' => Branch::main()->id,
             'department_id' => $city->department_id,
             'city_id' => $city->id,
             'neighborhood_id' => $neighborhood->id,

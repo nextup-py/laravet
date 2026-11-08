@@ -11,13 +11,19 @@ permission: view_any_user
 
 En **Configuración → Usuarios** se crean las cuentas del personal y se les asigna un rol. Al crear un usuario se define su contraseña; el usuario puede cambiarla desde su perfil.
 
-La lista muestra nombre, correo, teléfono, rol y ciudad. Los contadores de consultas, cirugías, vacunaciones y pruebas de cada usuario vienen ocultos: actívalos desde el selector de columnas de la tabla.
+La lista muestra nombre, correo, teléfono, rol, sucursal y ciudad. Los contadores de consultas, cirugías, vacunaciones y pruebas de cada usuario vienen ocultos: actívalos desde el selector de columnas de la tabla.
 
 Protecciones:
 
 - No puedes cambiar **tu propio rol** ni eliminar tu propio usuario.
 - No se puede quitar ni eliminar al **único administrador**.
 - Un usuario con registros clínicos no se puede eliminar, porque se perderían sus consultas, vacunas, cirugías y pruebas.
+
+## Sucursales
+
+En **Configuración → Sucursales** se registran los locales de la clínica. Cada una lleva un **código de 3 dígitos** (el establecimiento que figura en la factura: 001, 002…), nombre, contacto y ubicación. La sucursal principal (**001**, *Casa central*) ya existe: no se elimina, no se deshabilita y su código no cambia. Una sucursal con personal o registros asociados tampoco se puede eliminar; si ya no se usa, deshabilítala.
+
+Cada usuario del personal pertenece a una sucursal (campo **Sucursal** del formulario de usuarios); lo que registre queda anotado en ella. Los administradores no tienen sucursal propia: cuando hay más de una habilitada aparece un selector en la barra superior para elegir en cuál trabajan; si no eligen, se usa la principal. Los datos clínicos (propietarios, mascotas e historial) se comparten entre todas las sucursales.
 
 ## Catálogos geográficos
 

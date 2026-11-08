@@ -1,6 +1,7 @@
 <?php
 
 use App\Filament\Resources\UserResource\Pages\EditUser;
+use App\Models\Branch;
 use App\Models\City;
 use App\Models\Neighborhood;
 use App\Models\User;
@@ -17,6 +18,7 @@ it('editar un usuario sin tocar el password no lo sobreescribe con hash de caden
         'department_id' => $city->department_id,
         'city_id' => $city->id,
         'neighborhood_id' => $neighborhood->id,
+        'branch_id' => Branch::main()->id,
     ]);
     $user->assignRole('veterinarian');
     $hashOriginal = $user->password;
