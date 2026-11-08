@@ -34,6 +34,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'address', // Dirección de residencia
         'phone', // Teléfono de contacto
         'avatar_url', // Ruta de la foto de perfil en el disco público
+        'branch_id', // Sucursal del usuario (null para el admin, que elige una activa)
         'notification_preferences', // Canales elegidos por tipo de aviso (StaffAlert)
     ];
 
@@ -68,6 +69,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
+    }
+
+    /**
+     * Sucursal del usuario. Es null para el administrador, que no tiene sucursal propia.
+     */
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
     }
 
     /**
