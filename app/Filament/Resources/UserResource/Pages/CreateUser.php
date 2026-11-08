@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
+use App\Filament\Concerns\ClinicRoles;
 use App\Filament\Resources\UserResource;
 use Filament\Resources\Pages\CreateRecord;
 
@@ -20,6 +21,11 @@ class CreateUser extends CreateRecord
     {
         $this->roleName = $data['role'] ?? null;
         unset($data['role']);
+
+        // El administrador no tiene sucursal propia: elige una activa en la barra superior.
+        if ($this->roleName === ClinicRoles::ADMIN) {
+            $data['branch_id'] = null;
+        }
 
         return $data;
     }

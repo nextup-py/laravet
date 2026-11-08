@@ -1,5 +1,7 @@
 <?php
 
+use App\Filament\Resources\BranchResource;
+use App\Filament\Resources\BranchResource\Pages\ListBranches;
 use App\Filament\Resources\CityResource;
 use App\Filament\Resources\CityResource\Pages\ListCities;
 use App\Filament\Resources\ConsultationResource;
@@ -22,6 +24,7 @@ use App\Filament\Resources\UserResource;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Filament\Resources\VaccinationResource;
 use App\Filament\Resources\VaccinationResource\Pages\ListVaccinations;
+use App\Models\Branch;
 use App\Models\City;
 use App\Models\Consultation;
 use App\Models\Department;
@@ -52,6 +55,7 @@ function rowClickCases(): array
         'pruebas' => [ListTests::class, TestResource::class, 'test', fn () => Test::factory()->create()],
         'usuarios' => [ListUsers::class, UserResource::class, 'user', fn () => User::factory()->create()],
         'roles' => [ListRoles::class, RoleResource::class, 'role', fn () => Role::findByName('veterinarian')],
+        'sucursales' => [ListBranches::class, BranchResource::class, 'branch', fn () => Branch::main()],
         'departamentos' => [ListDepartments::class, DepartmentResource::class, 'department', fn () => Department::first()],
         'ciudades' => [ListCities::class, CityResource::class, 'city', fn () => City::first()],
         'barrios' => [ListNeighborhoods::class, NeighborhoodResource::class, 'neighborhood', fn () => Neighborhood::first()],
