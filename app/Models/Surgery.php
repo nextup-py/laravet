@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\SurgeryStatus;
+use App\Models\Concerns\BelongsToBranch;
 use App\Observers\SurgeryObserver;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[ObservedBy(SurgeryObserver::class)]
 class Surgery extends Model
 {
-    use HasFactory;
+    use BelongsToBranch, HasFactory;
 
     /**
      * Los atributos que se pueden asignar masivamente.
@@ -24,6 +25,7 @@ class Surgery extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'branch_id', // Sucursal donde se registró (se completa sola al crear)
         'date', // Fecha de la cirugía
         'type', // Tipo de cirugía realizada
         'observation', // Observaciones adicionales sobre la cirugía

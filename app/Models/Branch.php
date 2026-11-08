@@ -89,6 +89,13 @@ class Branch extends Model
             return 'Tiene personal asignado. Reasígnalo primero.';
         }
 
+        // Los registros clínicos solo anotan la sucursal, pero la base los protege con restrictOnDelete.
+        foreach ([Owner::class, Pet::class, Consultation::class, Vaccination::class, Surgery::class, Test::class, PetWeight::class] as $model) {
+            if ($model::query()->where('branch_id', $this->id)->exists()) {
+                return 'Tiene registros asociados (propietarios, mascotas o historial clínico).';
+            }
+        }
+
         return null;
     }
 }
